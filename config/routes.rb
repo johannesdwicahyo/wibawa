@@ -1,0 +1,17 @@
+Wibawa::Engine.routes.draw do
+  root to: "dashboard#show"
+
+  scope ":resource" do
+    get    "/",                       to: "resources#index",   as: :resources
+    post   "/",                       to: "resources#create"
+    get    "new",                     to: "resources#new",     as: :new_resource
+    post   "batch",                   to: "resources#batch",   as: :batch_resources
+    get    ":id",                     to: "resources#show",    as: :resource
+    patch  ":id",                     to: "resources#update"
+    put    ":id",                     to: "resources#update"
+    delete ":id",                     to: "resources#destroy"
+    get    ":id/edit",                to: "resources#edit",    as: :edit_resource
+    match  ":id/actions/:member_action", to: "resources#member", as: :member_action_resource,
+                                         via: %i[get post patch put delete]
+  end
+end

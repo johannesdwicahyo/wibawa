@@ -1,0 +1,37 @@
+Wibawa.configure do |config|
+  config.site_title = "<%= Rails.application.class.module_parent_name.titleize %> Admin"
+
+  # Wibawa's controllers inherit from this, so your authentication applies.
+  config.parent_controller = "ApplicationController"
+
+  # Who may enter the admin at all. Runs as a before_action.
+  # Rails 8 authentication generator:
+  #   config.authenticate_with { redirect_to main_app.root_path, alert: "Admins only" unless Current.user&.admin? }
+  # Devise:
+  #   config.authenticate_with { authenticate_user!; redirect_to main_app.root_path unless current_user.admin? }
+
+  # How to find the signed-in user (method name or proc run in the controller).
+  # config.current_user = -> { Current.user }
+  config.current_user = :current_user
+
+  # Per-action authorization: nil (allow all), :pundit, :action_policy,
+  # or a proc: ->(user, action, subject) { user.admin? || action.in?(%i[index show]) }
+  # config.authorization = :pundit
+
+  # Sign-out link in the sidebar.
+  # config.logout_path = -> { main_app.session_path }
+  # config.logout_method = :delete
+
+  # Money columns (as: :money). IDR formats as "Rp 1.250.000".
+  config.currency = "USD"
+
+  # Any CSS color for buttons, links and focus rings.
+  # config.brand_color = "#2f3e9e"
+
+  # Rows per page, and whether scopes show record counts (turn off for huge tables).
+  # config.per_page = 50
+  # config.scope_counts = true
+
+  # Use system fonts instead of loading Plus Jakarta Sans from Google Fonts.
+  # config.font_stylesheet = nil
+end

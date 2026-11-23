@@ -1,0 +1,2 @@
+<% content_for :title, t("wibawa.new_record", resource: resource.singular_label) %>
+<%= render wibawa_component(:form_page, Wibawa::FormPageComponent).new(resource: resource, record: record) %>

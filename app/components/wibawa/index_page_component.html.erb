@@ -1,0 +1,48 @@
+<%= render wibawa_component(:page_header, Wibawa::PageHeaderComponent).new(title: resource.label, actions: header_actions) %>
+
+<%# One GET form drives search, filters and scope; inputs elsewhere join it via form="..." %>
+<form id="<%= form_id %>" action="<%= resources_path(resource: resource.key) %>" method="get" data-turbo-action="advance" class="hidden">
+  <% if query.params[:scope].present? %><input type="hidden" name="scope" value="<%= query.params[:scope] %>"><% end %>
+  <% if query.params[:sort].present? %>
+    <input type="hidden" name="sort" value="<%= query.params[:sort] %>">
+    <input type="hidden" name="direction" value="<%= query.params[:direction] %>">
+  <% end %>
+  <% if query.params[:per_page].present? %><input type="hidden" name="per_page" value="<%= query.params[:per_page] %>"><% end %>
+</form>
+
+<div class="flex items-start gap-6">
+  <div class="min-w-0 flex-1">
+    <% if resource.scopes.any? %>
+      <%= render wibawa_component(:scopes, Wibawa::ScopesComponent).new(resource: resource, query: query) %>
+    <% end %>
+
+    <% if search? || filters? %>
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <% if search? %>
+          <label class="relative block min-w-0 flex-1 sm:max-w-sm">
+            <span class="sr-only"><%= t("wibawa.search") %></span>
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-zinc-400"><%= icon("search", size: "size-4") %></span>
+            <input type="search" name="search" form="<%= form_id %>" value="<%= query.search_term %>"
+                   placeholder="<%= t('wibawa.search_placeholder', resource: resource.label.to_s.downcase) %>"
+                   class="<%= wibawa_input_class %> pl-9" data-wb-search>
+          </label>
+        <% end %>
+        <% if filters? %>
+          <button type="button" data-wb-filters-toggle class="<%= wibawa_button_class(:secondary) %> xl:hidden" aria-controls="wb-filters">
+            <%= icon("filter", size: "size-4") %><%= t("wibawa.filters") %>
+          </button>
+        <% end %>
+        <% if query.filtered? %>
+          <%= link_to t("wibawa.clear_filters"), clear_url, class: wibawa_button_class(:ghost) %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= render wibawa_component(:index_table, Wibawa::IndexTableComponent).new(resource: resource, records: page.records, query: query) %>
+    <%= render wibawa_component(:pagination, Wibawa::PaginationComponent).new(page: page, form_id: form_id) %>
+  </div>
+
+  <% if filters? %>
+    <%= render wibawa_component(:filters, Wibawa::FiltersComponent).new(resource: resource, query: query, form_id: form_id, clear_url: clear_url) %>
+  <% end %>
+</div>

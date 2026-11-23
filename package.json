@@ -1,0 +1,12 @@
+{
+  "name": "wibawa-assets",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/wibawa.css -o ./app/assets/builds/wibawa.css --minify",
+    "watch:css": "tailwindcss -i ./src/wibawa.css -o ./app/assets/builds/wibawa.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}

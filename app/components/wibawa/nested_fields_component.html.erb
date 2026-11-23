@@ -1,0 +1,17 @@
+<fieldset data-wb-nested data-wb-new-index="<%= Wibawa::NestedFieldsComponent::NEW_INDEX %>">
+  <legend class="mb-2 text-sm font-medium text-zinc-800 dark:text-zinc-200"><%= label %></legend>
+
+  <div data-wb-nested-list class="space-y-2">
+    <% children.each_with_index do |child, index| %>
+      <%= row(child, index) %>
+    <% end %>
+  </div>
+
+  <template data-wb-nested-template>
+    <%= row(child_class.new, Wibawa::NestedFieldsComponent::NEW_INDEX) %>
+  </template>
+
+  <button type="button" data-wb-nested-add class="<%= wibawa_button_class(:secondary, 'mt-3 py-1.5') %>">
+    <%= icon("plus", size: "size-4") %><%= add_label %>
+  </button>
+</fieldset>

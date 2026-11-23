@@ -1,0 +1,39 @@
+Wibawa.resource <%= class_name %> do
+  menu icon: "table"
+<% if enum_scopes.any? -%>
+
+  scope :all, default: true
+<% enum_scopes.each do |s| -%>
+  scope :<%= s %>
+<% end -%>
+<% end -%>
+<% if searchable.any? -%>
+
+  search <%= searchable.map { |c| ":#{c}" }.join(", ") %>
+<% end -%>
+<% if filters.any? -%>
+
+<% filters.each do |name, as| -%>
+  filter :<%= name %><%= ", as: :#{as}" if as %>
+<% end -%>
+<% end -%>
+
+  index do
+    id_column
+<% index_columns.each do |c| -%>
+    column :<%= c %>
+<% end -%>
+<% if model.respond_to?(:column_names) && model.column_names.include?("created_at") -%>
+    column :created_at
+<% end -%>
+    actions
+  end
+<% if form_fields.any? -%>
+
+  form do
+<% form_fields.each do |f| -%>
+    field :<%= f %>
+<% end -%>
+  end
+<% end -%>
+end

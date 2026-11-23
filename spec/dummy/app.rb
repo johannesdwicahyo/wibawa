@@ -1,0 +1,68 @@
+# A one-file Rails app that mounts the engine, so specs exercise the real
+# controllers, components and views.
+ENV["RAILS_ENV"] = "test"
+ENV["DATABASE_URL"] = "sqlite3::memory:"
+
+require "rails"
+require "active_record/railtie"
+require "action_controller/railtie"
+require "action_view/railtie"
+require "wibawa"
+
+module Dummy
+  class Application < Rails::Application
+    config.root = __dir__
+    config.load_defaults Rails::VERSION::STRING.to_f
+    config.eager_load = false
+    config.secret_key_base = "test"
+    config.hosts.clear
+    config.logger = Logger.new(nil)
+    config.action_dispatch.show_exceptions = :none
+    config.action_controller.allow_forgery_protection = false # as in a generated test.rb
+  end
+end
+
+Wibawa.config.load_paths = [File.join(__dir__, "wibawa")]
+
+class ApplicationRecord < ActiveRecord::Base
+  self.abstract_class = true
+end
+
+class Customer < ApplicationRecord
+  has_many :orders
+end
+
+class Order < ApplicationRecord
+  belongs_to :customer
+  has_many :line_items, dependent: :destroy
+  accepts_nested_attributes_for :line_items, allow_destroy: true
+  enum :status, { pending: 0, paid: 1 }
+  validates :number, presence: true
+end
+
+class LineItem < ApplicationRecord
+  belongs_to :order
+end
+
+# Models are defined above so resource files can name them at boot;
+# the schema comes after, once the in-memory database is connected.
+Dummy::Application.initialize!
+
+ActiveRecord::Schema.verbose = false
+ActiveRecord::Schema.define do
+  create_table(:customers) { |t| t.string :name }
+  create_table :orders do |t|
+    t.string :number
+    t.integer :status, default: 0
+    t.decimal :total
+    t.references :customer
+    t.timestamps
+  end
+  create_table :line_items do |t|
+    t.references :order
+    t.string :product
+    t.integer :position
+  end
+end
+
+Dummy::Application.routes.draw { mount Wibawa::Engine, at: "/admin" }

@@ -1,0 +1,61 @@
+/* Source for app/assets/builds/wibawa.css. Rebuild with `npm run build:css`. */
+@import "tailwindcss" source(none);
+
+@source "../app/components";
+@source "../app/views";
+@source "../app/helpers";
+@source "../lib";
+@source "../app/assets/javascripts";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Brand tokens. Override --wb-primary (config.brand_color) or any of these in your own CSS. */
+@theme inline {
+  --color-primary: var(--wb-primary-effective);
+  --color-on-primary: var(--wb-on-primary);
+  --color-sidebar: var(--wb-sidebar);
+  --color-canvas: var(--wb-canvas);
+}
+
+:root {
+  --wb-primary: #2f3e9e;            /* indigo, as in batik dye */
+  --wb-primary-effective: var(--wb-primary);
+  --wb-on-primary: #fff;              /* text on a solid primary button */
+  --wb-sidebar: #1b2154;
+  --wb-canvas: #f5f6f8;
+}
+
+.dark {
+  --wb-primary-effective: color-mix(in oklab, var(--wb-primary) 55%, white);
+  --wb-on-primary: #0c0e1b;           /* the dark-mode primary is light, so its label is dark (white was 2.9:1) */
+  --wb-sidebar: #10133a;
+  --wb-canvas: #0c0e1b;
+  color-scheme: dark;
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  ::selection { background: color-mix(in oklab, var(--wb-primary) 22%, transparent); }
+  :focus-visible { outline-color: var(--color-primary); }
+  [hidden] { display: none !important; }
+}
+
+/* Kawung motif behind the sidebar footer: four petals around a point, repeated. */
+.wb-kawung {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg fill='none' stroke='white' stroke-opacity='.09'%3E%3Cellipse cx='14' cy='7' rx='4.2' ry='6.5'/%3E%3Cellipse cx='14' cy='21' rx='4.2' ry='6.5'/%3E%3Cellipse cx='7' cy='14' rx='6.5' ry='4.2'/%3E%3Cellipse cx='21' cy='14' rx='6.5' ry='4.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 28px 28px;
+  background-position: center top;
+}
+
+/* Action Text editor */
+.wb-trix trix-editor, trix-editor.wb-trix {
+  @apply min-h-36 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-inset ring-zinc-300 dark:bg-white/5 dark:ring-white/15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

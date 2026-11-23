@@ -1,0 +1,217 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="design/logo/wibawa-symbol-white.svg">
+    <img src="design/logo/wibawa-symbol.svg" width="72" height="72" alt="Wibawa logo: the kawung batik motif drawn as four table cells">
+  </picture>
+</p>
+
+# Wibawa
+
+A modern admin framework for Rails. One small Ruby file per model gives you scopes, filters, search, sortable tables, batch and member actions, nested forms, CSV export and authorization, in the spirit of ActiveAdmin but built on today's Rails:
+
+- **ViewComponent** instead of Arbre. Every page is a component you can subclass and restyle.
+- **Turbo**, plus under 200 lines of plain JavaScript. No Stimulus, no jQuery, no build step.
+- **Prebuilt Tailwind CSS** ships inside the gem. No Node, no Sass, no asset config in your app.
+- **No Formtastic, no Ransack.** Filters and sort columns are an allowlist you declare, so nothing else is queryable.
+- Dark mode, mobile layout, English and Indonesian translations.
+
+*Wibawa* (wee-BAH-wah) is Indonesian/Javanese for authority and dignity. The mark is *kawung*, a batik motif once reserved for the Javanese courts.
+
+## Install
+
+```ruby
+# Gemfile
+gem "wibawa"
+```
+
+```sh
+bundle install
+bin/rails g wibawa:install          # initializer, app/wibawa/, route, one file per model
+```
+
+Open `/admin`. Then set up who may enter in `config/initializers/wibawa.rb`:
+
+```ruby
+Wibawa.configure do |config|
+  config.parent_controller = "ApplicationController"
+  config.authenticate_with { redirect_to main_app.root_path unless Current.user&.admin? }
+  config.current_user = -> { Current.user }
+  config.currency = "IDR"   # as: :money => "Rp 1.250.000"
+end
+```
+
+Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets.
+
+## A resource
+
+Each file in `app/wibawa/` registers one resource. Edits reload without a server restart.
+
+```ruby
+# app/wibawa/orders.rb
+Wibawa.resource Order do
+  menu group: "Sales", priority: 1, icon: "receipt"
+
+  scope :all, default: true
+  scope :pending, -> { where(status: :pending) }
+  scope :paid, -> { where(status: :paid) }
+
+  search :number, "customer.name", "customer.phone"
+
+  filter :status                      # enum => select
+  filter :customer                    # belongs_to => select of customers
+  filter :total, as: :number_range
+  filter :created_at, as: :date_range
+  filter :overdue, as: :boolean, apply: ->(value) { value == "true" ? where("due_on < ?", Date.current) : self }
+
+  index sort: { created_at: :desc } do
+    id_column
+    column :number
+    column :customer, sortable: "customers.name"
+    column :total, as: :money
+    column :status                    # enums and status columns render as colored badges
+    column("Items") { |order| order.line_items.size }
+    column :created_at, as: :time_ago
+    actions
+  end
+
+  show do
+    attributes :number, :customer, :status
+    row :total, as: :money
+    panel("Notes") { |order| simple_format(order.notes) }
+    table_for :line_items do
+      column :product
+      column :quantity
+      column :price, as: :money
+    end
+  end
+
+  form do
+    section "Order" do
+      field :customer
+      field :status
+      field :notes, hint: "Only staff see this"
+    end
+    has_many :line_items, sortable: :position do
+      field :product
+      field :quantity
+      field :price
+    end
+  end
+
+  batch_action :mark_paid, confirm: true do |orders|
+    orders.update_all(status: :paid)
+    "#{orders.size} orders marked as paid"
+  end
+
+  member_action :refund, confirm: "Refund this order?", destructive: true do |order|
+    order.refund!
+    "Refund started"
+  end
+
+  controller do
+    def scoped_collection = super.where(store: Current.store)
+  end
+end
+```
+
+Leave any block out and Wibawa infers it from the model: index columns, show rows, form fields (with the right input for enums, associations, dates, booleans, Active Storage and Action Text) and strong params.
+
+### DSL reference
+
+| Method | What it does |
+| --- | --- |
+| `menu label:, group:, priority:, icon:, if:` | Sidebar entry. `menu false` hides it. `if:` gets the current user. |
+| `scope name, lambda = nil, default:, label:, count:` | Tabs above the table. Without a lambda, calls the model scope of that name. |
+| `search *fields` | The search box. Dotted names (`"customer.name"`) search through an association. |
+| `filter name, as:, collection:, on:, apply:` | `:string`, `:select`, `:boolean`, `:date_range`, `:number_range`, `:search` (with `on:`). Inferred when omitted. |
+| `index per_page:, sort:, count:` | `count: false` skips `COUNT(*)` on huge tables. |
+| `column name, as:, label:, sortable:, link:, &block` | Formats: `:money`, `:badge`, `:boolean`, `:date`, `:datetime`, `:time_ago`, `:number`, `:percentage`, `:email`, `:url`, `:image`, `:text`, `:json`, `:tags`. |
+| `actions only:, &block` | Row buttons. The block adds your own links. |
+| `show { row / attributes / panel / table_for }` | Show page layout. |
+| `form { field / fields / section / has_many }` | Form layout. `field name, as:, collection:, hint:, input_html:`. |
+| `csv { column ... }` | Export columns (defaults to the index columns). |
+| `permit_params *attrs` | Explicit strong params, if you don't want them inferred. |
+| `batch_action name, label:, confirm:, &block` | Block gets the selected relation. `batch_action :destroy, false` turns off batch delete. |
+| `member_action name, method:, confirm:, destructive:, &block` | Button on the show page. Block gets the record; return a String to flash it. |
+| `actions :all, except: [...]` | Turn off CRUD actions for this resource. |
+| `includes *associations` | Extra eager loading (column associations are included automatically). |
+| `controller { def ... }` | Override `scoped_collection`, `find_record`, `build_record`, `record_params`, `after_save_path`. |
+
+Column, panel and action blocks run in the view or controller, so `link_to`, `number_to_currency`, `redirect_to` and your own helpers all work.
+
+## Dashboard
+
+```ruby
+# app/wibawa/dashboard.rb
+Wibawa.dashboard do
+  stat("Orders today") { Order.where(created_at: Date.current.all_day).count }
+  stat("Revenue this month", as: :money, link: -> { resources_path(resource: "orders", scope: "paid") }) do
+    Order.paid.where(created_at: Date.current.all_month).sum(:total)
+  end
+
+  table "Latest orders", resource: :orders do
+    Order.order(created_at: :desc).limit(8)
+  end
+end
+```
+
+Without a dashboard file, the home page lists every resource.
+
+## Authorization
+
+```ruby
+config.authorization = :pundit          # or :action_policy
+config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[index show]) }
+```
+
+Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
+
+## Customizing the UI
+
+- **Colors:** `config.brand_color = "#0f766e"` or set `--wb-primary`, `--wb-sidebar` and `--wb-canvas` in your CSS.
+- **Fonts:** Plus Jakarta Sans loads from Google Fonts. `config.font_stylesheet = nil` uses system fonts.
+- **Markup:** copy any component into your app and point Wibawa at it:
+
+  ```sh
+  bin/rails g wibawa:component index_table
+  ```
+
+  ```ruby
+  config.components[:index_table] = "Admin::IndexTableComponent"
+  ```
+
+  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`.
+
+## Performance
+
+The index table is one component that loops rows and formats cells with plain methods, so a 500-row page doesn't create thousands of component objects. Associations shown in columns are eager-loaded. Turn off scope counts (`config.scope_counts = false`) and row counts (`index count: false`) on very large tables. CSV export streams in batches of 1,000 instead of loading everything into memory.
+
+## Coming from ActiveAdmin
+
+| ActiveAdmin | Wibawa |
+| --- | --- |
+| `ActiveAdmin.register Order do` | `Wibawa.resource Order do` |
+| `app/admin/orders.rb` | `app/wibawa/orders.rb` |
+| `index do ... end`, `column`, `actions` | Same |
+| `filter :status, as: :select` | Same, without Ransack predicates |
+| `form do \|f\| f.inputs { f.input :x } end` | `form do field :x end` |
+| `show do attributes_table do row :x end end` | `show do row :x end` |
+| `scope :pending` | Same |
+| `batch_action`, `member_action` | Same idea; the block gets the records |
+| `permit_params` | Same, but optional |
+| `controller do ... end` | Same |
+
+## Development
+
+```sh
+bundle install
+bundle exec rake             # DSL unit tests, then request specs against the Rails app in spec/dummy
+npm install
+npm run build:css            # rebuild app/assets/builds/wibawa.css after changing classes
+```
+
+Commit the rebuilt CSS; CI fails if it's out of date.
+
+## License
+
+MIT

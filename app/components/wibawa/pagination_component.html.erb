@@ -1,0 +1,35 @@
+<nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-600 dark:text-zinc-400" aria-label="<%= t('wibawa.pagination.label') %>">
+  <div class="flex items-center gap-3">
+    <p class="tabular-nums"><%= summary %></p>
+    <label class="flex items-center gap-2">
+      <span class="sr-only"><%= t("wibawa.pagination.per_page") %></span>
+      <%= helpers.select_tag "per_page", helpers.options_for_select(per_page_options.map { |n| [t("wibawa.pagination.per_page_option", count: n), n] }, page.per_page),
+            form: form_id, data: { wb_autosubmit: true },
+            class: "rounded-lg border-0 bg-transparent py-1 pl-2 pr-7 text-sm ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-primary dark:ring-white/15 dark:[color-scheme:dark]" %>
+    </label>
+  </div>
+
+  <ol class="flex items-center gap-1">
+    <li>
+      <%= link_to page_url(page.page - 1), class: nav_class(page.prev?), rel: "prev", "aria-disabled": !page.prev? do %>
+        <%= icon("chevron-left", size: "size-4") %><span class="sr-only"><%= t("wibawa.pagination.previous") %></span>
+      <% end %>
+    </li>
+    <% page.window.each do |number| %>
+      <li>
+        <% if number == :gap %>
+          <span class="px-1 text-zinc-400">…</span>
+        <% elsif number == page.page %>
+          <span aria-current="page" class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg bg-zinc-900 px-2 text-sm font-medium text-white tabular-nums dark:bg-white dark:text-zinc-900"><%= number %></span>
+        <% else %>
+          <%= link_to number, page_url(number), class: "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm tabular-nums text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10" %>
+        <% end %>
+      </li>
+    <% end %>
+    <li>
+      <%= link_to page_url(page.page + 1), class: nav_class(page.next?), rel: "next", "aria-disabled": !page.next? do %>
+        <%= icon("chevron-right", size: "size-4") %><span class="sr-only"><%= t("wibawa.pagination.next") %></span>
+      <% end %>
+    </li>
+  </ol>
+</nav>

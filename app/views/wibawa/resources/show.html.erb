@@ -1,0 +1,2 @@
+<% content_for :title, wibawa_presenter.display_name(record) %>
+<%= render wibawa_component(:show_page, Wibawa::ShowPageComponent).new(resource: resource, record: record) %>

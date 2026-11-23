@@ -1,0 +1,34 @@
+require "rails/generators"
+
+module Wibawa
+  module Generators
+    # Copy a built-in component into your app so you can change its markup:
+    #   bin/rails g wibawa:component index_table
+    # creates app/components/admin/index_table_component.rb (+ .html.erb)
+    # and prints the config line that switches Wibawa to it.
+    class ComponentGenerator < Rails::Generators::Base
+      argument :component, type: :string, desc: "e.g. index_table, sidebar, show_page, form_page, filters, dashboard"
+      class_option :namespace, type: :string, default: "Admin"
+
+      def copy_component
+        source_dir = File.expand_path("../../../../app/components/wibawa", __dir__)
+        source_template = File.join(source_dir, "#{component}_component.html.erb")
+        raise Thor::Error, "Unknown component: #{component}" unless File.exist?(File.join(source_dir, "#{component}_component.rb"))
+
+        ns = options[:namespace]
+        dir = File.join("app/components", ns.underscore)
+        create_file File.join(dir, "#{component}_component.rb"), <<~RUBY
+          module #{ns}
+            class #{component.camelize}Component < Wibawa::#{component.camelize}Component
+            end
+          end
+        RUBY
+        copy_file source_template, File.join(dir, "#{component}_component.html.erb") if File.exist?(source_template)
+
+        say ""
+        say "Add to config/initializers/wibawa.rb:", :green
+        say %(  config.components[:#{component}] = "#{ns}::#{component.camelize}Component")
+      end
+    end
+  end
+end

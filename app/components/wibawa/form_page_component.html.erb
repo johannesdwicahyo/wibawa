@@ -1,0 +1,38 @@
+<%= render wibawa_component(:page_header, Wibawa::PageHeaderComponent).new(title: title, breadcrumbs: breadcrumbs) %>
+
+<%= form_with model: record, scope: :record, url: form_url, method: (new_record? ? :post : :patch),
+              multipart: multipart?, class: "max-w-3xl", data: { wb_form: true } do |f| %>
+  <% if errors? %>
+    <div role="alert" class="mb-6 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30">
+      <p class="font-medium"><%= t("wibawa.form.errors_heading", count: record.errors.count) %></p>
+      <% if base_errors.any? %>
+        <ul class="mt-1 list-disc pl-5"><% base_errors.each do |message| %><li><%= message %></li><% end %></ul>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="space-y-6">
+    <% groups = items.slice_when { |a, b| (a.kind == :section) != (b.kind == :section) || a.kind == :section } %>
+    <% groups.each do |group| %>
+      <% if group.first.kind == :section %>
+        <% section = group.first %>
+        <fieldset class="<%= card_class %> p-5 sm:p-6">
+          <legend class="float-left mb-5 w-full text-base font-semibold text-zinc-950 dark:text-white"><%= section.name %></legend>
+          <div class="clear-both space-y-5">
+            <% section.children.each do |item| %><%= render_item(f, item, model) %><% end %>
+          </div>
+        </fieldset>
+      <% else %>
+        <div class="<%= card_class %> space-y-5 p-5 sm:p-6">
+          <% group.each do |item| %><%= render_item(f, item, model) %><% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="sticky bottom-0 -mx-4 mt-6 flex items-center gap-3 border-t border-zinc-200 bg-canvas/95 px-4 py-4 backdrop-blur sm:mx-0 sm:px-0 dark:border-white/10">
+    <%= f.button(new_record? ? t("wibawa.form.create", resource: resource.singular_label) : t("wibawa.form.save"),
+                 type: "submit", class: wibawa_button_class(:primary), data: { turbo_submits_with: t("wibawa.form.saving") }) %>
+    <%= link_to t("wibawa.cancel"), cancel_url, class: wibawa_button_class(:ghost) %>
+  </div>
+<% end %>

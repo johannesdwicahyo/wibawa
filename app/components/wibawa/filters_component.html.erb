@@ -1,0 +1,53 @@
+<aside id="wb-filters" data-wb-filters
+       class="fixed inset-y-0 right-0 z-40 hidden w-80 max-w-[90vw] overflow-y-auto bg-canvas p-5 shadow-xl ring-1 ring-zinc-950/10
+              xl:sticky xl:top-8 xl:z-auto xl:block xl:w-72 xl:max-w-none xl:shrink-0 xl:overflow-visible xl:p-0 xl:shadow-none xl:ring-0
+              dark:ring-white/10">
+  <div class="<%= card_class %> p-4 xl:p-5">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-zinc-950 dark:text-white"><%= t("wibawa.filters") %></h2>
+      <button type="button" data-wb-filters-toggle class="rounded-md p-1 text-zinc-500 hover:text-zinc-900 xl:hidden dark:hover:text-white" aria-label="<%= t('wibawa.close') %>">
+        <%= icon("x", size: "size-4") %>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <% filters.each do |filter| %>
+        <% type = type_for(filter) %>
+        <div>
+          <% if %i[date_range number_range].include?(type) %>
+            <p class="mb-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300"><%= filter.label %></p>
+            <div class="grid grid-cols-2 gap-2">
+              <label>
+                <span class="sr-only"><%= filter.label %> <%= t("wibawa.from") %></span>
+                <input type="<%= range_input_type(filter) %>" form="<%= form_id %>" name="<%= field_name(filter, '_from') %>" value="<%= value(filter, '_from') %>"
+                       placeholder="<%= t('wibawa.from') %>" step="any" class="<%= wibawa_input_class %> px-2.5">
+              </label>
+              <label>
+                <span class="sr-only"><%= filter.label %> <%= t("wibawa.to") %></span>
+                <input type="<%= range_input_type(filter) %>" form="<%= form_id %>" name="<%= field_name(filter, '_to') %>" value="<%= value(filter, '_to') %>"
+                       placeholder="<%= t('wibawa.to') %>" step="any" class="<%= wibawa_input_class %> px-2.5">
+              </label>
+            </div>
+          <% elsif type == :select %>
+            <label for="<%= field_id(filter) %>" class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"><%= filter.label %></label>
+            <%= helpers.select_tag field_name(filter), helpers.options_for_select(select_options(filter), value(filter)),
+                  include_blank: t("wibawa.any"), id: field_id(filter), form: form_id, class: wibawa_input_class %>
+          <% elsif type == :boolean %>
+            <label for="<%= field_id(filter) %>" class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"><%= filter.label %></label>
+            <%= helpers.select_tag field_name(filter), helpers.options_for_select(boolean_options, value(filter)),
+                  include_blank: t("wibawa.any"), id: field_id(filter), form: form_id, class: wibawa_input_class %>
+          <% else %>
+            <label for="<%= field_id(filter) %>" class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"><%= filter.label %></label>
+            <input type="search" id="<%= field_id(filter) %>" form="<%= form_id %>" name="<%= field_name(filter) %>" value="<%= value(filter) %>"
+                   class="<%= wibawa_input_class %>">
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-5 flex gap-2">
+      <button type="submit" form="<%= form_id %>" class="<%= wibawa_button_class(:primary, 'flex-1') %>"><%= t("wibawa.apply_filters") %></button>
+      <%= link_to t("wibawa.clear"), clear_url, class: wibawa_button_class(:secondary) %>
+    </div>
+  </div>
+</aside>

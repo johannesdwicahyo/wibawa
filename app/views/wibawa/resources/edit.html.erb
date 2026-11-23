@@ -1,0 +1,2 @@
+<% content_for :title, t("wibawa.edit_record", name: wibawa_presenter.display_name(record)) %>
+<%= render wibawa_component(:form_page, Wibawa::FormPageComponent).new(resource: resource, record: record) %>

@@ -1,0 +1,100 @@
+<div class="<%= card_class %> overflow-hidden" data-wb-table>
+  <% if selectable? %>
+    <%= helpers.form_tag batch_resources_path(resource: resource.key), id: batch_form_id, method: :post, class: "hidden" do %><% end %>
+
+    <div data-wb-batch-bar hidden
+         class="flex flex-wrap items-center gap-2 border-b border-zinc-200 bg-primary/[0.06] px-4 py-2.5 dark:border-white/10 dark:bg-primary/15">
+      <p class="mr-2 text-sm font-medium text-zinc-900 dark:text-white">
+        <span data-wb-selected-count>0</span> <%= t("wibawa.selected") %>
+      </p>
+      <% batch_actions.each do |action| %>
+        <button type="submit" form="<%= batch_form_id %>" name="batch_action" value="<%= action.name %>"
+                <% if (confirm = batch_confirm(action)) %>data-turbo-confirm="<%= confirm %>"<% end %>
+                class="<%= wibawa_button_class(action.destructive? ? :danger : :secondary, 'py-1.5') %>">
+          <%= action.label %>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if records.empty? %>
+    <div class="flex flex-col items-center px-6 py-16 text-center">
+      <span class="grid size-12 place-items-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-white/5 dark:text-zinc-400"><%= icon("inbox", size: "size-6") %></span>
+      <p class="mt-4 text-sm font-medium text-zinc-900 dark:text-white"><%= empty_message %></p>
+      <% if !query.filtered? && can_create? %>
+        <%= link_to new_resource_path(resource: resource.key), class: wibawa_button_class(:primary, "mt-5") do %>
+          <%= icon("plus", size: "size-4") %><%= t("wibawa.new_record", resource: resource.singular_label) %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="relative overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-200 bg-zinc-50/80 text-left dark:border-white/10 dark:bg-white/[0.02]">
+            <% if selectable? %>
+              <th scope="col" class="w-10 py-2.5 pl-4 pr-1">
+                <input type="checkbox" data-wb-select-all aria-label="<%= t('wibawa.select_all') %>"
+                       class="size-4 rounded border-zinc-300 text-primary accent-[var(--color-primary)]">
+              </th>
+            <% end %>
+            <% columns.each do |column| %>
+              <th scope="col" aria-sort="<%= aria_sort(column) %>"
+                  class="<%= class_names('whitespace-nowrap px-4 py-2.5 font-medium text-zinc-600 dark:text-zinc-400', 'text-right' => numeric?(column)) %>">
+                <% if sortable?(column) %>
+                  <%= link_to sort_url(column), class: class_names("group inline-flex items-center gap-1 hover:text-zinc-950 dark:hover:text-white", "flex-row-reverse" => numeric?(column), "text-zinc-950 dark:text-white" => sorted?(column)) do %>
+                    <%= column.label %>
+                    <%= icon(sort_icon(column), size: "size-3.5", class: class_names("text-zinc-400", "opacity-0 group-hover:opacity-100" => !sorted?(column))) %>
+                  <% end %>
+                <% else %>
+                  <%= column.label %>
+                <% end %>
+              </th>
+            <% end %>
+            <% if row_actions? %><th scope="col" class="px-4 py-2.5"><span class="sr-only"><%= t("wibawa.actions") %></span></th><% end %>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-white/[0.06]">
+          <% records.each do |record| %>
+            <tr class="group/row hover:bg-zinc-50 has-[:checked]:bg-primary/[0.04] dark:hover:bg-white/[0.03] dark:has-[:checked]:bg-primary/10">
+              <% if selectable? %>
+                <td class="w-10 py-2.5 pl-4 pr-1">
+                  <input type="checkbox" name="ids[]" value="<%= record.id %>" form="<%= batch_form_id %>" data-wb-select
+                         aria-label="<%= t('wibawa.select_record', name: presenter.display_name(record)) %>"
+                         class="size-4 rounded border-zinc-300 accent-[var(--color-primary)]">
+                </td>
+              <% end %>
+              <% columns.each do |column| %>
+                <td class="<%= class_names('px-4 py-2.5 align-middle text-zinc-700 dark:text-zinc-300', 'text-right' => numeric?(column), 'max-w-xs' => !numeric?(column)) %>"><%= cell(record, column) %></td>
+              <% end %>
+              <% if row_actions? %>
+                <td class="whitespace-nowrap px-3 py-1.5 text-right">
+                  <div class="inline-flex items-center gap-0.5">
+                    <%= custom_row_actions(record) %>
+                    <% if show_row_action?(:show) && wibawa_authorized?(:show, record) %>
+                      <%= link_to resource_path(resource: resource.key, id: record), class: wibawa_button_class(:ghost, "p-1.5"), title: t("wibawa.view") do %>
+                        <%= icon("eye", size: "size-4") %><span class="sr-only"><%= t("wibawa.view") %></span>
+                      <% end %>
+                    <% end %>
+                    <% if show_row_action?(:edit) && wibawa_authorized?(:edit, record) %>
+                      <%= link_to edit_resource_path(resource: resource.key, id: record), class: wibawa_button_class(:ghost, "p-1.5"), title: t("wibawa.edit") do %>
+                        <%= icon("pencil", size: "size-4") %><span class="sr-only"><%= t("wibawa.edit") %></span>
+                      <% end %>
+                    <% end %>
+                    <% if show_row_action?(:destroy) && wibawa_authorized?(:destroy, record) %>
+                      <%= button_to resource_path(resource: resource.key, id: record), method: :delete, title: t("wibawa.delete"),
+                            class: wibawa_button_class(:ghost, "p-1.5 hover:!text-rose-600"),
+                            form: { class: "contents", data: { turbo_confirm: t("wibawa.confirm_delete", name: presenter.display_name(record)) } } do %>
+                        <%= icon("trash", size: "size-4") %><span class="sr-only"><%= t("wibawa.delete") %></span>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

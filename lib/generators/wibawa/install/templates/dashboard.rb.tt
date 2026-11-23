@@ -1,0 +1,10 @@
+# The admin home page. Delete this file to get a grid of links to every resource.
+#
+# Wibawa.dashboard do
+#   stat("Orders today") { Order.where(created_at: Date.current.all_day).count }
+#   stat("Revenue this month", as: :money) { Order.paid.where(created_at: Date.current.all_month).sum(:total) }
+#
+#   table "Latest orders", resource: :orders do
+#     Order.order(created_at: :desc).limit(8)
+#   end
+# end
