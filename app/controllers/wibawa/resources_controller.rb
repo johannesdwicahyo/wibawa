@@ -81,6 +81,24 @@ module Wibawa
       end
     end
 
+    # GET: the upload form (or, as .csv, an empty template). POST: run the import.
+    def import
+      raise Wibawa::ResourceNotFound unless resource.importable?
+
+      wibawa_authorize!(:import, model)
+      @importer = Wibawa::CsvImporter.new(resource, find_in: authorized_collection, build: -> { build_record },
+                                                    authorize: ->(action, record) { wibawa_authorized?(action, record) })
+      return send_data(CSV.generate_line(@importer.headers), filename: "#{resource.key}-template.csv", type: "text/csv; charset=utf-8") if request.format.csv?
+      return unless request.post?
+
+      @result = @importer.call(params[:file].respond_to?(:read) ? params[:file].read : "")
+      return render(:import, status: :unprocessable_entity) unless @result.ok?
+
+      wibawa_audit(:import, nil, { created: @result.created, updated: @result.updated })
+      redirect_to resources_path(resource: resource.key), status: :see_other,
+                  notice: t("wibawa.flash.imported", created: @result.created, updated: @result.updated)
+    end
+
     # Choices for a searchable select, as <li> options. `target` must be a
     # model this resource's form or filters point at.
     def options

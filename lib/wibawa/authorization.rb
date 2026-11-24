@@ -21,6 +21,7 @@ module Wibawa
     def self.fallback_for(action)
       name = action.to_s
       return :index if name == "export"
+      return :create if name == "import"
       return :destroy if name == "batch_destroy"
       return :update if name.start_with?("batch_")
       return :create if name == "new"

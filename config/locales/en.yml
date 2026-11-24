@@ -24,6 +24,19 @@ en:
       one: "1 file"
       other: "%{count} files"
     filters: "Filters"
+    import:
+      button: "Import CSV"
+      title: "Import %{resource}"
+      file: "CSV file"
+      importing: "Importing…"
+      columns: "Columns you can use"
+      template: "Download template"
+      all_or_nothing: "The first row names the columns. Up to %{count} rows. Empty cells leave the value as it is. If any row is invalid, nothing is imported."
+      updates: "A row whose %{key} already exists updates that record."
+      failed: "Nothing was imported. Fix these rows and upload the file again."
+      line: "Line %{line}:"
+      unknown_columns: "Unknown columns: %{columns}"
+      too_many: "The file has more than %{count} rows."
     combobox:
       placeholder: "Type to search…"
       empty: "Nothing matches."
@@ -78,6 +91,7 @@ en:
       forbidden_title: "You don't have access"
       forbidden_body: "Ask an administrator for permission to open this page."
     flash:
+      imported: "Import finished: %{created} created, %{updated} updated."
       view_saved: "View \"%{name}\" saved."
       view_deleted: "View \"%{name}\" deleted."
       created: "%{resource} created."

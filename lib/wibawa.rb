@@ -79,6 +79,7 @@ if defined?(Rails::Engine)
   require "wibawa/query"
   require "wibawa/paginator"
   require "wibawa/csv_exporter"
+  require "wibawa/csv_importer"
   require "wibawa/authorization"
   require "wibawa/engine"
 end

@@ -229,6 +229,23 @@ A view belongs to the user who saved it (`config.current_user`). If the admin ha
 
 Press <kbd>Cmd</kbd>+<kbd>K</kbd> (<kbd>Ctrl</kbd>+<kbd>K</kbd> elsewhere) or click Search in the sidebar. The palette lists every page the user may open, a "New ..." shortcut per resource, and every report. From two characters on it also searches records in every resource that declares `search`, five hits each, through the same authorization and `scoped_collection` as the index page. There is nothing to configure.
 
+## CSV import
+
+```ruby
+Wibawa.resource Product do
+  import                          # every row creates a product
+  # import key: :sku              # a row whose sku exists updates that product instead
+  # import only: %i[sku name price]
+end
+```
+
+This adds an **Import CSV** button to the index page, with an upload form and a template to download. The first row names the columns, by attribute name or label; by default they are the form's fields, so a CSV can set nothing the form cannot. For a `belongs_to`, use its id column (`customer_id`).
+
+- **All or nothing.** If any row is invalid, nothing is imported and each problem is listed with its line number.
+- **Empty cells leave the value as it is**: a new record keeps its defaults and an existing one keeps its data. An import never clears a field.
+- **Authorization.** `:import` on the model (falls back to `create?`), then `create` or `update` on each row.
+- The import runs inside the request and is capped at 5,000 rows. With the audit log on, each import is one entry with its counts.
+
 ## Custom pages
 
 For anything that is not a model: a settings screen, a maintenance panel, a page of links. It gets a menu entry and the admin layout, and you write no controller or route.
