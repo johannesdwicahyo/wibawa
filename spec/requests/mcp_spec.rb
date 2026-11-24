@@ -46,7 +46,7 @@ RSpec.describe "Wibawa MCP server", type: :request do
 
   it "offers only read tools by default" do
     expect(rpc("initialize", protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "spec", version: "1" }).dig("result", "serverInfo", "name")).to eq("wibawa")
-    expect(rpc("tools/list").dig("result", "tools").map { |t| t["name"] }).to eq(%w[list_resources list_records get_record])
+    expect(rpc("tools/list").dig("result", "tools").map { |t| t["name"] }).to eq(%w[list_resources list_records get_record list_reports run_report])
 
     expect(rpc("tools/call", name: "delete_record", arguments: { resource: "orders", id: order.id })).not_to include("result" => hash_including("isError" => false))
     expect(Order.exists?(order.id)).to be(true)
@@ -64,6 +64,26 @@ RSpec.describe "Wibawa MCP server", type: :request do
     expect(call("list_records", resource: "orders", scope: "pending")["records"].map { |r| r["number"] }).to eq(["A-1"])
     expect(call("get_record", resource: "orders", id: order.id)).to include("number" => "A-1", "customer" => { "id" => customer.id, "name" => "Sari" })
     expect(call("get_record", resource: "orders", id: 0)).to eq("error" => "Not found.")
+  end
+
+  it "lists and runs reports, binding their parameters" do
+    Order.create!(number: "B-2", customer: customer, total: 15)
+    order.update!(total: 10)
+
+    listed = call("list_reports").find { |r| r["report"] == "orders_by_status" }
+    expect(listed).to include("title" => "Orders by status", "params" => [{ "name" => "number", "type" => "string", "default" => "%" }])
+
+    all = call("run_report", report: "orders_by_status")
+    expect(all).to include("total" => 1, "truncated" => false, "params" => { "number" => "%" })
+    expect(all["rows"].first).to include("orders" => 2)
+
+    expect(call("run_report", report: "orders_by_status", params: { number: "B-%" })["rows"].first).to include("orders" => 1)
+    expect(call("run_report", report: "orders_by_status", params: { number: "x' OR '1'='1" })["rows"]).to eq([])
+    expect(call("run_report", report: "nope")).to eq("error" => "Not found.")
+
+    Wibawa.config.authorize_with { |_user, _action, subject| !subject.is_a?(Wibawa::Report) }
+    expect(call("list_reports")).to eq([])
+    expect(call("run_report", report: "orders_by_status")).to eq("error" => "Not authorized.")
   end
 
   it "applies the same authorization as the browser" do
