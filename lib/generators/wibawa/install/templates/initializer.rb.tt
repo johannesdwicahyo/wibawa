@@ -32,6 +32,11 @@ Wibawa.configure do |config|
   # config.per_page = 50
   # config.scope_counts = true
 
+  # MCP server for AI agents at <mount path>/mcp (needs `gem "mcp"`). Off until
+  # this block is set; it turns a bearer token into a user, or nil.
+  # config.mcp_authenticate_with { |token| ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user }
+  # config.mcp_write = true   # let agents create, update, delete and run actions
+
   # Plus Jakarta Sans ships inside the gem. Use the system UI font instead:
   # config.font = :system
 end

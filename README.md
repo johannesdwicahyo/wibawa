@@ -166,6 +166,38 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
 
+## MCP server (AI agents)
+
+Wibawa can expose your admin to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io). It is off until you tell it how to recognise a token:
+
+```ruby
+# Gemfile
+gem "mcp"
+
+# config/initializers/wibawa.rb
+config.mcp_authenticate_with do |token|
+  ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user
+end
+config.mcp_write = true   # optional; without it agents can only read
+```
+
+The endpoint is `<mount path>/mcp` (for example `/admin/mcp`). Agents send `Authorization: Bearer <token>`.
+
+| Tool | Does | Needs `mcp_write` |
+| --- | --- | --- |
+| `list_resources` | Resources with their columns, scopes and filters | |
+| `list_records` | A page of records; scope, search, filters, sort | |
+| `get_record` | One record's detail fields | |
+| `create_record`, `update_record`, `delete_record` | Write through the form's strong params | yes |
+| `run_action` | Run a `member_action` on a record | yes |
+
+The user your block returns goes through the same `config.authorization`, the same `scoped_collection` overrides and the same strong params as in the browser, and an agent only sees the columns a resource declares. Two things differ from the browser:
+
+- The endpoint does not inherit from `parent_controller` (an agent has no session). In `controller do ... end` blocks, use `wibawa_current_user` rather than your app's `current_user` if the MCP server should honour them.
+- Batch actions are not exposed; an agent calls a tool once per record.
+
+Store tokens hashed and make them revocable. There is no OAuth flow yet.
+
 ## Customizing the UI
 
 - **Colors:** `config.brand_color = "#0f766e"` sets the action color (the dark-mode shade is derived from it). Every color is a CSS variable you can override: `--wb-canvas`, `--wb-surface`, `--wb-line`, `--wb-ink`, `--wb-rail` and so on; see `DESIGN.md`.
