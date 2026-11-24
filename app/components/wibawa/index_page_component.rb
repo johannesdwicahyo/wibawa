@@ -17,6 +17,9 @@ module Wibawa
                   url: resources_path(resource: resource.key, format: :csv, **preserved_params("page", "per_page").symbolize_keys),
                   data: { turbo: false } }
       end
+      if resource.importable? && wibawa_authorized?(:import, resource.model)
+        list << { label: t("wibawa.import.button"), icon: "file", style: :secondary, url: import_resource_path(resource: resource.key) }
+      end
       if resource.action?(:new) && wibawa_authorized?(:new, resource.model)
         list << { label: t("wibawa.new_record", resource: resource.singular_label), icon: "plus", style: :primary,
                   url: new_resource_path(resource: resource.key) }

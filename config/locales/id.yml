@@ -24,6 +24,19 @@ id:
       one: "1 berkas"
       other: "%{count} berkas"
     filters: "Filter"
+    import:
+      button: "Impor CSV"
+      title: "Impor %{resource}"
+      file: "Berkas CSV"
+      importing: "Mengimpor…"
+      columns: "Kolom yang bisa dipakai"
+      template: "Unduh templat"
+      all_or_nothing: "Baris pertama berisi nama kolom. Maksimal %{count} baris. Sel kosong tidak mengubah nilai. Jika ada baris yang tidak valid, tidak ada yang diimpor."
+      updates: "Baris dengan %{key} yang sudah ada akan memperbarui data tersebut."
+      failed: "Tidak ada yang diimpor. Perbaiki baris berikut lalu unggah lagi."
+      line: "Baris %{line}:"
+      unknown_columns: "Kolom tidak dikenal: %{columns}"
+      too_many: "Berkas berisi lebih dari %{count} baris."
     combobox:
       placeholder: "Ketik untuk mencari…"
       empty: "Tidak ada yang cocok."
@@ -78,6 +91,7 @@ id:
       forbidden_title: "Anda tidak punya akses"
       forbidden_body: "Minta izin ke administrator untuk membuka halaman ini."
     flash:
+      imported: "Impor selesai: %{created} dibuat, %{updated} diperbarui."
       view_saved: "Tampilan \"%{name}\" disimpan."
       view_deleted: "Tampilan \"%{name}\" dihapus."
       created: "%{resource} berhasil dibuat."

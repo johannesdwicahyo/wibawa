@@ -52,7 +52,8 @@ The things the first users will ask for in week one.
 - [ ] Saved views: share a view with the team, set a default view, rename *(candidate)*
 - [x] Audit log of changes made through the admin and MCP, with per-record history
 - [ ] Show PaperTrail or Audited history on the record page when the app uses one *(candidate)*
-- [ ] CSV import *(candidate)*
+- [x] CSV import, all-or-nothing, with create-or-update by a key column
+- [ ] CSV import in a background job for large files, with a dry-run preview *(candidate)*
 
 **Exit:** a mid-sized app (20+ models) can replace ActiveAdmin without writing a custom controller.
 

@@ -98,6 +98,14 @@ module Wibawa
       @csv.instance_eval(&block) if block
     end
 
+    # Turn on CSV import for this resource:
+    #   import                          # every row creates a record
+    #   import key: :number             # rows whose number exists update that record
+    #   import only: %i[number total]   # limit the columns (default: the form's fields)
+    def import(key: nil, only: nil)
+      @import = { key: key&.to_sym, only: only&.map(&:to_sym) }
+    end
+
     # Explicit strong params. Normally inferred from the form.
     def permit_params(*attributes)
       @permitted = attributes.flatten
@@ -224,6 +232,14 @@ module Wibawa
 
     def find_scope(name)
       scopes.find { |s| s.name.to_s == name.to_s }
+    end
+
+    def importable? = !@import.nil?
+    def import_options = @import || {}
+
+    # Columns a CSV may set: plain attributes only, no nested rows or lists.
+    def import_attributes
+      import_options[:only] || permitted_attributes.grep(Symbol)
     end
 
     # Strong-params list, inferred from the form unless permit_params was used.

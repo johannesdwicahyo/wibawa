@@ -1,0 +1,45 @@
+<% title = t("wibawa.import.title", resource: resource.label) %>
+<% content_for :title, title %>
+<%= render wibawa_component(:page_header, Wibawa::PageHeaderComponent).new(
+      title: title, breadcrumbs: [[resource.label, resources_path(resource: resource.key)], [t("wibawa.import.button"), nil]]) %>
+
+<div class="max-w-3xl space-y-6">
+  <% if @result && !@result.ok? %>
+    <div role="alert" class="rounded-control bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30">
+      <p class="font-medium"><%= t("wibawa.import.failed") %></p>
+      <ul class="mt-2 space-y-1">
+        <% @result.errors.each do |line, message| %>
+          <li><% if line %><span class="font-medium tabular-nums"><%= t("wibawa.import.line", line: line) %></span> <% end %><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with url: import_resource_path(resource: resource.key), method: :post, multipart: true, class: "rounded-card bg-surface p-5 ring-1 ring-line sm:p-6" do |f| %>
+    <label for="wb-import-file" class="mb-1.5 block text-sm font-medium text-ink"><%= t("wibawa.import.file") %></label>
+    <%= f.file_field :file, id: "wb-import-file", accept: ".csv,text/csv", required: true,
+          class: "block w-full text-sm text-ink-2 file:mr-3 file:rounded-control file:border-0 file:bg-surface-2 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-ink hover:file:bg-line" %>
+    <p class="mt-3 text-sm text-ink-2">
+      <%= t("wibawa.import.all_or_nothing", count: Wibawa::CsvImporter::MAX_ROWS) %>
+      <% if @importer.key %><%= t("wibawa.import.updates", key: resource.model.human_attribute_name(@importer.key)) %><% end %>
+    </p>
+    <div class="mt-5 flex items-center gap-3">
+      <%= f.button t("wibawa.import.button"), type: "submit", class: wibawa_button_class(:primary), data: { turbo_submits_with: t("wibawa.import.importing") } %>
+      <%= link_to t("wibawa.cancel"), resources_path(resource: resource.key), class: wibawa_button_class(:ghost) %>
+    </div>
+  <% end %>
+
+  <div class="rounded-card bg-surface p-5 ring-1 ring-line sm:p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 class="text-base font-semibold text-ink"><%= t("wibawa.import.columns") %></h2>
+      <%= link_to import_resource_path(resource: resource.key, format: :csv), class: wibawa_button_class(:secondary), data: { turbo: false } do %>
+        <%= wibawa_icon("download", size: "size-4") %><%= t("wibawa.import.template") %>
+      <% end %>
+    </div>
+    <ul class="mt-3 flex flex-wrap gap-2 text-sm">
+      <% @importer.attributes.each do |attribute| %>
+        <li class="rounded-control bg-surface-2 px-2.5 py-1 text-ink ring-1 ring-line"><%= attribute %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

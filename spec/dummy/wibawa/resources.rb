@@ -10,6 +10,7 @@ Wibawa.resource Order do
   scope :all, default: true
   scope :pending
   search :number, "customer.name"
+  import key: :number
   filter :status
   filter :customer
   filter :line_items
