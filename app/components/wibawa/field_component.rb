@@ -215,12 +215,12 @@ module Wibawa
     def belongs_to_options
       scope = field.options[:collection]
       scope = helpers.instance_exec(&scope) if scope.is_a?(Proc)
-      records = scope || reflection.klass.limit(COLLECTION_LIMIT)
+      records = scope || authorized_scope(reflection.klass).limit(COLLECTION_LIMIT)
       records.map { |r| r.is_a?(Array) ? r : [presenter.display_name(r), r.id] }
     end
 
     def many_options
-      reflection.klass.limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
+      authorized_scope(reflection.klass).limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
     end
 
     def hint_html

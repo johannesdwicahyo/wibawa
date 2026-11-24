@@ -56,8 +56,8 @@ module Wibawa
         [value(filter, "_from"), value(filter, "_to")].map { |v| v.presence || "…" }.join(" – ")
       when :select
         if (target = combobox_class(filter))
-          record = target.find_by(target.primary_key => value(filter))
-          return record ? presenter.display_name(record) : value(filter).to_s
+          record = authorized_scope(target).find_by(target.primary_key => value(filter))
+          return record ? presenter.display_name(record) : "##{value(filter)}"
         end
 
         labels = select_options(filter).to_h { |label, v| [v.to_s, label] }
@@ -82,7 +82,7 @@ module Wibawa
       return normalize(collection) if collection
 
       if (ref = model.reflect_on_association(filter.name))
-        ref.klass.limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
+        authorized_scope(ref.klass).limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
       elsif (enum = model.defined_enums[filter.name.to_s])
         enum.keys.map { |k| [Util.humanize(k), k] }
       else

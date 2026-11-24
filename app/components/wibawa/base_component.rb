@@ -12,6 +12,12 @@ module Wibawa
     # Use the app's translations (wibawa.*) rather than component-relative keys.
     def t(key, **options) = helpers.t(key, **options)
 
+    # Records of another model the current user may see: what a select may list
+    # and what a chosen id may be named as.
+    def authorized_scope(klass)
+      Wibawa::Authorization.build(helpers.wibawa_current_user).scope(klass.all)
+    end
+
     def card_class
       "rounded-card bg-surface ring-1 ring-line"
     end

@@ -39,10 +39,10 @@ module Wibawa
     end
 
     def call
-      label = current && presenter.display_name(current)
+      label = current ? presenter.display_name(current) : ("##{@value}" if @value.present?)
       content_tag(:div, class: "relative", data: { wb_combobox: true, url: helpers.options_resource_path(resource: @resource_key, target: @klass.name) }) do
         safe_join([
-          helpers.tag.input(type: "hidden", name: @name, value: current&.id, form: @form),
+          helpers.tag.input(type: "hidden", name: @name, value: @value, form: @form),
           helpers.tag.input(**{ type: "text", id: @id, value: label, role: "combobox", autocomplete: "off", spellcheck: "false",
                                 "aria-expanded": "false", "aria-controls": "#{@id}_list", "aria-autocomplete": "list",
                                 placeholder: t("wibawa.combobox.placeholder"), data: { label: label.to_s },
@@ -55,10 +55,12 @@ module Wibawa
 
     private
 
+    # Looked up inside the user's scope, so an id typed into the URL is never
+    # answered with the name of a record they may not see.
     def current
       return @current if defined?(@current)
 
-      @current = @value.present? ? @klass.find_by(@klass.primary_key => @value) : nil
+      @current = @value.present? ? authorized_scope(@klass).find_by(@klass.primary_key => @value) : nil
     end
   end
 end
