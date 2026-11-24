@@ -17,15 +17,9 @@ function setSidebar(open) {
   document.body.classList.toggle("overflow-hidden", open)
 }
 
-// ---- Filters panel (below xl) ----------------------------------------------
+// ---- Filters popover ---------------------------------------------------------
 
-function toggleFilters() {
-  const panel = document.querySelector("[data-wb-filters]")
-  if (!panel) return
-  const open = panel.classList.toggle("hidden") === false
-  document.querySelector("[data-wb-sidebar-backdrop]")?.classList.toggle("hidden", !open)
-  $$("[data-wb-filters-toggle]").forEach((b) => b.setAttribute("aria-expanded", String(open)))
-}
+const closeFilters = () => document.querySelector("details[data-wb-filters][open]")?.removeAttribute("open")
 
 // ---- Theme -----------------------------------------------------------------
 
@@ -139,18 +133,15 @@ document.addEventListener("dragend", () => {
 
 document.addEventListener("click", (event) => {
   const target = event.target.closest?.(
-    "[data-wb-sidebar-open], [data-wb-sidebar-close], [data-wb-sidebar-backdrop], [data-wb-filters-toggle], " +
+    "[data-wb-sidebar-open], [data-wb-sidebar-close], [data-wb-sidebar-backdrop], " +
     "[data-wb-theme-toggle], [data-wb-dismiss], [data-wb-nested-add], [data-wb-nested-remove]"
   )
+  if (!event.target.closest?.("[data-wb-filters]")) closeFilters()
   if (!target) return
 
   if (target.matches("[data-wb-sidebar-open]")) setSidebar(true)
   else if (target.matches("[data-wb-sidebar-close]")) setSidebar(false)
-  else if (target.matches("[data-wb-sidebar-backdrop]")) {
-    setSidebar(false)
-    document.querySelector("[data-wb-filters]:not(.hidden)") && toggleFilters()
-  }
-  else if (target.matches("[data-wb-filters-toggle]")) toggleFilters()
+  else if (target.matches("[data-wb-sidebar-backdrop]")) setSidebar(false)
   else if (target.matches("[data-wb-theme-toggle]")) toggleTheme()
   else if (target.matches("[data-wb-dismiss]")) target.closest("[data-wb-flash]")?.remove()
   else if (target.matches("[data-wb-nested-add]")) addNested(target)
@@ -179,7 +170,7 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape") {
     setSidebar(false)
-    if (document.querySelector("[data-wb-filters]:not(.hidden)") && window.matchMedia("(max-width: 1279px)").matches) toggleFilters()
+    closeFilters()
   }
   // "/" focuses the index search box.
   if (event.key === "/" && !el.matches?.("input, textarea, select, [contenteditable]")) {

@@ -12,6 +12,15 @@ RSpec.describe "Wibawa admin", type: :request do
     end
   end
 
+it "shows active filters as chips that remove one filter and keep the rest" do
+    get "/admin/orders?search=Sari&q[status]=pending"
+    expect(response.body).to include("<details data-wb-filters", "Remove filter: Status", ">Pending<")
+    expect(response.body).to include('href="/admin/orders?search=Sari"')
+  
+    get "/admin/orders"
+    expect(response.body).not_to include("Remove filter")
+  end
+
   # Regression: the nested builder used the component as its template, so
   # f.label hit NestedFieldsComponent#label and every form page raised.
   it "renders new and edit forms, including nested fields" do

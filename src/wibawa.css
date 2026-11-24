@@ -86,17 +86,13 @@
 /* Motion (DESIGN.md section 7). Things arrive with a short fade; they leave at once. */
 @keyframes wb-drop { from { opacity: 0; translate: 0 -4px; } }
 @keyframes wb-fade { from { opacity: 0; } }
-@keyframes wb-slide-in { from { translate: 100% 0; } }
 @keyframes wb-spin { to { rotate: 360deg; } }
 
 /* Page changes and the theme switch cross-fade (Turbo view transitions). */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }
 
-[data-wb-batch-bar], [data-wb-flash], .wb-enter { animation: wb-drop 180ms var(--default-transition-timing-function); }
+[data-wb-batch-bar], [data-wb-flash], .wb-enter, [data-wb-filters][open] > div { animation: wb-drop 180ms var(--default-transition-timing-function); }
 [data-wb-sidebar-backdrop] { animation: wb-fade 200ms; }
-@media (width < 80rem) {
-  [data-wb-filters] { animation: wb-slide-in 200ms var(--default-transition-timing-function); }
-}
 
 /* A button waiting for the server. */
 [data-wb-busy] { cursor: progress; }

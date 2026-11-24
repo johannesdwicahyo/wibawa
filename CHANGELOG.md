@@ -11,4 +11,6 @@ First release.
 - Authorization adapters: Pundit, ActionPolicy, or a proc
 - ViewComponent UI with prebuilt Tailwind CSS, dark mode, English and Indonesian locales
 - Design system in `DESIGN.md`: every color is a CSS variable, Plus Jakarta Sans ships in the gem (no third-party requests), statuses show as a dot plus the word
+- Search and filters share one toolbar: a Filters popover, with active filters as removable chips
+- Page changes cross-fade; the button that saved a form shows a spinner
 - Generators: `wibawa:install`, `wibawa:resource`, `wibawa:component`

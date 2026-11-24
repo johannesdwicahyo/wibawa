@@ -50,7 +50,7 @@ Every interactive control gets default, hover, focus-visible, active, disabled a
 - **Status.** A 6 px dot plus the word, in ink, replaces the filled pill. A full column of red, amber and green pills is the loudest thing on the index page while carrying one word of information. The pill stays available with `as: :badge`.
 - **Index table.** Header row on `surface-2`, sticky under the toolbar. Row height 40 px, with a `density: :compact` option at 32 px. Selected rows tint with primary at 6%. Row actions appear on hover and focus on desktop, always on touch.
 - **Scopes.** Keep the underline tabs. Counts become plain tabular numbers in `ink-2`, no pill.
-- **Filters.** Keep the right-hand panel at xl and above. Below xl it becomes a `<dialog>` sheet instead of a hidden div, so focus is trapped and Escape closes it. Active filters show as removable chips above the table.
+- **Filters.** One toolbar: search box, then a Filters button that opens a popover (a bottom sheet on phones). It is a native `<details>`, closed by Escape or a click outside. Active filters show as removable chips above the table, and the button carries their count. There is no side panel; the table gets the full width.
 - **Forms.** Input width follows content: numbers and dates 12rem, selects 20rem, text full width (max 40rem). Today a date field stretches 720 px. Errors under the field with `aria-describedby`; first invalid field takes focus. Nested rows keep the current layout.
 - **Dashboard.** Stat tiles stay, value at 24 px (never larger than the page title). Tables get a header row.
 - **Empty and loading.** Empty states say what the resource is and offer the create action. Turbo navigation shows a 2 px progress bar in primary; no spinners inside content.
@@ -102,7 +102,7 @@ Don't:
 
 ## 9. Responsive
 
-- Breakpoints: 640, 1024 (sidebar appears), 1280 (filter panel docks).
+- Breakpoints: 640 (filter sheet becomes a popover), 1024 (sidebar appears).
 - Below 640: page actions collapse to primary plus an overflow menu; tables scroll horizontally inside their card with the first column sticky.
 - Touch targets 44 px. No horizontal page scroll at 390 px (now covered by a spec).
 
@@ -122,7 +122,6 @@ These are in the spec above but were left out of the first build; they are track
 
 - Sticky table header (the table scrolls inside its own container, so it needs a layout change)
 - `density: :compact` rows
-- Filters as a `<dialog>` sheet and active-filter chips (the current slide-over closes on Escape but does not trap focus)
 - Collapsible icon rail for the sidebar
 - Overflow menu for page actions and a sticky first column on phones
 - Loading and disabled states on every control (buttons have them; selects and row actions do not)

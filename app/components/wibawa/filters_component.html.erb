@@ -1,15 +1,12 @@
-<aside id="wb-filters" data-wb-filters
-       class="fixed inset-y-0 right-0 z-40 hidden w-80 max-w-[90vw] overflow-y-auto bg-canvas p-5 shadow-xl ring-1 ring-line
-              xl:sticky xl:top-8 xl:z-auto xl:block xl:w-72 xl:max-w-none xl:shrink-0 xl:overflow-visible xl:p-0 xl:shadow-none xl:ring-0
-             ">
-  <div class="<%= card_class %> p-4 xl:p-5">
-    <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-ink"><%= t("wibawa.filters") %></h2>
-      <button type="button" data-wb-filters-toggle class="rounded-md p-1 text-ink-2 hover:text-ink xl:hidden" aria-label="<%= t('wibawa.close') %>">
-        <%= icon("x", size: "size-4") %>
-      </button>
-    </div>
+<%# The panel is positioned against the toolbar (the nearest `relative` parent), so it always fits the page. %>
+<details data-wb-filters>
+  <summary class="<%= wibawa_button_class(:secondary) %> cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+    <%= icon("filter", size: "size-4") %><%= t("wibawa.filters") %>
+    <% if chips.any? %><span class="font-normal tabular-nums text-ink-2"><%= chips.size %></span><% end %>
+  </summary>
 
+  <div class="absolute left-0 top-full z-30 mt-2 max-h-[70vh] w-80 overflow-y-auto rounded-card bg-surface p-4 shadow-lg ring-1 ring-line
+              max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:mt-0 max-sm:w-auto max-sm:rounded-b-none">
     <div class="space-y-4">
       <% filters.each do |filter| %>
         <% type = type_for(filter) %>
@@ -50,4 +47,17 @@
       <%= link_to t("wibawa.clear"), clear_url, class: wibawa_button_class(:secondary) %>
     </div>
   </div>
-</aside>
+</details>
+
+<% if chips.any? %>
+  <ul class="order-last flex w-full flex-wrap gap-2" aria-label="<%= t('wibawa.active_filters') %>">
+    <% chips.each do |chip| %>
+      <li>
+        <%= link_to chip[:url], "aria-label": t("wibawa.remove_filter", name: chip[:label]),
+              class: "inline-flex items-center gap-1.5 rounded-control bg-surface py-1 pl-2.5 pr-1.5 text-xs text-ink ring-1 ring-line transition-colors hover:bg-surface-2" do %>
+          <span class="text-ink-2"><%= chip[:label] %></span><%= chip[:value] %><%= icon("x", size: "size-3.5", class: "text-ink-3") %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

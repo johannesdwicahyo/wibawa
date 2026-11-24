@@ -24,6 +24,8 @@ en:
       one: "1 file"
       other: "%{count} files"
     filters: "Filters"
+    active_filters: "Active filters"
+    remove_filter: "Remove filter: %{name}"
     from: "From"
     navigation: "Main navigation"
     new: "New"
