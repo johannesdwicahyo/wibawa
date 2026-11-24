@@ -12,6 +12,10 @@ Wibawa.resource Order do
   search :number, "customer.name"
   filter :status
   filter :customer
+  filter :line_items
+  filter "line_items.product"
+  filter "line_items.position"
+  filter "customer.name", label: "Customer name"
 
   form do
     field :number

@@ -237,8 +237,9 @@ module Wibawa
     def option_classes
       classes = choice_classes(form_items, model)
       filters.each do |filter|
-        ref = model.reflect_on_association(filter.name)
-        classes << ref.klass if ref&.macro == :belongs_to && !ref.polymorphic?
+        klass, column = Query.target(model, filter.name)
+        ref = klass.reflect_on_association(column.to_sym)
+        classes << ref.klass if ref && !ref.polymorphic? && Query::CHOICE_MACROS.include?(ref.macro)
       end
       classes.uniq.index_by(&:name)
     end

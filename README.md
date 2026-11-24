@@ -116,6 +116,18 @@ end
 
 Leave any block out and Wibawa infers it from the model: index columns, show rows, form fields (with the right input for enums, associations, dates, booleans, Active Storage and Action Text) and strong params.
 
+### Filtering on associations
+
+```ruby
+filter :customer                 # belongs_to: choose a customer
+filter :tags                     # has_many / through / habtm: orders that have the chosen tag
+filter "line_items.product"      # a column of an associated table: text match
+filter "line_items.quantity"     # ... or a number / date range, by the column's type
+filter "customer.country", as: :select
+```
+
+A filter on an associated column never duplicates rows: an order with three matching line items is listed once. Long lists of choices become a search box, as in forms.
+
 ### DSL reference
 
 | Method | What it does |

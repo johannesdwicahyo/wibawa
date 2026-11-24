@@ -10,7 +10,8 @@ module Wibawa
     def self.needed?(klass) = klass.limit(THRESHOLD + 1).count > THRESHOLD
 
     # Records of `klass` matching `term`: through the model's own resource
-    # search when it has one, otherwise on its display-name columns.
+    # search when it has one, otherwise on its display-name columns (or, failing
+    # those, every text column).
     def self.search(klass, scope, term)
       term = term.to_s.strip
       resource = Wibawa.registry.for_model(klass)
@@ -19,7 +20,9 @@ module Wibawa
               elsif resource&.search_fields.present?
                 Wibawa::Query.new(resource, scope, { search: term }).filtered_base
               else
-                columns = Wibawa.config.display_name_methods.map(&:to_s).select { |c| %i[string text citext].include?(klass.columns_hash[c]&.type) }
+                text = klass.columns.select { |c| %i[string text citext].include?(c.type) }.map(&:name)
+                columns = Wibawa.config.display_name_methods.map(&:to_s) & text
+                columns = text if columns.empty? # no name-like column: search every text column
                 like = "%#{ActiveRecord::Base.sanitize_sql_like(term)}%"
                 matches = columns.map { |c| klass.arel_table[c].matches(like, "\\", false) }
                 matches << klass.arel_table[klass.primary_key].eq(term) if term.match?(/\A\d+\z/)

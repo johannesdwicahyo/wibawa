@@ -18,6 +18,7 @@ First release.
 - Column and menu labels may be procs, resolved when shown
 - Saved views: each user can name and reuse an index page's scope, search, filters and sort (`wibawa:saved_views`)
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
+- Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)
 - Custom pages: `Wibawa.page` gives a template or block its own menu entry, with action buttons
 - Reports: `Wibawa.report` turns SQL or a query block into a table, a bar chart and CSV, on any connected database
 - MCP server for AI agents (`config.mcp_authenticate_with`): read-only by default, same authorization as the UI

@@ -17,7 +17,7 @@ module Wibawa
 
     def field_name(filter, suffix = nil) = "q[#{filter.name}#{suffix}]"
     def value(filter, suffix = nil) = query.filter_value("#{filter.name}#{suffix}")
-    def field_id(filter, suffix = nil) = "wb-filter-#{filter.name}#{suffix}"
+    def field_id(filter, suffix = nil) = "wb-filter-#{filter.name}#{suffix}".tr(".", "-")
 
     def range_input_type(filter)
       type_for(filter) == :date_range ? "date" : "number"
@@ -29,8 +29,7 @@ module Wibawa
     def combobox_class(filter)
       return nil if filter.options[:collection]
 
-      ref = model.reflect_on_association(filter.name)
-      klass = ref.klass if ref&.macro == :belongs_to && !ref.polymorphic?
+      klass = choice_reflection(filter)&.klass
       klass if klass && Wibawa::ComboboxComponent.needed?(klass)
     end
 
@@ -81,13 +80,21 @@ module Wibawa
       collection = helpers.instance_exec(&collection) if collection.is_a?(Proc)
       return normalize(collection) if collection
 
-      if (ref = model.reflect_on_association(filter.name))
+      klass, column = Wibawa::Query.target(model, filter.name)
+      if (ref = choice_reflection(filter))
         authorized_scope(ref.klass).limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
-      elsif (enum = model.defined_enums[filter.name.to_s])
+      elsif (enum = klass.defined_enums[column])
         enum.keys.map { |k| [Util.humanize(k), k] }
       else
-        model.distinct.order(filter.name).limit(COLLECTION_LIMIT).pluck(filter.name).compact.map { |v| [v.to_s, v] }
+        klass.distinct.order(column).limit(COLLECTION_LIMIT).pluck(column).compact.map { |v| [v.to_s, v] }
       end
+    end
+
+    # The association whose records this filter chooses from, if it is one.
+    def choice_reflection(filter)
+      klass, column = Wibawa::Query.target(model, filter.name)
+      ref = klass.reflect_on_association(column.to_sym)
+      ref if ref && !ref.polymorphic? && Wibawa::Query::CHOICE_MACROS.include?(ref.macro)
     end
 
     def normalize(collection)

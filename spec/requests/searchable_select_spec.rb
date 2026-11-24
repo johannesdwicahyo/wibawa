@@ -69,7 +69,7 @@ RSpec.describe "Wibawa searchable select", type: :request do
     get "/admin/orders/options/Customer", params: { q: "zzz" }
     expect(response.body).to include("Nothing matches.")
 
-    get "/admin/orders/options/LineItem"
+    get "/admin/orders/options/Order" # no field or filter of orders chooses an Order
     expect(response).to have_http_status(:not_found)
     get "/admin/customers/options/Customer"
     expect(response).to have_http_status(:not_found)
