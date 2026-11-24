@@ -10,6 +10,7 @@ module Wibawa
 
     def clear!
       @resources = {}
+      @reports = {}
       @dashboard = nil
     end
 
@@ -18,6 +19,13 @@ module Wibawa
     end
 
     def [](key) = @resources[key.to_s]
+
+    def register_report(report)
+      @reports[report.key] = report
+    end
+
+    def report(key) = @reports[key.to_s]
+    def reports = @reports.values
 
     def fetch(key)
       self[key] || raise(ResourceNotFound, "No Wibawa resource registered as #{key.inspect}")

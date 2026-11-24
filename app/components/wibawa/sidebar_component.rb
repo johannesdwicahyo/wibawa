@@ -20,6 +20,14 @@ module Wibawa
       end
     end
 
+    # [[group name, [reports...]], ...]; reports without a group go under "Reports".
+    def report_groups
+      Wibawa.registry.reports.select { |report| wibawa_authorized?(:show, report) }
+            .group_by { |report| report.menu_group || t("wibawa.reports") }
+    end
+
+    def report_active?(report) = helpers.controller_name == "reports" && helpers.params[:report] == report.key
+
     def active?(resource) = resource.key == @current_key
     def dashboard_active? = @current_key.empty? && helpers.controller_name == "dashboard"
 

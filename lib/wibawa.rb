@@ -5,6 +5,7 @@ require "wibawa/definitions"
 require "wibawa/builders"
 require "wibawa/resource"
 require "wibawa/dashboard"
+require "wibawa/report"
 require "wibawa/registry"
 
 module Wibawa
@@ -32,6 +33,15 @@ module Wibawa
     #   end
     def resource(model, **options, &block)
       registry.register(Resource.new(model, **options, &block))
+    end
+
+    # Register a report (see Wibawa::Report):
+    #
+    #   Wibawa.report :sales_by_status do
+    #     sql "SELECT status, COUNT(*) AS orders FROM orders GROUP BY status"
+    #   end
+    def report(name, &block)
+      registry.register_report(Report.new(name, &block))
     end
 
     # Define the dashboard shown at the admin root.

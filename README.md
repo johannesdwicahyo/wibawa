@@ -166,6 +166,38 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
 
+## Reports
+
+A report is a read-only page built from a query: a table, an optional bar chart and CSV export. Put it in `app/wibawa/` next to your resources:
+
+```ruby
+Wibawa.report :revenue_by_customer do
+  title "Revenue by customer"
+  param :from, as: :date, default: -> { 30.days.ago.to_date }
+  param :status, as: :select, collection: %w[pending paid]
+
+  sql <<~SQL
+    SELECT customers.name AS customer, COUNT(*) AS orders, SUM(orders.total) AS revenue
+    FROM orders JOIN customers ON customers.id = orders.customer_id
+    WHERE orders.created_at >= :from AND (:status IS NULL OR orders.status = :status)
+    GROUP BY customers.name ORDER BY revenue DESC
+  SQL
+
+  column :customer
+  column :orders
+  column :revenue, as: :money
+  chart x: :customer, y: :revenue
+end
+```
+
+- **Params** (`:string`, `:date`, `:number`, `:select`) become a form above the report. Their values are bound to the `:named` placeholders, never interpolated into the SQL.
+- **Another database.** `sql "...", on: WarehouseRecord` runs the query on that class's connection, so a data warehouse is just another entry in `database.yml` (any database with an ActiveRecord adapter).
+- **No SQL.** Give a block instead: `query { |params| Order.where(created_at: params[:from]..).group(:status).count }`. It may return a relation, a grouped hash or an array of hashes.
+- **Columns** take the same `as:` formats as index columns. Leave them out to show every column the query returns.
+- **Authorization.** Reports are checked as `:show` on the `Wibawa::Report` object: `config.authorize_with { |user, action, subject| ... }` receives it as `subject`, and Pundit looks for `Wibawa::ReportPolicy#show?`.
+
+The page shows the first 1,000 rows and the CSV has all of them. Reports are meant for aggregates; nothing stops a report's SQL from writing, so point reports at a read-only database user where you can.
+
 ## MCP server (AI agents)
 
 Wibawa can expose your admin to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io). It is off until you tell it how to recognise a token:
@@ -214,7 +246,7 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
   config.components[:index_table] = "Admin::IndexTableComponent"
   ```
 
-  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`.
+  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`, `report_page`.
 
 ## Performance
 

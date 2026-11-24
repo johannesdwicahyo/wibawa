@@ -41,7 +41,8 @@ The things the first users will ask for in week one.
 
 - [x] MCP server: resources and member actions as tools for AI agents (official `mcp` gem). Read-only by default; every call goes through the same authorization as the UI
 - [ ] MCP: OAuth with per-token scopes, an audit trail of agent calls, batch actions
-- [ ] Reports: `Wibawa.report` takes a relation or SQL and gives a table, a chart and CSV. Reads from any database Rails is connected to, so a warehouse needs no special code
+- [x] Reports: `Wibawa.report` takes a relation or SQL and gives a table, a bar chart and CSV. Reads from any database Rails is connected to, so a warehouse needs no special code
+- [ ] Reports: line charts for time series, paging for large results, reports as MCP tools
 - [ ] Command palette (Cmd+K) across resources
 - [ ] Searchable select for large `belongs_to` collections (today: first 500 records)
 - [ ] Custom pages: `Wibawa.page "Reports" do … end` with their own menu entry
