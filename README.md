@@ -274,7 +274,7 @@ The admin's stylesheet is prebuilt, so a page's template can rely on the design 
 
 ## Reports
 
-A report is a read-only page built from a query: a table, an optional bar chart and CSV export. Put it in `app/wibawa/` next to your resources:
+A report is a read-only page built from a query: a table, an optional chart and CSV export. Put it in `app/wibawa/` next to your resources:
 
 ```ruby
 Wibawa.report :revenue_by_customer do
@@ -299,6 +299,7 @@ end
 - **Params** (`:string`, `:date`, `:number`, `:select`) become a form above the report. Their values are bound to the `:named` placeholders, never interpolated into the SQL.
 - **Another database.** `sql "...", on: WarehouseRecord` runs the query on that class's connection, so a data warehouse is just another entry in `database.yml` (any database with an ActiveRecord adapter).
 - **No SQL.** Give a block instead: `query { |params| Order.where(created_at: params[:from]..).group(:status).count }`. It may return a relation, a grouped hash or an array of hashes.
+- **Charts.** `chart x:, y:` draws bars, for comparing categories. `chart :line, x: :month, y: :revenue` draws a line, for change over time; give it rows in time order. Hover a point for its value.
 - **Columns** take the same `as:` formats as index columns. Leave them out to show every column the query returns.
 - **Authorization.** Reports are checked as `:show` on the `Wibawa::Report` object: `config.authorize_with { |user, action, subject| ... }` receives it as `subject`, and Pundit looks for `Wibawa::ReportPolicy#show?`.
 

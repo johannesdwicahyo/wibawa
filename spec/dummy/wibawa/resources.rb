@@ -58,3 +58,10 @@ end
 Wibawa.page :about do
   view "admin/about"
 end
+
+Wibawa.report :total_by_number do
+  query { |_params| Order.group(:number).order(:number).sum(:total) }
+  column :number
+  column :total, as: :money
+  chart :line, x: :number, y: :total
+end
