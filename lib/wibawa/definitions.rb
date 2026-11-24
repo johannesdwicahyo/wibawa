@@ -24,7 +24,8 @@ module Wibawa
 
   Filter = Struct.new(:name, :options) do
     def as = options[:as]
-    def label = options[:label] || Util.humanize(name)
+    # "line_items.product" reads as "Line items product".
+    def label = options[:label] || Util.humanize(name.to_s.tr(".", "_"))
   end
 
   Scope = Struct.new(:name, :body, :options) do

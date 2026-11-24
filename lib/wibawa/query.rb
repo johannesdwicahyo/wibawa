@@ -16,16 +16,31 @@ module Wibawa
 
     def model = resource.model
 
+    CHOICE_MACROS = %i[belongs_to has_many has_and_belongs_to_many].freeze
+
+    # What a filter name points at: [Order, "status"] for :status, and
+    # [LineItem, "product"] for "line_items.product".
+    def self.target(model, name)
+      association, column = name.to_s.split(".", 2)
+      return [model, association] unless column
+
+      ref = model.reflect_on_association(association.to_sym)
+      raise Error, "#{model} has no association :#{association} (used in filter #{name.inspect})" unless ref
+
+      [ref.klass, column]
+    end
+
     # Infer a filter's input type from the model when `as:` is omitted.
     def self.filter_type(model, filter)
       return filter.as.to_sym if filter.as
       return :search if filter.options[:on]
 
-      ref = model.reflect_on_association(filter.name)
-      return :select if ref && ref.macro == :belongs_to
-      return :select if model.defined_enums.key?(filter.name.to_s)
+      klass, column = target(model, filter.name)
+      ref = klass.reflect_on_association(column.to_sym)
+      return :select if ref && !ref.polymorphic? && CHOICE_MACROS.include?(ref.macro)
+      return :select if klass.defined_enums.key?(column)
 
-      case model.columns_hash[filter.name.to_s]&.type
+      case klass.columns_hash[column]&.type
       when *NUMBER_TYPES then :number_range
       when *DATE_TYPES then :date_range
       when :boolean then :boolean
@@ -138,13 +153,31 @@ module Wibawa
         return Array(value).any?(&:present?) ? rel.instance_exec(value, &custom) : rel
       end
 
-      case self.class.filter_type(model, filter)
-      when :search then apply_search_filter(rel, filter)
-      when :select then apply_select(rel, filter)
-      when :boolean then apply_boolean(rel, name)
-      when :date_range then apply_range(rel, name, :date)
-      when :number_range then apply_range(rel, name, :number)
-      else apply_string(rel, name)
+      type = self.class.filter_type(model, filter)
+      return apply_search_filter(rel, filter) if type == :search
+
+      klass, column = self.class.target(model, name)
+      return apply_typed(rel, klass, column, name, type) unless name.include?(".")
+      return rel unless filter_active?(name)
+
+      # "line_items.product": the condition is on the associated table. A
+      # subquery keeps one row per record however many associated rows match.
+      matching = model.joins(name.split(".").first.to_sym).merge(apply_typed(klass.all, klass, column, name, type))
+      rel.where(model.primary_key => matching.select(model.arel_table[model.primary_key]))
+    end
+
+    def filter_active?(key)
+      ["", "_from", "_to"].any? { |suffix| Array(filter_value("#{key}#{suffix}")).any?(&:present?) }
+    end
+
+    # `rel` is a relation on `klass`; `key` is the name the value was submitted under.
+    def apply_typed(rel, klass, column, key, type)
+      case type
+      when :select then apply_select(rel, klass, column, key)
+      when :boolean then apply_boolean(rel, column, key)
+      when :date_range then apply_range(rel, klass, column, key, :date)
+      when :number_range then apply_range(rel, klass, column, key, :number)
+      else apply_string(rel, klass, column, key)
       end
     end
 
@@ -155,39 +188,47 @@ module Wibawa
       search_across(rel, Array(filter.options[:on]).map(&:to_s), term)
     end
 
-    def apply_select(rel, filter)
-      values = Array(filter_value(filter.name)).compact_blank
+    def apply_select(rel, klass, column, key)
+      values = Array(filter_value(key)).compact_blank
       return rel if values.empty?
 
-      ref = model.reflect_on_association(filter.name)
-      column = ref&.macro == :belongs_to ? ref.foreign_key : filter.name.to_s
-      rel.where(column => values.size == 1 ? values.first : values)
+      ref = klass.reflect_on_association(column.to_sym)
+      case ref&.macro
+      when :belongs_to
+        rel.where(ref.foreign_key => values)
+      when :has_many, :has_and_belongs_to_many
+        # Records that have at least one of the chosen associated records.
+        having = klass.joins(column.to_sym).where(ref.klass.arel_table[ref.klass.primary_key].in(values))
+        rel.where(klass.primary_key => having.select(klass.arel_table[klass.primary_key]))
+      else
+        rel.where(column => values)
+      end
     end
 
-    def apply_boolean(rel, name)
-      value = filter_value(name)
+    def apply_boolean(rel, column, key)
+      value = filter_value(key)
       return rel if value.blank?
 
-      rel.where(name => ActiveModel::Type::Boolean.new.cast(value))
+      rel.where(column => ActiveModel::Type::Boolean.new.cast(value))
     end
 
-    def apply_string(rel, name)
-      term = filter_value(name).to_s.strip
+    def apply_string(rel, klass, column, key)
+      term = filter_value(key).to_s.strip
       return rel if term.empty?
 
-      rel.where(model.arel_table[name].matches("%#{ActiveRecord::Base.sanitize_sql_like(term)}%", "\\", false))
+      rel.where(klass.arel_table[column].matches("%#{ActiveRecord::Base.sanitize_sql_like(term)}%", "\\", false))
     end
 
-    def apply_range(rel, name, kind)
-      from = parse(filter_value("#{name}_from"), kind)
-      to = parse(filter_value("#{name}_to"), kind)
+    def apply_range(rel, klass, column, key, kind)
+      from = parse(filter_value("#{key}_from"), kind)
+      to = parse(filter_value("#{key}_to"), kind)
       return rel if from.nil? && to.nil?
 
-      if kind == :date && model.columns_hash[name]&.type != :date
+      if kind == :date && klass.columns_hash[column]&.type != :date
         from = from&.beginning_of_day
         to = to&.end_of_day
       end
-      rel.where(name => from..to)
+      rel.where(column => from..to)
     end
 
     def parse(value, kind)

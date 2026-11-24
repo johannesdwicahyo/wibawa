@@ -47,7 +47,7 @@ The things the first users will ask for in week one.
 - [x] Searchable select for large `belongs_to` collections, in forms and filters
 - [x] Searchable multi-select for `has_many` fields
 - [x] Custom pages: `Wibawa.page :name do … end` with their own menu entry and action buttons
-- [ ] Filters on `has_many` and through associations
+- [x] Filters on `has_many` and through associations, and on columns of associated tables
 - [x] Saved views: a named set of filters, scope and sort, per user
 - [ ] Saved views: share a view with the team, set a default view, rename *(candidate)*
 - [x] Audit log of changes made through the admin and MCP, with per-record history
