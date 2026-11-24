@@ -24,6 +24,9 @@ en:
       one: "1 file"
       other: "%{count} files"
     filters: "Filters"
+    combobox:
+      placeholder: "Type to search…"
+      empty: "Nothing matches."
     audit_log: "Audit log"
     audit:
       who: "Who"

@@ -6,6 +6,7 @@ Wibawa.resource Order do
   scope :pending
   search :number, "customer.name"
   filter :status
+  filter :customer
 
   form do
     field :number

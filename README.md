@@ -166,6 +166,17 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
 
+## Large associations
+
+A `belongs_to` field or filter is a plain `<select>` while its table has up to 100 records. Above that it becomes a search box: type to find a record, pick it with the mouse or the arrow keys. Nothing to configure, and no record is out of reach because it was not among the first few hundred.
+
+```ruby
+field :customer, searchable: true    # always a search box
+field :customer, searchable: false   # always a <select> (first 500 records)
+```
+
+The search uses the target model's own `search` fields when it is a Wibawa resource, and otherwise its name-like columns (`config.display_name_methods`). Results pass through your authorization scope.
+
 ## Audit log
 
 Record every create, update, delete, member action and batch action made through the admin, whether from the browser or by an agent through the MCP server:

@@ -24,6 +24,9 @@ id:
       one: "1 berkas"
       other: "%{count} berkas"
     filters: "Filter"
+    combobox:
+      placeholder: "Ketik untuk mencari…"
+      empty: "Tidak ada yang cocok."
     audit_log: "Log audit"
     audit:
       who: "Siapa"

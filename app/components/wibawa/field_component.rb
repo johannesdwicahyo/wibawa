@@ -137,7 +137,7 @@ module Wibawa
       when :datetime then form.datetime_field(attribute, html_options)
       when :time then form.time_field(attribute, html_options)
       when :select then form.select(attribute, select_options, { include_blank: blank_option }, html_options)
-      when :belongs_to then form.select(attribute, belongs_to_options, { include_blank: blank_option }, html_options)
+      when :belongs_to then searchable? ? combobox_html : form.select(attribute, belongs_to_options, { include_blank: blank_option }, html_options)
       when :many then form.select(attribute, many_options, {}, html_options(multiple: true, size: 6))
       when :rich_text then rich_text_html
       when :attachment then attachment_html
@@ -194,6 +194,22 @@ module Wibawa
       collection = helpers.instance_exec(&collection) if collection.is_a?(Proc)
       collection ||= klass.defined_enums[name.to_s]&.keys || []
       collection.map { |item| item.is_a?(Array) ? item : [Util.humanize(item.to_s), item] }
+    end
+
+    # A belongs_to becomes a search box once its table is too long to list.
+    # `searchable: true` or `false` on the field decides it by hand.
+    def searchable?
+      return false if field.options[:collection]
+
+      choice = field.options[:searchable]
+      choice.nil? ? Wibawa::ComboboxComponent.needed?(reflection.klass) : choice
+    end
+
+    def combobox_html
+      render Wibawa::ComboboxComponent.new(
+        name: form.field_name(attribute), klass: reflection.klass, value: record.public_send(attribute),
+        resource_key: helpers.params[:resource], id: form.field_id(attribute), input_html: html_options
+      )
     end
 
     def belongs_to_options

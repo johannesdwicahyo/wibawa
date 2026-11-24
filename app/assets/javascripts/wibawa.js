@@ -117,6 +117,102 @@ document.addEventListener("click", (event) => {
 // Turbo keeps a snapshot of the page for Back; it must not remember the palette as open.
 document.addEventListener("turbo:before-cache", () => palette()?.close())
 
+// ---- Searchable select (combobox) -----------------------------------------
+// The text box shows the chosen record's name; a hidden input next to it holds the id.
+
+let comboTimer = null
+
+function comboParts(el) {
+  const root = el.closest("[data-wb-combobox]")
+  return root && {
+    root,
+    input: root.querySelector("[role=combobox]"),
+    hidden: root.querySelector("input[type=hidden]"),
+    list: root.querySelector("[role=listbox]"),
+  }
+}
+
+function closeCombo({ input, list }) {
+  list.hidden = true
+  input.setAttribute("aria-expanded", "false")
+}
+
+function comboActive(list, option) {
+  $$("[aria-selected=true]", list).forEach((el) => el.setAttribute("aria-selected", "false"))
+  option?.setAttribute("aria-selected", "true")
+  option?.scrollIntoView({ block: "nearest" })
+}
+
+function loadCombo(parts, term, delay) {
+  clearTimeout(comboTimer)
+  comboTimer = setTimeout(async () => {
+    let html = ""
+    try {
+      const response = await fetch(`${parts.root.dataset.url}?q=${encodeURIComponent(term)}`, { headers: { Accept: "text/html" } })
+      if (response.ok) html = await response.text()
+    } catch (_) {}
+    if (document.activeElement !== parts.input) return // moved on while it loaded
+    parts.list.innerHTML = html
+    parts.list.hidden = false
+    parts.input.setAttribute("aria-expanded", "true")
+    comboActive(parts.list, parts.list.querySelector("[role=option]"))
+  }, delay)
+}
+
+function pickCombo(parts, option) {
+  parts.hidden.value = option.dataset.value
+  parts.input.value = parts.input.dataset.label = option.textContent.trim()
+  closeCombo(parts)
+  parts.hidden.dispatchEvent(new Event("change", { bubbles: true }))
+}
+
+document.addEventListener("focusin", (event) => {
+  const parts = event.target.matches?.("[data-wb-combobox] [role=combobox]") && comboParts(event.target)
+  if (!parts) return
+  parts.input.select()
+  loadCombo(parts, "", 0)
+})
+
+document.addEventListener("input", (event) => {
+  const parts = event.target.matches?.("[data-wb-combobox] [role=combobox]") && comboParts(event.target)
+  if (parts) loadCombo(parts, parts.input.value.trim(), 200)
+})
+
+// Leaving the box: empty text clears the choice, anything else goes back to the chosen name.
+document.addEventListener("focusout", (event) => {
+  const parts = event.target.matches?.("[data-wb-combobox] [role=combobox]") && comboParts(event.target)
+  if (!parts) return
+  clearTimeout(comboTimer)
+  if (parts.input.value.trim() === "") parts.hidden.value = parts.input.dataset.label = ""
+  parts.input.value = parts.input.dataset.label
+  closeCombo(parts)
+})
+
+// pointerdown rather than click: it comes before the text box loses focus.
+document.addEventListener("pointerdown", (event) => {
+  const option = event.target.closest?.("[data-wb-combobox] [role=option]")
+  if (!option) return
+  event.preventDefault()
+  pickCombo(comboParts(option), option)
+})
+
+document.addEventListener("keydown", (event) => {
+  const parts = event.target.matches?.("[data-wb-combobox] [role=combobox]") && comboParts(event.target)
+  if (!parts || parts.list.hidden) return
+  const options = $$("[role=option]", parts.list)
+  const index = options.findIndex((el) => el.getAttribute("aria-selected") === "true")
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault()
+    if (options.length) comboActive(parts.list, options[(index + (event.key === "ArrowDown" ? 1 : -1) + options.length) % options.length])
+  } else if (event.key === "Enter") {
+    event.preventDefault() // never submit the form from an open list
+    if (options[index]) pickCombo(parts, options[index])
+  } else if (event.key === "Escape") {
+    event.stopPropagation()
+    closeCombo(parts)
+  }
+}, true)
+
 // ---- Theme -----------------------------------------------------------------
 
 function toggleTheme() {

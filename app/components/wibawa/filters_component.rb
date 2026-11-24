@@ -25,6 +25,15 @@ module Wibawa
 
     def select_options(filter) = (@select_options ||= {})[filter.name] ||= load_options(filter)
 
+    # The model behind a belongs_to filter, when it has too many records for a <select>.
+    def combobox_class(filter)
+      return nil if filter.options[:collection]
+
+      ref = model.reflect_on_association(filter.name)
+      klass = ref.klass if ref&.macro == :belongs_to && !ref.polymorphic?
+      klass if klass && Wibawa::ComboboxComponent.needed?(klass)
+    end
+
     def boolean_options
       [[t("wibawa.yes"), "true"], [t("wibawa.no"), "false"]]
     end
@@ -46,6 +55,11 @@ module Wibawa
       when :date_range, :number_range
         [value(filter, "_from"), value(filter, "_to")].map { |v| v.presence || "…" }.join(" – ")
       when :select
+        if (target = combobox_class(filter))
+          record = target.find_by(target.primary_key => value(filter))
+          return record ? presenter.display_name(record) : value(filter).to_s
+        end
+
         labels = select_options(filter).to_h { |label, v| [v.to_s, label] }
         Array(value(filter)).compact_blank.map { |v| labels.fetch(v.to_s, v) }.join(", ")
       when :boolean

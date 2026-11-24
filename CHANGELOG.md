@@ -13,6 +13,7 @@ First release.
 - Design system in `DESIGN.md`: every color is a CSS variable, Plus Jakarta Sans ships in the gem (no third-party requests), statuses show as a dot plus the word
 - Search and filters share one toolbar: a Filters popover, with active filters as removable chips
 - Page changes cross-fade; the button that saved a form shows a spinner
+- Searchable select: `belongs_to` fields and filters turn into a search box once the table passes 100 records
 - Audit log of changes made through the admin and the MCP server (`wibawa:audit_log`), with a History button on every record
 - Column and menu labels may be procs, resolved when shown
 - Saved views: each user can name and reuse an index page's scope, search, filters and sort (`wibawa:saved_views`)
