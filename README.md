@@ -327,6 +327,7 @@ The endpoint is `<mount path>/mcp` (for example `/admin/mcp`). Agents send `Auth
 | `list_resources` | Resources with their columns, scopes and filters | |
 | `list_records` | A page of records; scope, search, filters, sort | |
 | `get_record` | One record's detail fields | |
+| `list_reports`, `run_report` | Your [reports](#reports) and their parameters; runs one and returns its rows | |
 | `create_record`, `update_record`, `delete_record` | Write through the form's strong params | yes |
 | `run_action` | Run a `member_action` on a record | yes |
 

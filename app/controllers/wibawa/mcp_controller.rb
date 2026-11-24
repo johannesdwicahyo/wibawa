@@ -49,6 +49,18 @@ module Wibawa
         required: %w[resource]
       },
       get_record: { description: "Show one record with all its detail fields.", properties: RESOURCE.merge(ID), required: %w[resource id] },
+      list_reports: {
+        description: "List the reports you may run (aggregates and summaries the admin's owner has defined), with the parameters each accepts.",
+        properties: {}
+      },
+      run_report: {
+        description: "Run a report and get its rows. Prefer this over paging through records when a report answers the question.",
+        properties: {
+          report: { type: "string", description: "Report key from list_reports" },
+          params: { type: "object", description: "Parameter name => value. Dates as YYYY-MM-DD. Omitted parameters use their defaults." }
+        },
+        required: %w[report]
+      },
       create_record: { description: "Create a record.", properties: RESOURCE.merge(ATTRIBUTES), required: %w[resource attributes], write: true },
       update_record: { description: "Update a record.", properties: RESOURCE.merge(ID, ATTRIBUTES), required: %w[resource id attributes], write: true },
       delete_record: { description: "Delete a record. This cannot be undone.", properties: RESOURCE.merge(ID), required: %w[resource id], write: true, destructive: true },
@@ -151,6 +163,23 @@ module Wibawa
       record = find_record
       wibawa_authorize!(:show, record)
       detail(record)
+    end
+
+    def tool_list_reports
+      Wibawa.registry.reports.select { |report| wibawa_authorized?(:show, report) }.map do |report|
+        { report: report.key, title: report.title, description: report.description,
+          params: report.params.map { |param| { name: param.name, type: param.as, default: json_value(param.default), options: param.collection }.compact } }.compact
+      end
+    end
+
+    def tool_run_report
+      report = Wibawa.registry.report(params[:report]) || raise(Wibawa::ResourceNotFound)
+      wibawa_authorize!(:show, report)
+      values = report.values(params[:params])
+      rows = report.run(values)
+      { report: report.key, params: values.transform_values { |value| json_value(value) },
+        rows: rows.first(Wibawa::Report::MAX_ROWS).map { |row| row.transform_values { |value| json_value(value) } },
+        total: rows.size, truncated: rows.size > Wibawa::Report::MAX_ROWS }
     end
 
     def tool_create_record
