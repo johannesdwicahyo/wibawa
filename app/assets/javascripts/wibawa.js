@@ -21,6 +21,101 @@ function setSidebar(open) {
 
 const closeFilters = () => document.querySelector("details[data-wb-filters][open]")?.removeAttribute("open")
 
+// ---- Command palette (Cmd/Ctrl+K) ------------------------------------------
+
+const palette = () => document.querySelector("[data-wb-palette]")
+let searchTimer = null
+let searching = false
+
+function setActiveOption(option) {
+  $$("[aria-selected=true]", palette()).forEach((el) => el.setAttribute("aria-selected", "false"))
+  option?.setAttribute("aria-selected", "true")
+  option?.scrollIntoView({ block: "nearest" })
+}
+
+// Selects the first visible option and shows "no matches" when there is none.
+function refreshPalette() {
+  const dialog = palette()
+  const options = $$("[role=option]:not([hidden])", dialog)
+  setActiveOption(options[0])
+  dialog.querySelector("[data-wb-palette-empty]").hidden = options.length > 0 || searching
+}
+
+// Pages filter in the browser; records come from the server after a short pause.
+function filterPalette() {
+  const dialog = palette()
+  const input = dialog.querySelector("[data-wb-palette-input]")
+  const results = dialog.querySelector("[data-wb-palette-results]")
+  const term = input.value.trim().toLowerCase()
+
+  $$("[data-wb-palette-static] [role=option]", dialog).forEach((el) => { el.hidden = !el.textContent.toLowerCase().includes(term) })
+  clearTimeout(searchTimer)
+  results.innerHTML = ""
+  searching = term.length >= 2
+  if (searching) {
+    searchTimer = setTimeout(async () => {
+      let html = ""
+      try {
+        const response = await fetch(`${input.dataset.searchUrl}?q=${encodeURIComponent(term)}`, { headers: { Accept: "text/html" } })
+        if (response.ok) html = await response.text()
+      } catch (_) {}
+      if (input.value.trim().toLowerCase() !== term) return // a newer search is on its way
+      results.innerHTML = html
+      searching = false
+      refreshPalette()
+    }, 200)
+  }
+  refreshPalette()
+}
+
+function openPalette() {
+  const dialog = palette()
+  if (!dialog || dialog.open) return
+  setSidebar(false)
+  dialog.showModal()
+  dialog.querySelector("[data-wb-palette-input]").value = ""
+  filterPalette()
+}
+
+function movePalette(step) {
+  const options = $$("[role=option]:not([hidden])", palette())
+  if (!options.length) return
+  const index = options.findIndex((el) => el.getAttribute("aria-selected") === "true")
+  setActiveOption(options[(index + step + options.length) % options.length])
+}
+
+document.addEventListener("input", (event) => {
+  if (event.target.matches("[data-wb-palette-input]")) filterPalette()
+})
+
+document.addEventListener("pointermove", (event) => {
+  const option = event.target.closest?.("[data-wb-palette] [role=option]")
+  if (option && option.getAttribute("aria-selected") !== "true") setActiveOption(option)
+})
+
+document.addEventListener("keydown", (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault()
+    openPalette()
+  } else if (event.target.matches?.("[data-wb-palette-input]")) {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault()
+      movePalette(event.key === "ArrowDown" ? 1 : -1)
+    } else if (event.key === "Enter") {
+      event.preventDefault()
+      palette().querySelector("[aria-selected=true] a")?.click()
+    }
+  }
+})
+
+document.addEventListener("click", (event) => {
+  if (event.target.closest?.("[data-wb-palette-open]")) openPalette()
+  else if (event.target.matches?.("dialog[data-wb-palette]")) event.target.close() // the backdrop
+})
+
+// Turbo keeps a snapshot of the page for Back; it must not remember the palette as open.
+document.addEventListener("turbo:before-cache", () => palette()?.close())
+
 // ---- Theme -----------------------------------------------------------------
 
 function toggleTheme() {
@@ -183,6 +278,8 @@ document.addEventListener("turbo:load", () => {
   setSidebar(false)
   syncBatchBar()
   lastChecked = null
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform)
+  $$("[data-wb-palette-kbd]").forEach((el) => { el.textContent = mac ? "⌘K" : "Ctrl K" })
 })
 // After a failed save, put the cursor in the first field that needs fixing.
 document.addEventListener("turbo:render", () => document.querySelector('[data-wb-form] [aria-invalid="true"]')?.focus())

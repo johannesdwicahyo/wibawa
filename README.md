@@ -166,6 +166,10 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
 
+## Command palette
+
+Press <kbd>Cmd</kbd>+<kbd>K</kbd> (<kbd>Ctrl</kbd>+<kbd>K</kbd> elsewhere) or click Search in the sidebar. The palette lists every page the user may open, a "New ..." shortcut per resource, and every report. From two characters on it also searches records in every resource that declares `search`, five hits each, through the same authorization and `scoped_collection` as the index page. There is nothing to configure.
+
 ## Reports
 
 A report is a read-only page built from a query: a table, an optional bar chart and CSV export. Put it in `app/wibawa/` next to your resources:
@@ -246,7 +250,7 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
   config.components[:index_table] = "Admin::IndexTableComponent"
   ```
 
-  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`, `report_page`.
+  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`, `report_page`, `command_palette`.
 
 ## Performance
 

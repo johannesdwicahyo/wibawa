@@ -12,6 +12,15 @@
     </button>
   </div>
 
+  <div class="shrink-0 px-3 pb-3">
+    <button type="button" data-wb-palette-open
+            class="flex w-full items-center gap-3 rounded-control bg-white/[0.07] px-2.5 py-2 text-sm text-white/70 transition-colors hover:bg-white/12 hover:text-white">
+      <%= icon("search", size: "size-4") %>
+      <span class="flex-1 text-left"><%= t("wibawa.search") %></span>
+      <kbd data-wb-palette-kbd class="font-sans text-xs text-white/70">Ctrl K</kbd>
+    </button>
+  </div>
+
   <nav class="flex-1 overflow-y-auto px-3 pb-6" aria-label="<%= t('wibawa.navigation') %>">
     <%= link_to root_path, class: link_class(dashboard_active?), "aria-current": (dashboard_active? ? "page" : nil) do %>
       <%= icon("home", class: "opacity-80") %><span><%= t("wibawa.dashboard") %></span>

@@ -1,0 +1,28 @@
+<dialog data-wb-palette aria-label="<%= t('wibawa.palette.label') %>"
+        class="mx-auto mt-[12vh] w-[calc(100vw-2rem)] max-w-xl overflow-hidden rounded-card bg-surface p-0 text-ink shadow-2xl ring-1 ring-line backdrop:bg-zinc-950/50">
+  <label class="flex items-center gap-3 border-b border-line px-4">
+    <span class="text-ink-3"><%= icon("search", size: "size-4") %></span>
+    <span class="sr-only"><%= t("wibawa.palette.label") %></span>
+    <input type="text" data-wb-palette-input data-search-url="<%= helpers.search_path %>" autocomplete="off" spellcheck="false"
+           role="combobox" aria-expanded="true" aria-controls="wb-palette-list" aria-autocomplete="list"
+           placeholder="<%= t('wibawa.palette.placeholder') %>"
+           class="h-12 min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-3">
+    <kbd class="rounded border border-line px-1.5 py-0.5 font-sans text-xs text-ink-2">Esc</kbd>
+  </label>
+
+  <div id="wb-palette-list" role="listbox" class="max-h-[50vh] overflow-y-auto p-2">
+    <ul data-wb-palette-static>
+      <% items.each do |item| %>
+        <li role="option" aria-selected="false" class="rounded-control aria-selected:bg-surface-2">
+          <%= link_to item.url, class: "flex items-center gap-3 px-3 py-2 text-sm text-ink" do %>
+            <%= icon(item.icon, size: "size-4", class: "shrink-0 text-ink-3") %>
+            <span class="min-w-0 flex-1 truncate"><%= item.label %></span>
+            <% if item.hint %><span class="shrink-0 text-xs text-ink-2"><%= item.hint %></span><% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+    <ul data-wb-palette-results></ul>
+    <p data-wb-palette-empty hidden class="px-3 py-6 text-center text-sm text-ink-2"><%= t("wibawa.palette.empty") %></p>
+  </div>
+</dialog>

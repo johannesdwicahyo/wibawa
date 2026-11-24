@@ -43,7 +43,7 @@ The things the first users will ask for in week one.
 - [ ] MCP: OAuth with per-token scopes, an audit trail of agent calls, batch actions
 - [x] Reports: `Wibawa.report` takes a relation or SQL and gives a table, a bar chart and CSV. Reads from any database Rails is connected to, so a warehouse needs no special code
 - [ ] Reports: line charts for time series, paging for large results, reports as MCP tools
-- [ ] Command palette (Cmd+K) across resources
+- [x] Command palette (Cmd+K): pages, new-record shortcuts and record search across resources
 - [ ] Searchable select for large `belongs_to` collections (today: first 500 records)
 - [ ] Custom pages: `Wibawa.page "Reports" do … end` with their own menu entry
 - [ ] Filters on `has_many` and through associations
