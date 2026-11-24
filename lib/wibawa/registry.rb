@@ -11,6 +11,7 @@ module Wibawa
     def clear!
       @resources = {}
       @reports = {}
+      @pages = {}
       @dashboard = nil
     end
 
@@ -25,6 +26,13 @@ module Wibawa
     end
 
     def report(key) = @reports[key.to_s]
+
+    def register_page(page)
+      @pages[page.key] = page
+    end
+
+    def page(key) = @pages[key.to_s]
+    def pages = @pages.values
     def reports = @reports.values
 
     def fetch(key)

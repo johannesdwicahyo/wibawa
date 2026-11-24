@@ -46,7 +46,7 @@ The things the first users will ask for in week one.
 - [x] Command palette (Cmd+K): pages, new-record shortcuts and record search across resources
 - [x] Searchable select for large `belongs_to` collections, in forms and filters
 - [x] Searchable multi-select for `has_many` fields
-- [ ] Custom pages: `Wibawa.page "Reports" do … end` with their own menu entry
+- [x] Custom pages: `Wibawa.page :name do … end` with their own menu entry and action buttons
 - [ ] Filters on `has_many` and through associations
 - [x] Saved views: a named set of filters, scope and sort, per user
 - [ ] Saved views: share a view with the team, set a default view, rename *(candidate)*

@@ -20,13 +20,23 @@ module Wibawa
       end
     end
 
-    # [[group name, [reports...]], ...]; reports without a group go under "Reports".
-    def report_groups
-      Wibawa.registry.reports.select { |report| wibawa_authorized?(:show, report) }
-            .group_by { |report| report.menu_group || t("wibawa.reports") }
+    Entry = Struct.new(:label, :url, :icon, :active, :group)
+
+    # Custom pages and reports, as [[group name or nil, [entries...]], ...].
+    # Pages without a group sit right under the resources; reports without one
+    # go under "Reports".
+    def extra_groups
+      pages = Wibawa.registry.pages.select { |page| wibawa_authorized?(:show, page) }.map do |page|
+        Entry.new(page.title, helpers.page_path(page: page.key), page.menu_icon, on?("pages", :page, page.key), page.menu_group)
+      end
+      reports = Wibawa.registry.reports.select { |report| wibawa_authorized?(:show, report) }.map do |report|
+        Entry.new(report.title, helpers.report_path(report: report.key), report.menu_icon, on?("reports", :report, report.key),
+                  report.menu_group || t("wibawa.reports"))
+      end
+      (pages + reports).group_by(&:group).sort_by { |name, _| name ? 1 : 0 }
     end
 
-    def report_active?(report) = helpers.controller_name == "reports" && helpers.params[:report] == report.key
+    def on?(controller, param, key) = helpers.controller_name == controller && helpers.params[param] == key
 
     def active?(resource) = resource.key == @current_key
     def dashboard_active? = @current_key.empty? && helpers.controller_name == "dashboard"

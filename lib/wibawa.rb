@@ -6,6 +6,7 @@ require "wibawa/builders"
 require "wibawa/resource"
 require "wibawa/dashboard"
 require "wibawa/report"
+require "wibawa/page"
 require "wibawa/registry"
 
 module Wibawa
@@ -42,6 +43,15 @@ module Wibawa
     #   end
     def report(name, &block)
       registry.register_report(Report.new(name, &block))
+    end
+
+    # Register a custom page (see Wibawa::Page):
+    #
+    #   Wibawa.page :maintenance do
+    #     content { tag.p("Hello") }
+    #   end
+    def page(name, &block)
+      registry.register_page(Page.new(name, &block))
     end
 
     # Define the dashboard shown at the admin root.

@@ -10,7 +10,7 @@ module Wibawa
       resources = groups.flat_map(&:last)
       [Item.new(t("wibawa.dashboard"), root_path, "home", nil)] +
         resources.map { |r| Item.new(r.label, resources_path(resource: r.key), r.menu_icon, nil) } +
-        report_groups.values.flatten.map { |r| Item.new(r.title, helpers.report_path(report: r.key), r.menu_icon, t("wibawa.reports")) } +
+        extra_groups.flat_map(&:last).map { |entry| Item.new(entry.label, entry.url, entry.icon, entry.group) } +
         resources.select { |r| r.action?(:new) && wibawa_authorized?(:new, r.model) }.map do |r|
           Item.new(t("wibawa.new_record", resource: r.singular_label), new_resource_path(resource: r.key), "plus", nil)
         end

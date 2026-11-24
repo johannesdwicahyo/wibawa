@@ -217,6 +217,32 @@ A view belongs to the user who saved it (`config.current_user`). If the admin ha
 
 Press <kbd>Cmd</kbd>+<kbd>K</kbd> (<kbd>Ctrl</kbd>+<kbd>K</kbd> elsewhere) or click Search in the sidebar. The palette lists every page the user may open, a "New ..." shortcut per resource, and every report. From two characters on it also searches records in every resource that declares `search`, five hits each, through the same authorization and `scoped_collection` as the index page. There is nothing to configure.
 
+## Custom pages
+
+For anything that is not a model: a settings screen, a maintenance panel, a page of links. It gets a menu entry and the admin layout, and you write no controller or route.
+
+```ruby
+# app/wibawa/maintenance.rb
+Wibawa.page :maintenance do
+  title "Maintenance"
+  menu group: "System", icon: "cog"
+
+  view "admin/maintenance"          # app/views/admin/maintenance.html.erb
+
+  action :clear_cache, confirm: "Clear the cache?" do
+    Rails.cache.clear
+    "Cache cleared"                 # shown as the flash message
+  end
+end
+```
+
+- **Content** is a template from your app (`view`), or a block run in the view: `content { tag.p("Jobs waiting: #{Job.pending.count}") }`.
+- **Actions** become buttons in the page header. The block runs in the controller on POST, so it can `redirect_to` or `send_data` itself.
+- **Authorization** is `:show` on the `Wibawa::Page` object, and each action's name for its button. Pundit looks for `Wibawa::PagePolicy`.
+- Pages appear in the command palette, and their actions in the audit log.
+
+The admin's stylesheet is prebuilt, so a page's template can rely on the design tokens (`var(--wb-surface)`, `var(--wb-line)`, ...) and on classes the admin itself uses, not on arbitrary Tailwind classes. Add your own CSS with `content_for :head`.
+
 ## Reports
 
 A report is a read-only page built from a query: a table, an optional bar chart and CSV export. Put it in `app/wibawa/` next to your resources:
