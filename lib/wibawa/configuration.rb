@@ -96,8 +96,10 @@ module Wibawa
 
     # Turns on the MCP server at <mount path>/mcp. The block gets the bearer
     # token an agent sent and returns the user it belongs to, or nil:
-    #   config.mcp_authenticate_with { |token| ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user }
-    # That user goes through the same authorization as in the browser.
+    #   config.mcp_authenticate_with { |token| ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user&.then { |user| user if user.admin? } }
+    # This block is the admin gate for agents: `authenticate_with` does not run
+    # on the MCP endpoint, so return only users who may use the admin. That
+    # user then goes through the same authorization as in the browser.
     def mcp_authenticate_with(&block)
       @mcp_authenticate = block
     end

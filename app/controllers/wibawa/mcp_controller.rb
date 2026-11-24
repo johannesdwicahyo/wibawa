@@ -5,6 +5,9 @@ module Wibawa
   # bearer token, the block turns it into a user, and that user goes through
   # the same authorization, scopes and strong params as in the browser.
   #
+  # That block is the only gate in front of this endpoint: `authenticate_with`
+  # does not run here, so it must return admins only.
+  #
   # It does not inherit from the app's parent controller: that one signs
   # people in with a session, which an agent does not have.
   #

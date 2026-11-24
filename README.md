@@ -176,7 +176,7 @@ gem "mcp"
 
 # config/initializers/wibawa.rb
 config.mcp_authenticate_with do |token|
-  ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user
+  ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user&.then { |user| user if user.admin? }
 end
 config.mcp_write = true   # optional; without it agents can only read
 ```
@@ -195,6 +195,8 @@ The user your block returns goes through the same `config.authorization`, the sa
 
 - The endpoint does not inherit from `parent_controller` (an agent has no session). In `controller do ... end` blocks, use `wibawa_current_user` rather than your app's `current_user` if the MCP server should honour them.
 - Batch actions are not exposed; an agent calls a tool once per record.
+
+**This block is the admin gate for agents.** `authenticate_with` (your browser sign-in check) does not run here, so return a user only if they are allowed into the admin, as the example does with `user.admin?`. If you leave `config.authorization` unset, every user the block returns can read everything, and write everything when `mcp_write` is on.
 
 Store tokens hashed and make them revocable. There is no OAuth flow yet.
 
