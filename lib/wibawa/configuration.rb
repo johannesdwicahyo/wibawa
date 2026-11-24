@@ -55,6 +55,10 @@ module Wibawa
     # a name. Needs a table: run `bin/rails g wibawa:saved_views` first.
     attr_accessor :saved_views
 
+    # Records every create, update, delete and action made through the admin
+    # (browser and MCP). Needs a table: run `bin/rails g wibawa:audit_log` first.
+    attr_accessor :audit_log
+
     # Swap any built-in component for your own subclass:
     #   config.components[:index_table] = "Admin::IndexTableComponent"
     attr_accessor :components
@@ -86,6 +90,7 @@ module Wibawa
       @components = {}
       @mcp_write = false
       @saved_views = false
+      @audit_log = false
       @mcp_authenticate = nil
     end
 

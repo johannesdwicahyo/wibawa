@@ -4,8 +4,10 @@ module Wibawa
     def as = options[:as]
     def link? = !!options[:link]
 
+    # A proc label is resolved when shown, e.g. `label: -> { I18n.t("...") }`.
     def label
-      options[:label] || Util.humanize(name)
+      value = options[:label]
+      (value.respond_to?(:call) ? value.call : value) || Util.humanize(name)
     end
 
     # Returns the SQL to sort by, or nil when the column isn't sortable.

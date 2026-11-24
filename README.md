@@ -166,6 +166,28 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
 
+## Audit log
+
+Record every create, update, delete, member action and batch action made through the admin, whether from the browser or by an agent through the MCP server:
+
+```sh
+bin/rails g wibawa:audit_log && bin/rails db:migrate
+```
+
+```ruby
+config.audit_log = true
+```
+
+Each entry holds who did it, when, the action, the record, the changed attributes (old and new value) and whether it came from the web or MCP. The log is an ordinary read-only resource called `audit_log`: it appears in the sidebar with search, filters and CSV, every record's page gets a **History** button, and you authorize it like any model (`Wibawa::AuditEntry`). To change its columns, register your own resource with `as: "audit_log"`.
+
+What it does not cover:
+
+- Changes made outside the admin (console, your app's own controllers, background jobs). Use PaperTrail or Audited for a full model history.
+- Reads. Agent calls that only read are not logged.
+- Changes to nested `has_many` rows are saved but only the parent's own attributes are listed.
+
+Values of attributes matching your app's `filter_parameters`, or that Wibawa already hides from forms (`*_digest`, `*_token`, `encrypted_*`), are stored as `[FILTERED]`. The entry is written right after the change, not in the same transaction.
+
 ## Saved views
 
 Let each user save an index page's scope, search, filters, sort and page size under a name, and come back to it from the **Views** button on the toolbar:

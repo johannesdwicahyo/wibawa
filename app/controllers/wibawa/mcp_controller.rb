@@ -174,6 +174,7 @@ module Wibawa
       record = find_record
       wibawa_authorize!(:destroy, record)
       record.destroy || raise(ToolError, record.errors.full_messages.to_sentence.presence || "Could not delete.")
+      wibawa_audit(:destroy, record)
       { deleted: record.id }
     end
 
@@ -182,6 +183,7 @@ module Wibawa
       record = find_record
       wibawa_authorize!(action.name, record)
       result = instance_exec(record, &action.block)
+      wibawa_audit(action.name, record)
       # An action written for the browser may redirect or render; the agent gets JSON instead.
       if performed?
         self.response_body = nil
@@ -194,7 +196,10 @@ module Wibawa
     # ---- Serialization -----------------------------------------------------
 
     def save(record)
-      record.save ? detail(record) : raise(ToolError, record.errors.full_messages.to_sentence)
+      action = record.new_record? ? :create : :update
+      record.save || raise(ToolError, record.errors.full_messages.to_sentence)
+      wibawa_audit(action, record, record.saved_changes)
+      detail(record)
     end
 
     def detail(record)

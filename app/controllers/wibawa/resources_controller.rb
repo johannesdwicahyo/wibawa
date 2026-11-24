@@ -42,6 +42,7 @@ module Wibawa
       wibawa_authorize!(:create, record)
 
       if record.save
+        wibawa_audit(:create, record, record.saved_changes)
         redirect_to after_save_path, notice: t("wibawa.flash.created", resource: resource.singular_label), status: :see_other
       else
         render :new, status: :unprocessable_entity
@@ -59,6 +60,7 @@ module Wibawa
       record.assign_attributes(record_params)
 
       if record.save
+        wibawa_audit(:update, record, record.saved_changes)
         redirect_to after_save_path, notice: t("wibawa.flash.updated", resource: resource.singular_label), status: :see_other
       else
         render :edit, status: :unprocessable_entity
@@ -70,6 +72,7 @@ module Wibawa
       wibawa_authorize!(:destroy, record)
 
       if record.destroy
+        wibawa_audit(:destroy, record)
         redirect_to resources_path(resource: resource.key), notice: t("wibawa.flash.destroyed", resource: resource.singular_label), status: :see_other
       else
         redirect_back_or_to resource_path(resource: resource.key, id: record),
@@ -87,6 +90,7 @@ module Wibawa
 
       records = authorized_collection.where(model.primary_key => ids)
       result = action.block ? instance_exec(records, &action.block) : batch_destroy(records)
+      wibawa_audit(:"batch_#{action.name}", nil, { ids: ids.first(Wibawa::AuditEntry::MAX_IDS), count: ids.size })
       return if performed?
 
       message = result.is_a?(String) ? result : t("wibawa.flash.batch_done", action: action.label, count: ids.size)
@@ -99,6 +103,7 @@ module Wibawa
 
       wibawa_authorize!(action.name, record)
       result = instance_exec(record, &action.block)
+      wibawa_audit(action.name, record)
       return if performed?
 
       message = result.is_a?(String) ? result : t("wibawa.flash.action_done", action: action.label)
