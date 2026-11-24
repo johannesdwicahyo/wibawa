@@ -24,6 +24,13 @@ en:
       one: "1 file"
       other: "%{count} files"
     filters: "Filters"
+    audit_log: "Audit log"
+    audit:
+      who: "Who"
+      resource: "Resource"
+      record: "Record"
+      changes: "Changes"
+      history: "History"
     views: "Views"
     save: "Save"
     no_views: "No saved views yet."

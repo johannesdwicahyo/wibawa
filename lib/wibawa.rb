@@ -52,6 +52,8 @@ module Wibawa
     # (Re)load every resource file. Called on boot and on each code reload.
     def load!
       registry.clear!
+      # Before the app's files, so an app can register its own "audit_log" resource instead.
+      registry.register(Wibawa::AuditEntry.resource) if config.audit_log
       config.load_paths.each do |path|
         Dir[File.join(path.to_s, "**", "*.rb")].sort.each { |file| load file }
       end

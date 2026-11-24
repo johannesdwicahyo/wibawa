@@ -149,7 +149,9 @@ module Wibawa
     end
 
     def label
-      return @menu_options[:label] if menu? && @menu_options[:label]
+      if menu? && (custom = @menu_options[:label])
+        return custom.respond_to?(:call) ? custom.call : custom
+      end
 
       return Util.humanize(key) unless model.respond_to?(:model_name)
 

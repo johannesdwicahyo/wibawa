@@ -21,6 +21,10 @@ module Wibawa
           style: action.destructive? ? :danger : :secondary, confirm: action.confirm,
           url: member_action_resource_path(resource: resource.key, id: record, member_action: action.name) }
       end
+      if Wibawa.config.audit_log && resource.key != Wibawa::AuditEntry::RESOURCE_KEY && wibawa_authorized?(:index, Wibawa::AuditEntry)
+        list << { label: t("wibawa.audit.history"), icon: "file", style: :secondary,
+                  url: resources_path(resource: Wibawa::AuditEntry::RESOURCE_KEY, q: { resource_key: resource.key, record_id: record.id }) }
+      end
       if resource.action?(:destroy) && wibawa_authorized?(:destroy, record)
         list << { label: t("wibawa.delete"), icon: "trash", method: :delete, style: :danger,
                   confirm: t("wibawa.confirm_delete", name: title),

@@ -20,6 +20,15 @@ module Wibawa
       @wibawa_presenter ||= Wibawa::Presenter.new(view_context)
     end
 
+    # Writes an audit entry when config.audit_log is on. `data` is the record's
+    # saved_changes, or whatever describes the action.
+    def wibawa_audit(action, record = nil, data = nil)
+      return unless Wibawa.config.audit_log
+
+      Wibawa::AuditEntry.record!(user: wibawa_current_user, action: action, resource: resource, record: record, data: data,
+                                 via: is_a?(Wibawa::McpController) ? "mcp" : "web")
+    end
+
     # Selects the resource for this request and applies its `controller do ... end` overrides.
     def use_resource(key)
       @resource = Wibawa.registry.fetch(key)

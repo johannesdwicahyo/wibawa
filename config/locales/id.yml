@@ -24,6 +24,13 @@ id:
       one: "1 berkas"
       other: "%{count} berkas"
     filters: "Filter"
+    audit_log: "Log audit"
+    audit:
+      who: "Siapa"
+      resource: "Sumber"
+      record: "Data"
+      changes: "Perubahan"
+      history: "Riwayat"
     views: "Tampilan"
     save: "Simpan"
     no_views: "Belum ada tampilan tersimpan."
