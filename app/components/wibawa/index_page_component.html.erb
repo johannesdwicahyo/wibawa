@@ -21,7 +21,7 @@
         <% if search? %>
           <label class="relative block min-w-0 flex-1 sm:max-w-sm">
             <span class="sr-only"><%= t("wibawa.search") %></span>
-            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-zinc-400"><%= icon("search", size: "size-4") %></span>
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-3"><%= icon("search", size: "size-4") %></span>
             <input type="search" name="search" form="<%= form_id %>" value="<%= query.search_term %>"
                    placeholder="<%= t('wibawa.search_placeholder', resource: resource.label.to_s.downcase) %>"
                    class="<%= wibawa_input_class %> pl-9" data-wb-search>

@@ -168,8 +168,8 @@ Actions checked: `index show new create edit update destroy export`, `batch_<nam
 
 ## Customizing the UI
 
-- **Colors:** `config.brand_color = "#0f766e"` or set `--wb-primary`, `--wb-sidebar` and `--wb-canvas` in your CSS.
-- **Fonts:** Plus Jakarta Sans loads from Google Fonts. `config.font_stylesheet = nil` uses system fonts.
+- **Colors:** `config.brand_color = "#0f766e"` sets the action color (the dark-mode shade is derived from it). Every color is a CSS variable you can override: `--wb-canvas`, `--wb-surface`, `--wb-line`, `--wb-ink`, `--wb-rail` and so on; see `DESIGN.md`.
+- **Fonts:** Plus Jakarta Sans ships inside the gem, so the admin makes no third-party request. `config.font = :system` uses the system UI font.
 - **Markup:** copy any component into your app and point Wibawa at it:
 
   ```sh

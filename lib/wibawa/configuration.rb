@@ -43,9 +43,9 @@ module Wibawa
     # Any CSS color. Sets the --wb-primary variable used for buttons and links.
     attr_accessor :brand_color
 
-    # Stylesheet URL for the UI font (Plus Jakarta Sans). Set to nil to use
-    # system fonts, e.g. under a strict Content Security Policy.
-    attr_accessor :font_stylesheet
+    # :bundled serves Plus Jakarta Sans from the gem (no third-party request);
+    # :system uses the operating system's UI font.
+    attr_accessor :font
 
     # Swap any built-in component for your own subclass:
     #   config.components[:index_table] = "Admin::IndexTableComponent"
@@ -74,7 +74,7 @@ module Wibawa
       @logout_path = nil
       @logout_method = :delete
       @brand_color = nil
-      @font_stylesheet = "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      @font = :bundled
       @components = {}
     end
 

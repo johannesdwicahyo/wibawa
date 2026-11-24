@@ -1,11 +1,11 @@
-<nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-600 dark:text-zinc-400" aria-label="<%= t('wibawa.pagination.label') %>">
+<nav class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-ink-2" aria-label="<%= t('wibawa.pagination.label') %>">
   <div class="flex items-center gap-3">
     <p class="tabular-nums"><%= summary %></p>
     <label class="flex items-center gap-2">
       <span class="sr-only"><%= t("wibawa.pagination.per_page") %></span>
       <%= helpers.select_tag "per_page", helpers.options_for_select(per_page_options.map { |n| [t("wibawa.pagination.per_page_option", count: n), n] }, page.per_page),
             form: form_id, data: { wb_autosubmit: true },
-            class: "rounded-lg border-0 bg-transparent py-1 pl-2 pr-7 text-sm ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-primary dark:ring-white/15 dark:[color-scheme:dark]" %>
+            class: "rounded-control border-0 bg-transparent py-1 pl-2 pr-7 text-sm ring-1 ring-inset ring-line focus:ring-2 focus:ring-primary dark:[color-scheme:dark]" %>
     </label>
   </div>
 
@@ -18,11 +18,11 @@
     <% page.window.each do |number| %>
       <li>
         <% if number == :gap %>
-          <span class="px-1 text-zinc-400">…</span>
+          <span class="px-1 text-ink-3">…</span>
         <% elsif number == page.page %>
-          <span aria-current="page" class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg bg-zinc-900 px-2 text-sm font-medium text-white tabular-nums dark:bg-white dark:text-zinc-900"><%= number %></span>
+          <span aria-current="page" class="inline-flex h-8 min-w-8 items-center justify-center rounded-control bg-ink px-2 text-sm font-medium text-surface tabular-nums"><%= number %></span>
         <% else %>
-          <%= link_to number, page_url(number), class: "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm tabular-nums text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10" %>
+          <%= link_to number, page_url(number), class: "inline-flex h-8 min-w-8 items-center justify-center rounded-control px-2 text-sm tabular-nums text-ink hover:bg-surface-2" %>
         <% end %>
       </li>
     <% end %>

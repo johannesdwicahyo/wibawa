@@ -2,15 +2,15 @@
 
 <% if custom? %>
   <% if dashboard.stats.any? %>
-    <dl class="mb-8 grid grid-cols-[repeat(auto-fit,minmax(13rem,1fr))] gap-px overflow-hidden rounded-xl bg-zinc-950/[0.07] ring-1 ring-zinc-950/[0.07] dark:bg-white/10 dark:ring-white/10">
+    <dl class="mb-8 grid grid-cols-[repeat(auto-fit,minmax(13rem,1fr))] gap-px overflow-hidden rounded-card bg-line ring-1 ring-line">
       <% dashboard.stats.each do |stat| %>
         <% link = stat_link(stat) %>
-        <div class="bg-white px-5 py-5 dark:bg-zinc-900">
-          <dt class="text-sm text-zinc-500 dark:text-zinc-400"><%= stat.label %></dt>
-          <dd class="mt-1.5 text-[28px] font-semibold leading-tight tracking-tight text-zinc-950 dark:text-white">
+        <div class="bg-surface px-5 py-5">
+          <dt class="text-sm text-ink-2"><%= stat.label %></dt>
+          <dd class="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-ink">
             <%= link ? link_to(stat_value(stat), link, class: "hover:text-primary") : stat_value(stat) %>
           </dd>
-          <% if stat.options[:hint] %><p class="mt-1 text-xs text-zinc-500"><%= stat.options[:hint] %></p><% end %>
+          <% if stat.options[:hint] %><p class="mt-1 text-xs text-ink-2"><%= stat.options[:hint] %></p><% end %>
         </div>
       <% end %>
     </dl>
@@ -21,22 +21,27 @@
       <% records = table_records(table) %>
       <% columns = table_columns(table) %>
       <section class="<%= card_class %> overflow-hidden">
-        <div class="flex items-center justify-between border-b border-zinc-100 px-5 py-3 dark:border-white/[0.06]">
+        <div class="flex items-center justify-between border-b border-line px-5 py-3">
           <h2 class="text-sm font-semibold"><%= table.title %></h2>
           <% if (url = table_all_url(table)) %>
             <%= link_to t("wibawa.view_all"), url, class: "text-sm font-medium text-primary hover:underline underline-offset-2" %>
           <% end %>
         </div>
         <% if records.empty? %>
-          <p class="px-5 py-6 text-sm text-zinc-500"><%= t("wibawa.none") %></p>
+          <p class="px-5 py-6 text-sm text-ink-2"><%= t("wibawa.none") %></p>
         <% else %>
           <div class="relative overflow-x-auto">
             <table class="min-w-full text-sm">
-              <tbody class="divide-y divide-zinc-100 dark:divide-white/[0.06]">
+              <thead>
+                <tr class="border-b border-line text-left">
+                  <% columns.each do |column| %><th scope="col" class="whitespace-nowrap px-5 py-2 font-medium text-ink-2"><%= column.label %></th><% end %>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-line">
                 <% records.each do |record| %>
                   <tr>
                     <% columns.each do |column| %>
-                      <td class="px-5 py-2.5 text-zinc-700 dark:text-zinc-300"><%= presenter.cell(record, column) %></td>
+                      <td class="px-5 py-2.5 text-ink"><%= presenter.cell(record, column) %></td>
                     <% end %>
                   </tr>
                 <% end %>
@@ -51,7 +56,7 @@
   <% if resources.empty? %>
     <div class="<%= card_class %> px-6 py-12 text-center">
       <p class="text-sm font-medium"><%= t("wibawa.no_resources_title") %></p>
-      <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400"><%= t("wibawa.no_resources_body_html") %></p>
+      <p class="mt-2 text-sm text-ink-2"><%= t("wibawa.no_resources_body_html") %></p>
     </div>
   <% else %>
     <ul class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -59,12 +64,12 @@
         <li>
           <%= link_to resources_path(resource: resource.key),
                 class: "#{card_class} group flex items-center gap-4 p-4 transition-colors hover:ring-primary/40" do %>
-            <span class="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary"><%= icon(resource.menu_icon) %></span>
+            <%= icon(resource.menu_icon, class: "text-ink-2") %>
             <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-semibold text-zinc-950 dark:text-white"><%= resource.label %></span>
-              <% if resource.menu_group %><span class="block truncate text-xs text-zinc-500"><%= resource.menu_group %></span><% end %>
+              <span class="block truncate text-sm font-semibold text-ink"><%= resource.label %></span>
+              <% if resource.menu_group %><span class="block truncate text-xs text-ink-2"><%= resource.menu_group %></span><% end %>
             </span>
-            <%= icon("chevron-right", size: "size-4", class: "text-zinc-400 transition-transform group-hover:translate-x-0.5") %>
+            <%= icon("chevron-right", size: "size-4", class: "text-ink-3 transition-transform group-hover:translate-x-0.5") %>
           <% end %>
         </li>
       <% end %>

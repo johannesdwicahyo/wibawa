@@ -16,11 +16,7 @@
       } catch (e) {}
     <% end %>
 
-    <% if Wibawa.config.font_stylesheet %>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <%= stylesheet_link_tag Wibawa.config.font_stylesheet %>
-    <% end %>
+    <%= wibawa_font_face if Wibawa.config.font == :bundled %>
     <%= stylesheet_link_tag "wibawa", "data-turbo-track": "reload" %>
     <% if Wibawa.config.brand_color.present? %>
       <%= tag.style(":root { --wb-primary: #{Wibawa.config.brand_color.to_s.gsub(/[;{}<>]/, '')}; }".html_safe, nonce: content_security_policy_nonce) %>
@@ -30,11 +26,11 @@
     <%= yield :head %>
   </head>
 
-  <body class="h-full bg-canvas font-sans text-zinc-900 antialiased dark:text-zinc-100">
+  <body class="h-full bg-canvas font-sans text-ink antialiased">
     <%= render wibawa_component(:sidebar, Wibawa::SidebarComponent).new(current_key: params[:resource]) %>
 
     <div class="lg:pl-64">
-      <div class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-zinc-200 bg-canvas/90 px-4 backdrop-blur lg:hidden dark:border-white/10">
+      <div class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-canvas/90 px-4 backdrop-blur lg:hidden">
         <button type="button" data-wb-sidebar-open class="<%= wibawa_button_class(:ghost, '-ml-2 px-2') %>" aria-label="<%= t('wibawa.open_menu') %>">
           <%= wibawa_icon("menu") %>
         </button>
@@ -45,7 +41,7 @@
         <% flash.each do |type, message| %>
           <% next if message.blank? || !message.is_a?(String) %>
           <div data-wb-flash role="status"
-               class="mb-5 flex items-start gap-3 rounded-lg px-4 py-3 text-sm ring-1 ring-inset <%= type.to_s.in?(%w[alert error]) ? 'bg-rose-50 text-rose-800 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30' : 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/30' %>">
+               class="mb-5 flex items-start gap-3 rounded-control px-4 py-3 text-sm ring-1 ring-inset <%= type.to_s.in?(%w[alert error]) ? 'bg-rose-50 text-rose-800 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30' : 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/30' %>">
             <p class="flex-1"><%= message %></p>
             <button type="button" data-wb-dismiss class="-m-1 rounded p-1 opacity-60 hover:opacity-100" aria-label="<%= t('wibawa.dismiss') %>">
               <%= wibawa_icon("x", size: "size-4") %>

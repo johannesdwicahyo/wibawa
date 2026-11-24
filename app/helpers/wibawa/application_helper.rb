@@ -1,21 +1,23 @@
 module Wibawa
   module ApplicationHelper
-    BUTTON_BASE = "inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold " \
-                  "transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary " \
+    BUTTON_BASE = "inline-flex items-center justify-center gap-1.5 rounded-control px-3 py-2 text-sm font-semibold " \
+                  "transition active:scale-[.985] pointer-coarse:min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary " \
                   "disabled:opacity-50 disabled:pointer-events-none cursor-pointer whitespace-nowrap".freeze
     BUTTON_STYLES = {
-      primary: "bg-primary text-on-primary shadow-sm hover:bg-primary/90",
-      secondary: "bg-white text-zinc-800 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 " \
-                 "dark:bg-white/5 dark:text-zinc-100 dark:ring-white/15 dark:hover:bg-white/10",
-      danger: "bg-white text-rose-700 ring-1 ring-inset ring-rose-300 hover:bg-rose-50 " \
+      primary: "bg-primary text-on-primary hover:bg-primary/90",
+      secondary: "bg-surface text-ink ring-1 ring-inset ring-line hover:bg-surface-2",
+      danger: "bg-surface text-rose-700 ring-1 ring-inset ring-rose-300 hover:bg-rose-50 " \
               "dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/20",
-      ghost: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
+      ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink"
     }.freeze
 
-    INPUT_CLASS = "block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs ring-1 ring-inset " \
-                  "ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-primary " \
-                  "dark:bg-white/5 dark:text-white dark:ring-white/15 dark:[color-scheme:dark]".freeze
+    INPUT_CLASS = "block w-full rounded-control border-0 bg-surface px-3 py-2 text-sm text-ink ring-1 ring-inset " \
+                  "ring-line placeholder:text-ink-3 focus:ring-2 focus:ring-inset focus:ring-primary dark:[color-scheme:dark]".freeze
     INPUT_ERROR_CLASS = "ring-rose-400 focus:ring-rose-500 dark:ring-rose-500/60".freeze
+
+    MARK_PATH = "M12,12 H38 A74,74 0 0 1 112,86 V112 H86 A74,74 0 0 1 12,38 Z M244,12 V38 A74,74 0 0 1 170,112 H144 V86 A74,74 0 0 1 218,12 Z M112,144 V170 A74,74 0 0 1 38,244 H12 V218 A74,74 0 0 1 86,144 Z M144,144 H170 A74,74 0 0 1 244,218 V244 H218 A74,74 0 0 1 144,170 Z M128,104 L152,128 L128,152 L104,128 Z".freeze
+    FONT_LATIN_RANGE = "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD".freeze
+    FONT_LATIN_EXT_RANGE = "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF".freeze
 
     # Stroke icons drawn on a 20×20 grid.
     ICONS = {
@@ -61,6 +63,20 @@ module Wibawa
                                  "aria-hidden": "true", class: [size, "shrink-0", binding.local_variable_get(:class)].compact.join(" "))
     end
 
+    # The Wibawa mark: kawung, four table cells around one point.
+    def wibawa_mark(size: "size-5")
+      tag.svg(tag.path(d: MARK_PATH), viewBox: "0 0 256 256", fill: "currentColor", "aria-hidden": "true", class: "#{size} shrink-0")
+    end
+    
+    # @font-face for the bundled typeface. Inline so asset URLs work under both Propshaft and Sprockets.
+    def wibawa_font_face
+      faces = { "latin" => FONT_LATIN_RANGE, "latin-ext" => FONT_LATIN_EXT_RANGE }.map do |subset, range|
+        %(@font-face{font-family:"Plus Jakarta Sans";font-style:normal;font-weight:200 800;font-display:swap;) +
+          %(src:url("#{asset_path("wibawa/plus-jakarta-sans-#{subset}.woff2")}") format("woff2");unicode-range:#{range}})
+      end
+      tag.style(faces.join.html_safe, nonce: content_security_policy_nonce)
+    end
+    
     def wibawa_button_class(style = :secondary, extra = nil)
       [BUTTON_BASE, BUTTON_STYLES.fetch(style.to_sym), extra].compact.join(" ")
     end

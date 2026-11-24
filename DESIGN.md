@@ -1,6 +1,6 @@
 # Wibawa design spec
 
-**Status: draft, waiting for sign-off.** Nothing below is built yet except the items under "Already fixed". The logo is decided (kawung); status style and font bundling are still open.
+**Status: built**, except the items under "Not built yet" at the end. Logo: kawung. Status style: dot plus word. Font: bundled.
 
 Sources: [Impeccable](https://impeccable.style) ("Operate" mode, for product UI), [Taste Skill](https://www.tasteskill.dev) (system and motion rules), and the DESIGN.md format from [xiaopu-ai/web-design](https://github.com/xiaopu-ai/web-design). That last skill is written for landing pages; its scroll effects, WebGL and "three wow moments" rules are deliberately not applied to an admin panel. They will apply to the docs site (roadmap M3).
 
@@ -113,8 +113,14 @@ Found while auditing the current UI, and fixed because they were defects rather 
 - Enum columns were right-aligned as if they were numbers.
 - Sidebar group labels were below 4.5:1.
 
-## Open decisions
+## Not built yet
 
-1. ~~Logo direction~~ Decided: A, the kawung mark (`design/logo/wibawa-symbol.svg`). The indigo stays.
-2. **Status as dot plus word** by default instead of pills. This is the most visible change.
-3. **Bundle the font** (adds about 80 KB to the gem) or default to system fonts.
+These are in the spec above but were left out of the first build; they are tracked in ROADMAP M1.
+
+- Sticky table header (the table scrolls inside its own container, so it needs a layout change)
+- `density: :compact` rows
+- Filters as a `<dialog>` sheet and active-filter chips (the current slide-over closes on Escape but does not trap focus)
+- Collapsible icon rail for the sidebar
+- Overflow menu for page actions and a sticky first column on phones
+- Loading and disabled states on every control (buttons have them; selects and row actions do not)
+- State colors still use Tailwind's emerald, amber, rose and sky rather than the hues listed in section 2

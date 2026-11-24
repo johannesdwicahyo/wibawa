@@ -6,6 +6,9 @@ module Wibawa
 
     def title = Wibawa.config.site_title
 
+    # Until the app names itself, the tile shows the Wibawa mark instead of initials.
+    def default_title? = title == Wibawa::Configuration.new.site_title
+
     def initials
       title.to_s.split(/\s+/).first(2).map { |w| w[0] }.join.upcase.presence || "A"
     end
@@ -22,7 +25,7 @@ module Wibawa
 
     def link_class(active)
       class_names(
-        "group flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+        "group flex items-center gap-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors",
         "bg-white/12 text-white" => active,
         "text-white/70 hover:bg-white/[0.07] hover:text-white" => !active
       )

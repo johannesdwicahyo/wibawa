@@ -51,6 +51,24 @@ RSpec.describe "Wibawa admin", type: :request do
     expect(response.body).to include('class="relative overflow-x-auto"')
   end
 
+  it "shows a status as a dot plus the word, and as a pill only when asked" do
+    get "/admin/orders"
+    expect(response.body).to include("bg-amber-500").and include("Pending")
+    expect(response.body).not_to include("ring-amber-600/20")
+  end
+  
+  it "serves its own font and calls no third party" do
+    get "/admin/orders"
+    expect(response.body).to include("@font-face").and include("wibawa/plus-jakarta-sans-latin")
+    expect(response.body).not_to match(/googleapis|gstatic/)
+  
+    Wibawa.config.font = :system
+    get "/admin/orders"
+    expect(response.body).not_to include("@font-face")
+  ensure
+    Wibawa.config.font = :bundled
+  end
+
   it "exports CSV" do
     get "/admin/orders.csv"
     expect(response.media_type).to eq("text/csv")

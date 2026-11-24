@@ -188,4 +188,6 @@ document.addEventListener("turbo:load", () => {
   syncBatchBar()
   lastChecked = null
 })
+// After a failed save, put the cursor in the first field that needs fixing.
+document.addEventListener("turbo:render", () => document.querySelector('[data-wb-form] [aria-invalid="true"]')?.focus())
 document.addEventListener("turbo:morph", syncBatchBar)

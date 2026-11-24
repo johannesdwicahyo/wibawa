@@ -21,7 +21,7 @@ module Wibawa
       type = input_type
       return form.hidden_field(attribute) if type == :hidden
 
-      content_tag(:div, class: "min-w-0", data: { wb_field: field.name }) do
+      content_tag(:div, class: class_names("min-w-0", width_class(type) => !@compact), data: { wb_field: field.name }) do
         parts = type == :boolean ? [boolean_html] : [label_html, input_html(type)]
         safe_join((parts + [hint_html, error_html]).compact)
       end
@@ -115,11 +115,12 @@ module Wibawa
     end
 
     def label_class
-      @compact ? "mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400" : "mb-1.5 block text-sm font-medium text-zinc-800 dark:text-zinc-200"
+      @compact ? "mb-1 block text-xs font-medium text-ink-2" : "mb-1.5 block text-sm font-medium text-ink"
     end
 
     def html_options(extra = {})
       { class: wibawa_input_class(errors.any?), "aria-invalid": (errors.any? ? "true" : nil),
+        "aria-describedby": (errors.any? ? error_id : nil),
         required: (required? && !%i[attachment boolean].include?(input_type) ? true : nil) }
         .merge(extra).merge(field.options[:input_html] || {}).compact
     end
@@ -147,8 +148,8 @@ module Wibawa
     def boolean_html
       content_tag(:div, class: "flex items-start gap-3") do
         safe_join([
-          form.check_box(attribute, class: "mt-0.5 size-4 rounded border-zinc-300 accent-[var(--color-primary)]"),
-          form.label(attribute, label_text, class: "text-sm font-medium text-zinc-800 dark:text-zinc-200")
+          form.check_box(attribute, class: "mt-0.5 size-4 rounded border-line accent-[var(--color-primary)]"),
+          form.label(attribute, label_text, class: "text-sm font-medium text-ink")
         ])
       end
     end
@@ -164,10 +165,10 @@ module Wibawa
     def attachment_html
       many = attachment.macro == :has_many_attached
       current = record.public_send(name)
-      input = form.file_field(attribute, multiple: many, class: "block w-full text-sm text-zinc-600 dark:text-zinc-400 " \
-                                                            "file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 " \
-                                                            "file:text-sm file:font-semibold file:text-zinc-800 hover:file:bg-zinc-200 " \
-                                                            "dark:file:bg-white/10 dark:file:text-zinc-100")
+      input = form.file_field(attribute, multiple: many, class: "block w-full text-sm text-ink-2 " \
+                                                            "file:mr-3 file:rounded-control file:border-0 file:bg-surface-2 file:px-3 file:py-2 " \
+                                                            "file:text-sm file:font-semibold file:text-ink hover:file:bg-line " \
+                                                            "")
       return input unless current.attached?
 
       existing = content_tag(:div, presenter.format(current, nil, record: record), class: "mb-2 text-sm")
@@ -208,13 +209,23 @@ module Wibawa
 
     def hint_html
       hint = field.options[:hint]
-      hint && content_tag(:p, hint, class: "mt-1.5 text-xs text-zinc-500 dark:text-zinc-400")
+      hint && content_tag(:p, hint, class: "mt-1.5 text-xs text-ink-2")
+    end
+
+    def error_id = "#{form.object_name}_#{attribute}_error".gsub(/[^\w-]+/, "_")
+    
+    # Inputs are as wide as what goes in them, not as wide as the page.
+    def width_class(type)
+      case type
+      when :number, :date, :datetime, :time then "max-w-48"
+      when :select, :belongs_to, :email, :tel, :password then "max-w-80"
+      end
     end
 
     def error_html
       return nil if errors.empty?
 
-      content_tag(:p, errors.to_sentence.upcase_first, class: "mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400")
+      content_tag(:p, errors.to_sentence.upcase_first, id: error_id, class: "mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400")
     end
   end
 end
