@@ -1,4 +1,9 @@
-Wibawa.resource Customer
+Wibawa.resource Customer do
+  form do
+    field :name
+    field :orders
+  end
+end
 Wibawa.resource LineItem
 
 Wibawa.resource Order do

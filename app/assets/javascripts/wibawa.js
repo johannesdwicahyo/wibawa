@@ -110,6 +110,7 @@ document.addEventListener("keydown", (event) => {
 })
 
 document.addEventListener("click", (event) => {
+  event.target.closest?.("[data-wb-combo-remove]")?.closest("li").remove()
   if (event.target.closest?.("[data-wb-palette-open]")) openPalette()
   else if (event.target.matches?.("dialog[data-wb-palette]")) event.target.close() // the backdrop
 })
@@ -129,6 +130,7 @@ function comboParts(el) {
     input: root.querySelector("[role=combobox]"),
     hidden: root.querySelector("input[type=hidden]"),
     list: root.querySelector("[role=listbox]"),
+    multiple: root.hasAttribute("data-multiple"),
   }
 }
 
@@ -159,7 +161,27 @@ function loadCombo(parts, term, delay) {
   }, delay)
 }
 
+// Multiple choice: each pick becomes a chip (label, hidden id, remove button)
+// copied from the server-rendered template. The list closes so it never covers
+// the rest of the form; typing or the down arrow opens it again.
+function addComboChip(parts, option) {
+  const id = option.dataset.value
+  const chips = parts.root.querySelector("[data-wb-combo-chips]")
+  if (!$$("input[type=hidden]", chips).some((el) => el.value === id)) {
+    const chip = parts.root.querySelector("[data-wb-combo-chip-template]").content.firstElementChild.cloneNode(true)
+    const label = option.textContent.trim()
+    chip.querySelector("span").textContent = label
+    chip.querySelector("input").value = id
+    chip.querySelector("button").setAttribute("aria-label", `${chip.querySelector("button").getAttribute("aria-label")}${label}`)
+    chips.append(chip)
+  }
+  parts.input.value = ""
+  closeCombo(parts)
+  chips.dispatchEvent(new Event("change", { bubbles: true }))
+}
+
 function pickCombo(parts, option) {
+  if (parts.multiple) return addComboChip(parts, option)
   parts.hidden.value = option.dataset.value
   parts.input.value = parts.input.dataset.label = option.textContent.trim()
   closeCombo(parts)
@@ -183,7 +205,8 @@ document.addEventListener("focusout", (event) => {
   const parts = event.target.matches?.("[data-wb-combobox] [role=combobox]") && comboParts(event.target)
   if (!parts) return
   clearTimeout(comboTimer)
-  if (parts.input.value.trim() === "") parts.hidden.value = parts.input.dataset.label = ""
+  if (parts.multiple) parts.input.dataset.label = ""
+  else if (parts.input.value.trim() === "") parts.hidden.value = parts.input.dataset.label = ""
   parts.input.value = parts.input.dataset.label
   closeCombo(parts)
 })
@@ -198,7 +221,13 @@ document.addEventListener("pointerdown", (event) => {
 
 document.addEventListener("keydown", (event) => {
   const parts = event.target.matches?.("[data-wb-combobox] [role=combobox]") && comboParts(event.target)
-  if (!parts || parts.list.hidden) return
+  if (!parts) return
+  // Backspace in an empty box takes back the last chip.
+  if (parts.multiple && event.key === "Backspace" && parts.input.value === "") parts.root.querySelector("[data-wb-combo-chips] li:last-child")?.remove()
+  if (parts.list.hidden) {
+    if (event.key === "ArrowDown") loadCombo(parts, parts.input.value.trim(), 0)
+    return
+  }
   const options = $$("[role=option]", parts.list)
   const index = options.findIndex((el) => el.getAttribute("aria-selected") === "true")
   if (event.key === "ArrowDown" || event.key === "ArrowUp") {

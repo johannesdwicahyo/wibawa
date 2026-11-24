@@ -168,7 +168,7 @@ Actions checked: `index show new create edit update destroy export`, `batch_<nam
 
 ## Large associations
 
-A `belongs_to` field or filter is a plain `<select>` while its table has up to 100 records. Above that it becomes a search box: type to find a record, pick it with the mouse or the arrow keys. Nothing to configure, and no record is out of reach because it was not among the first few hundred.
+A `belongs_to` field or filter is a plain `<select>` while its table has up to 100 records. Above that it becomes a search box: type to find a record, pick it with the mouse or the arrow keys. A `has_many` field works the same way: a multi-select list up to 100 records, then a search box where each chosen record is a chip you can remove. Nothing to configure, and no record is out of reach because it was not among the first few hundred.
 
 ```ruby
 field :customer, searchable: true    # always a search box

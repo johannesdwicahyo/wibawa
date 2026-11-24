@@ -45,7 +45,7 @@ The things the first users will ask for in week one.
 - [ ] Reports: line charts for time series, paging for large results, reports as MCP tools
 - [x] Command palette (Cmd+K): pages, new-record shortcuts and record search across resources
 - [x] Searchable select for large `belongs_to` collections, in forms and filters
-- [ ] Searchable multi-select for `has_many` fields (today: first 500 records)
+- [x] Searchable multi-select for `has_many` fields
 - [ ] Custom pages: `Wibawa.page "Reports" do … end` with their own menu entry
 - [ ] Filters on `has_many` and through associations
 - [x] Saved views: a named set of filters, scope and sort, per user
