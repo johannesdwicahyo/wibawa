@@ -4,6 +4,8 @@ Wibawa::Engine.routes.draw do
   # Model Context Protocol endpoint. Answers 404 until config.mcp_authenticate_with is set.
   match "mcp", to: "mcp#handle", via: %i[get post delete]
 
+  get "-/search", to: "search#index", as: :search
+
   # Only registered reports match, so a resource called "reports" keeps its own pages.
   get "reports/:report", to: "reports#show", as: :report,
                          constraints: ->(request) { Wibawa.registry.report(request.path_parameters[:report]) }

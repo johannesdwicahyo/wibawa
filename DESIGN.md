@@ -54,6 +54,7 @@ Every interactive control gets default, hover, focus-visible, active, disabled a
 - **Forms.** Input width follows content: numbers and dates 12rem, selects 20rem, text full width (max 40rem). Today a date field stretches 720 px. Errors under the field with `aria-describedby`; first invalid field takes focus. Nested rows keep the current layout.
 - **Dashboard.** Stat tiles stay, value at 24 px (never larger than the page title). Tables get a header row.
 - **Empty and loading.** Empty states say what the resource is and offer the create action. Turbo navigation shows a 2 px progress bar in primary; no spinners inside content.
+- **Command palette.** A native `<dialog>` opened by Cmd/Ctrl+K or the sidebar's Search button. Pages filter instantly; record hits arrive after a 200 ms pause. Arrow keys move, Enter opens, Escape closes. This is the one modal in the interface.
 - **Sidebar.** Indigo rail stays as the committed shell color. The kawung motif stays in the footer only, at its current strength. The Wibawa mark replaces the initials tile only when `config.logo` is unset and no site title is given.
 
 ## 5. Layout

@@ -24,6 +24,10 @@ id:
       one: "1 berkas"
       other: "%{count} berkas"
     filters: "Filter"
+    palette:
+      label: "Cari dan lompat"
+      placeholder: "Cari data atau lompat ke halaman…"
+      empty: "Tidak ada yang cocok."
     reports: "Laporan"
     run_report: "Jalankan"
     report_empty: "Laporan ini tidak memiliki baris."

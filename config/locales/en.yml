@@ -24,6 +24,10 @@ en:
       one: "1 file"
       other: "%{count} files"
     filters: "Filters"
+    palette:
+      label: "Search and jump"
+      placeholder: "Search records or jump to a page…"
+      empty: "Nothing matches."
     reports: "Reports"
     run_report: "Run"
     report_empty: "This report has no rows."

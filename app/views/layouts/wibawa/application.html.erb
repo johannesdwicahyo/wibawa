@@ -29,6 +29,7 @@
 
   <body class="h-full bg-canvas font-sans text-ink antialiased">
     <%= render wibawa_component(:sidebar, Wibawa::SidebarComponent).new(current_key: params[:resource]) %>
+    <%= render wibawa_component(:command_palette, Wibawa::CommandPaletteComponent).new %>
 
     <div class="lg:pl-64">
       <div class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-canvas/90 px-4 backdrop-blur lg:hidden">
@@ -36,6 +37,9 @@
           <%= wibawa_icon("menu") %>
         </button>
         <%= link_to Wibawa.config.site_title, root_path, class: "truncate text-[15px] font-semibold" %>
+        <button type="button" data-wb-palette-open class="<%= wibawa_button_class(:ghost, '-mr-2 ml-auto px-2') %>" aria-label="<%= t('wibawa.palette.label') %>">
+          <%= wibawa_icon("search") %>
+        </button>
       </div>
 
       <main class="mx-auto max-w-[1600px] px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-8">
