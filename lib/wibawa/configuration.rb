@@ -51,6 +51,10 @@ module Wibawa
     # actions. Off by default: agents can only read.
     attr_accessor :mcp_write
 
+    # Lets each user save an index page's scope, search, filters and sort under
+    # a name. Needs a table: run `bin/rails g wibawa:saved_views` first.
+    attr_accessor :saved_views
+
     # Swap any built-in component for your own subclass:
     #   config.components[:index_table] = "Admin::IndexTableComponent"
     attr_accessor :components
@@ -81,6 +85,7 @@ module Wibawa
       @font = :bundled
       @components = {}
       @mcp_write = false
+      @saved_views = false
       @mcp_authenticate = nil
     end
 

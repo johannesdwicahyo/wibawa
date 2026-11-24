@@ -19,7 +19,8 @@ function setSidebar(open) {
 
 // ---- Filters popover ---------------------------------------------------------
 
-const closeFilters = () => document.querySelector("details[data-wb-filters][open]")?.removeAttribute("open")
+// Filters and saved views. One open at a time; a click elsewhere or Escape closes them.
+const closePopovers = (except) => $$("details[data-wb-popover][open]").forEach((el) => { if (el !== except) el.removeAttribute("open") })
 
 // ---- Command palette (Cmd/Ctrl+K) ------------------------------------------
 
@@ -231,7 +232,7 @@ document.addEventListener("click", (event) => {
     "[data-wb-sidebar-open], [data-wb-sidebar-close], [data-wb-sidebar-backdrop], " +
     "[data-wb-theme-toggle], [data-wb-dismiss], [data-wb-nested-add], [data-wb-nested-remove]"
   )
-  if (!event.target.closest?.("[data-wb-filters]")) closeFilters()
+  closePopovers(event.target.closest?.("details[data-wb-popover]"))
   if (!target) return
 
   if (target.matches("[data-wb-sidebar-open]")) setSidebar(true)
@@ -265,7 +266,7 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape") {
     setSidebar(false)
-    closeFilters()
+    closePopovers()
   }
   // "/" focuses the index search box.
   if (event.key === "/" && !el.matches?.("input, textarea, select, [contenteditable]")) {

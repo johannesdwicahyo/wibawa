@@ -1,5 +1,5 @@
 <%# The panel is positioned against the toolbar (the nearest `relative` parent), so it always fits the page. %>
-<details data-wb-filters>
+<details data-wb-filters data-wb-popover>
   <summary class="<%= wibawa_button_class(:secondary) %> cursor-pointer list-none [&::-webkit-details-marker]:hidden">
     <%= icon("filter", size: "size-4") %><%= t("wibawa.filters") %>
     <% if chips.any? %><span class="font-normal tabular-nums text-ink-2"><%= chips.size %></span><% end %>

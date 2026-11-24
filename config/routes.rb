@@ -14,6 +14,8 @@ Wibawa::Engine.routes.draw do
     get    "/",                       to: "resources#index",   as: :resources
     post   "/",                       to: "resources#create"
     get    "new",                     to: "resources#new",     as: :new_resource
+    post   "views",                   to: "saved_views#create",  as: :saved_views
+    delete "views/:id",               to: "saved_views#destroy", as: :saved_view
     post   "batch",                   to: "resources#batch",   as: :batch_resources
     get    ":id",                     to: "resources#show",    as: :resource
     patch  ":id",                     to: "resources#update"

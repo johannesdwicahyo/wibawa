@@ -38,6 +38,9 @@ Wibawa.configure do |config|
   # config.mcp_authenticate_with { |token| ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user&.then { |user| user if user.admin? } }
   # config.mcp_write = true   # let agents create, update, delete and run actions
 
+  # Saved views on index pages. Run `bin/rails g wibawa:saved_views` and migrate first.
+  # config.saved_views = true
+
   # Plus Jakarta Sans ships inside the gem. Use the system UI font instead:
   # config.font = :system
 end

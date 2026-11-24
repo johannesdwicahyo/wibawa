@@ -26,6 +26,7 @@ module Wibawa
 
     def search? = resource.search_fields.present?
     def filters? = resource.filters.any?
+    def saved_views? = !!Wibawa.config.saved_views
     def form_id = FORM_ID
 
     def clear_url
