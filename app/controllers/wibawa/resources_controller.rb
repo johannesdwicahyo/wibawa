@@ -81,6 +81,16 @@ module Wibawa
       end
     end
 
+    # Choices for a searchable select, as <li> options. `target` must be a
+    # model this resource's form or filters point at.
+    def options
+      target = resource.option_classes[params[:target]] || raise(Wibawa::ResourceNotFound)
+      raise Wibawa::NotAuthorized unless %i[index create update].any? { |action| wibawa_authorized?(action, model) }
+
+      @options = Wibawa::ComboboxComponent.search(target, wibawa_authorizer.scope(target.all), params[:q])
+      render layout: false
+    end
+
     def batch
       action = resource.find_batch_action(params[:batch_action]) || raise(Wibawa::ResourceNotFound)
       wibawa_authorize!(:"batch_#{action.name}", model)
