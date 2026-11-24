@@ -1,5 +1,5 @@
 module Wibawa
-  # A read-only page built from a query: a table, an optional bar chart and CSV.
+  # A read-only page built from a query: a table, an optional chart and CSV.
   #
   #   Wibawa.report :sales_by_status do
   #     title "Sales by status"
@@ -101,9 +101,12 @@ module Wibawa
       @table.column(name, **options)
     end
 
-    #   chart x: :status, y: :revenue
-    def chart(x:, y:)
-      @chart_options = { x: x.to_s, y: y.to_s }
+    #   chart x: :status, y: :revenue          # bars: compare categories
+    #   chart :line, x: :month, y: :revenue    # a line: change over time, rows in time order
+    def chart(type = :bar, x:, y:)
+      raise Error, "Unknown chart type #{type.inspect} (use :bar or :line)" unless %i[bar line].include?(type.to_sym)
+
+      @chart_options = { type: type.to_sym, x: x.to_s, y: y.to_s }
     end
 
     # ---- Reading and running -----------------------------------------------

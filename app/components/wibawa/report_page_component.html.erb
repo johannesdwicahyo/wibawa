@@ -40,6 +40,41 @@
     </div>
   <% end %>
 
+  <% if line_points.size > 1 %>
+    <%# One series, so no legend. The SVG stretches with the card; labels and the hover layer are HTML so they never distort. %>
+    <div class="<%= card_class %> mb-4 p-5" role="img" aria-label="<%= chart_column.label %>">
+      <p class="mb-4 text-sm font-medium text-ink-2"><%= chart_column.label %></p>
+      <div class="flex gap-3">
+        <div class="flex h-56 flex-col justify-between text-right text-xs tabular-nums text-ink-2">
+          <% y_ticks.each do |tick| %><span><%= chart_value(tick) %></span><% end %>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="relative h-56">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="absolute inset-0 size-full overflow-visible" aria-hidden="true">
+              <% [0, 50, 100].each do |y| %>
+                <line x1="0" x2="100" y1="<%= y %>" y2="<%= y %>" class="stroke-line" stroke-width="1" vector-effect="non-scaling-stroke" />
+              <% end %>
+              <polyline points="<%= polyline %>" class="fill-none stroke-primary" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            </svg>
+            <div class="absolute inset-0 flex">
+              <% line_points.each_with_index do |point, index| %>
+                <div class="group/point relative flex-1">
+                  <span class="absolute inset-y-0 left-1/2 hidden w-px bg-ink-3 group-hover/point:block"></span>
+                  <span class="absolute left-1/2 hidden size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary ring-2 ring-surface group-hover/point:block" style="bottom: <%= point.y %>%"></span>
+                  <span class="<%= class_names('pointer-events-none absolute -top-2 z-10 hidden -translate-y-full whitespace-nowrap rounded-control bg-ink px-2 py-1 text-xs text-surface group-hover/point:block',
+                                               index < line_points.size / 2 ? 'left-1/2' : 'right-1/2') %>"><%= point.label %>: <span class="tabular-nums"><%= helpers.strip_tags(chart_value(point.raw).to_s) %></span></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          <div class="mt-2 flex justify-between text-xs text-ink-2">
+            <% x_labels.each do |label| %><span><%= label %></span><% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <div class="<%= card_class %> overflow-hidden">
     <div class="relative overflow-x-auto">
       <table class="min-w-full text-sm">

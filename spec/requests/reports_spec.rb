@@ -18,6 +18,15 @@ RSpec.describe "Wibawa reports", type: :request do
     expect(response.body).to include('href="/admin/reports/orders_by_status"', ">Reports<")
   end
 
+  it "draws a line chart with a zero-based value axis" do
+    get "/admin/reports/total_by_number"
+    # =B-1 5, A-1 10, A-2 15 on an axis from 0 to 15: a third of the way across each, rising.
+    expect(response.body).to include('points="16.67,66.67 50.0,33.33 83.33,0.0"', "$15.00", "$7.50", "$0.00", "A-2: <span")
+    expect(response.body).not_to include("width: 100.0%") # no bars on a line chart
+
+    expect { Wibawa::Report.new(:x) { query { [] } and chart(:pie, x: :a, y: :b) } }.to raise_error(Wibawa::Error, /Unknown chart type/)
+  end
+
   it "binds params instead of interpolating them" do
     get "/admin/reports/orders_by_status", params: { p: { number: "A-%" } }
     expect(response.body).to include("$25.00")
