@@ -83,6 +83,35 @@
 /* Turbo's navigation bar is the only loading indicator. */
 .turbo-progress-bar { height: 2px; background: var(--color-primary); }
 
+/* Motion (DESIGN.md section 7). Things arrive with a short fade; they leave at once. */
+@keyframes wb-drop { from { opacity: 0; translate: 0 -4px; } }
+@keyframes wb-fade { from { opacity: 0; } }
+@keyframes wb-slide-in { from { translate: 100% 0; } }
+@keyframes wb-spin { to { rotate: 360deg; } }
+
+/* Page changes and the theme switch cross-fade (Turbo view transitions). */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }
+
+[data-wb-batch-bar], [data-wb-flash], .wb-enter { animation: wb-drop 180ms var(--default-transition-timing-function); }
+[data-wb-sidebar-backdrop] { animation: wb-fade 200ms; }
+@media (width < 80rem) {
+  [data-wb-filters] { animation: wb-slide-in 200ms var(--default-transition-timing-function); }
+}
+
+/* A button waiting for the server. */
+[data-wb-busy] { cursor: progress; }
+[data-wb-busy] > svg { display: none; }
+[data-wb-busy]::before {
+  content: "";
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: wb-spin 600ms linear infinite;
+}
+
 /* Kawung motif behind the sidebar footer: four petals around a point, repeated. */
 .wb-kawung {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg fill='none' stroke='white' stroke-opacity='.09'%3E%3Cellipse cx='14' cy='7' rx='4.2' ry='6.5'/%3E%3Cellipse cx='14' cy='21' rx='4.2' ry='6.5'/%3E%3Cellipse cx='7' cy='14' rx='6.5' ry='4.2'/%3E%3Cellipse cx='21' cy='14' rx='6.5' ry='4.2'/%3E%3C/g%3E%3C/svg%3E");
@@ -97,4 +126,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  [data-wb-busy]::before { animation: none !important; }
 }

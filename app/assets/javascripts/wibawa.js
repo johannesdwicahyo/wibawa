@@ -30,8 +30,12 @@ function toggleFilters() {
 // ---- Theme -----------------------------------------------------------------
 
 function toggleTheme() {
-  const dark = document.documentElement.classList.toggle("dark")
-  try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light") } catch (_) {}
+  const flip = () => {
+    const dark = document.documentElement.classList.toggle("dark")
+    try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light") } catch (_) {}
+  }
+  // Cross-fade the two themes where the browser can; otherwise switch at once.
+  document.startViewTransition ? document.startViewTransition(flip) : flip()
 }
 
 // ---- Batch selection -------------------------------------------------------
@@ -76,6 +80,7 @@ function addNested(button) {
   const html = template.innerHTML.replaceAll(marker, index)
   list.insertAdjacentHTML("beforeend", html)
   renumber(fieldset)
+  list.lastElementChild?.classList.add("wb-enter")
   list.lastElementChild?.querySelector("input:not([type=hidden]), select, textarea")?.focus()
 }
 
@@ -191,3 +196,9 @@ document.addEventListener("turbo:load", () => {
 // After a failed save, put the cursor in the first field that needs fixing.
 document.addEventListener("turbo:render", () => document.querySelector('[data-wb-form] [aria-invalid="true"]')?.focus())
 document.addEventListener("turbo:morph", syncBatchBar)
+
+// The button that submitted a form shows a spinner until the response arrives.
+document.addEventListener("turbo:submit-start", (event) => event.detail.formSubmission.submitter?.setAttribute("data-wb-busy", ""))
+document.addEventListener("turbo:submit-end", (event) => {
+  if (!event.detail.success) event.detail.formSubmission.submitter?.removeAttribute("data-wb-busy")
+})

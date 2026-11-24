@@ -56,7 +56,7 @@
         </thead>
         <tbody class="divide-y divide-line">
           <% records.each do |record| %>
-            <tr class="group/row hover:bg-surface-2 has-[:checked]:bg-primary/[0.04] dark:has-[:checked]:bg-primary/10">
+            <tr class="group/row transition-colors hover:bg-surface-2 has-[:checked]:bg-primary/[0.04] dark:has-[:checked]:bg-primary/10">
               <% if selectable? %>
                 <td class="w-10 py-2 pl-4 pr-1">
                   <input type="checkbox" name="ids[]" value="<%= record.id %>" form="<%= batch_form_id %>" data-wb-select

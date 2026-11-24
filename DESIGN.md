@@ -73,7 +73,10 @@ Level L1 of the web-design skill: state feedback only.
 
 - Hover 150 ms, press 90 ms, sheet open 200 ms and close 120 ms, ease `cubic-bezier(.2,.8,.2,1)`. No bounce.
 - Animate opacity and transform only.
-- No entrance animation on page load, no scroll effects.
+- Page changes and the theme switch cross-fade in 150 ms (view transitions; browsers without them switch at once).
+- Things that appear fade in over 180 ms: the batch bar, flash messages, a new nested row, the filter sheet. They leave at once.
+- The button that submitted a form shows a spinner until the server answers. No other spinners.
+- No staggered entrances, no scroll effects.
 - `prefers-reduced-motion`: color still changes, movement jumps to its end state. Already present; keep.
 
 ## 8. Do and don't
