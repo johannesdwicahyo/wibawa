@@ -1,0 +1,12 @@
+class CreateWibawaSavedViews < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    create_table :wibawa_saved_views do |t|
+      t.string :resource_key, null: false
+      t.string :name, null: false
+      t.text :query, null: false, default: ""
+      t.string :owner # "User:42"; null when the admin has no signed-in user
+      t.timestamps
+    end
+    add_index :wibawa_saved_views, %i[resource_key owner]
+  end
+end

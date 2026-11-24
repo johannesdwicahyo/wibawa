@@ -47,7 +47,8 @@ The things the first users will ask for in week one.
 - [ ] Searchable select for large `belongs_to` collections (today: first 500 records)
 - [ ] Custom pages: `Wibawa.page "Reports" do … end` with their own menu entry
 - [ ] Filters on `has_many` and through associations
-- [ ] Saved views: a named set of filters, scope and sort *(candidate)*
+- [x] Saved views: a named set of filters, scope and sort, per user
+- [ ] Saved views: share a view with the team, set a default view, rename *(candidate)*
 - [ ] Change history hook for audit gems (PaperTrail, Audited) *(candidate)*
 - [ ] CSV import *(candidate)*
 

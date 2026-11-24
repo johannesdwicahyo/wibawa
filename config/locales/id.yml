@@ -24,6 +24,12 @@ id:
       one: "1 berkas"
       other: "%{count} berkas"
     filters: "Filter"
+    views: "Tampilan"
+    save: "Simpan"
+    no_views: "Belum ada tampilan tersimpan."
+    save_view: "Simpan tampilan ini"
+    view_name: "Nama"
+    delete_view: "Hapus tampilan %{name}"
     palette:
       label: "Cari dan lompat"
       placeholder: "Cari data atau lompat ke halaman…"
@@ -62,6 +68,8 @@ id:
       forbidden_title: "Anda tidak punya akses"
       forbidden_body: "Minta izin ke administrator untuk membuka halaman ini."
     flash:
+      view_saved: "Tampilan \"%{name}\" disimpan."
+      view_deleted: "Tampilan \"%{name}\" dihapus."
       created: "%{resource} berhasil dibuat."
       updated: "%{resource} berhasil diperbarui."
       destroyed: "%{resource} berhasil dihapus."

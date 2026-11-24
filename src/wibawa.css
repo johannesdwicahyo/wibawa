@@ -91,7 +91,7 @@
 /* Page changes and the theme switch cross-fade (Turbo view transitions). */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }
 
-[data-wb-batch-bar], [data-wb-flash], .wb-enter, [data-wb-filters][open] > div, [data-wb-palette][open] { animation: wb-drop 180ms var(--default-transition-timing-function); }
+[data-wb-batch-bar], [data-wb-flash], .wb-enter, [data-wb-popover][open] > div, [data-wb-palette][open] { animation: wb-drop 180ms var(--default-transition-timing-function); }
 [data-wb-sidebar-backdrop] { animation: wb-fade 200ms; }
 
 /* A button waiting for the server. */

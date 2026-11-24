@@ -14,7 +14,7 @@
   <%= render wibawa_component(:scopes, Wibawa::ScopesComponent).new(resource: resource, query: query) %>
 <% end %>
 
-<% if search? || filters? %>
+<% if search? || filters? || saved_views? %>
   <div class="relative mb-4 flex flex-wrap items-center gap-2">
     <% if search? %>
       <label class="relative block min-w-0 flex-1 sm:max-w-sm">
@@ -27,6 +27,9 @@
     <% end %>
     <% if filters? %>
       <%= render wibawa_component(:filters, Wibawa::FiltersComponent).new(resource: resource, query: query, form_id: form_id, clear_url: clear_url) %>
+    <% end %>
+    <% if saved_views? %>
+      <%= render wibawa_component(:saved_views, Wibawa::SavedViewsComponent).new(resource: resource) %>
     <% end %>
     <% if query.filtered? %>
       <%= link_to t("wibawa.clear_filters"), clear_url, class: wibawa_button_class(:ghost) %>

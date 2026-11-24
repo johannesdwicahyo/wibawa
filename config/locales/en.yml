@@ -24,6 +24,12 @@ en:
       one: "1 file"
       other: "%{count} files"
     filters: "Filters"
+    views: "Views"
+    save: "Save"
+    no_views: "No saved views yet."
+    save_view: "Save current view"
+    view_name: "Name"
+    delete_view: "Delete view %{name}"
     palette:
       label: "Search and jump"
       placeholder: "Search records or jump to a page…"
@@ -62,6 +68,8 @@ en:
       forbidden_title: "You don't have access"
       forbidden_body: "Ask an administrator for permission to open this page."
     flash:
+      view_saved: "View \"%{name}\" saved."
+      view_deleted: "View \"%{name}\" deleted."
       created: "%{resource} created."
       updated: "%{resource} updated."
       destroyed: "%{resource} deleted."
