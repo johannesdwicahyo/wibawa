@@ -38,3 +38,18 @@ end
 Wibawa.report :orders_per_customer do
   query { |_params| Order.joins(:customer).group("customers.name").count }
 end
+
+Wibawa.page :maintenance do
+  title "Maintenance"
+  description "Housekeeping."
+  menu group: "System", icon: "cog"
+  content { tag.p("Pending orders: #{Order.pending.count}", id: "pending") }
+
+  action :pay_all, confirm: "Pay every order?" do
+    "#{Order.pending.update_all(status: 1)} orders paid"
+  end
+end
+
+Wibawa.page :about do
+  view "admin/about"
+end

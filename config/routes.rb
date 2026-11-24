@@ -6,6 +6,12 @@ Wibawa::Engine.routes.draw do
 
   get "-/search", to: "search#index", as: :search
 
+  # Only registered pages match, so a resource called "pages" keeps its own.
+  constraints ->(request) { Wibawa.registry.page(request.path_parameters[:page]) } do
+    get  "pages/:page",              to: "pages#show", as: :page
+    post "pages/:page/:page_action", to: "pages#run",  as: :page_action
+  end
+
   # Only registered reports match, so a resource called "reports" keeps its own pages.
   get "reports/:report", to: "reports#show", as: :report,
                          constraints: ->(request) { Wibawa.registry.report(request.path_parameters[:report]) }

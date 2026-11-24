@@ -44,14 +44,16 @@
       </ul>
     <% end %>
 
-    <% report_groups.each do |name, reports| %>
-      <p class="mb-1 mt-6 px-2.5 text-xs font-medium text-white/70"><%= name %></p>
-      <ul class="space-y-0.5">
-        <% reports.each do |report| %>
+    <% extra_groups.each do |name, entries| %>
+      <% if name %>
+        <p class="mb-1 mt-6 px-2.5 text-xs font-medium text-white/70"><%= name %></p>
+      <% end %>
+      <ul class="<%= name ? 'space-y-0.5' : 'mt-0.5 space-y-0.5' %>">
+        <% entries.each do |entry| %>
           <li>
-            <%= link_to helpers.report_path(report: report.key), class: link_class(report_active?(report)), "aria-current": (report_active?(report) ? "page" : nil) do %>
-              <%= icon(report.menu_icon, class: "opacity-80") %>
-              <span class="truncate"><%= report.title %></span>
+            <%= link_to entry.url, class: link_class(entry.active), "aria-current": (entry.active ? "page" : nil) do %>
+              <%= icon(entry.icon, class: "opacity-80") %>
+              <span class="truncate"><%= entry.label %></span>
             <% end %>
           </li>
         <% end %>
