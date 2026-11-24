@@ -71,9 +71,14 @@ module Wibawa
       values = mapping.to_h { |header, attribute| [attribute, clean(row[header])] }.compact
       record = (key && values[key].present? && @find_in.find_by(key => values[key])) || @build.call
       action = record.new_record? ? :create : :update
+      # As in the form: an update is authorized on the record as it is stored,
+      # before the row's values touch it, so a row cannot rewrite the very
+      # attribute a policy decides on. A create is judged with its values set.
+      allowed = @authorize.call(action, record) if action == :update
       record.assign_attributes(values)
+      allowed = @authorize.call(action, record) if action == :create
 
-      if !@authorize.call(action, record)
+      if !allowed
         result.errors << [line, I18n.t("wibawa.flash.not_authorized")]
       elsif record.save
         action == :create ? result.created += 1 : result.updated += 1

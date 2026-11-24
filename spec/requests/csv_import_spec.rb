@@ -47,6 +47,16 @@ RSpec.describe "Wibawa CSV import", type: :request do
     expect(Order.count).to eq(1)
   end
 
+  it "authorizes an update on the stored record, not on the row's values" do
+    # Only pending orders may be changed; the row tries to pass by saying it is pending.
+    order.paid!
+    Wibawa.config.authorize_with { |_user, action, subject| action != :update || subject.pending? }
+    upload "number,status\nA-1,pending\n"
+
+    expect(response.body).to include("Line 2:", "permission")
+    expect(order.reload).to be_paid
+  end
+
   it "is authorized as a whole and per row" do
     Wibawa.config.authorize_with { |_user, action, _subject| action != :import }
     upload "number,customer_id\nB-2,#{customer.id}\n"
