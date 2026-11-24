@@ -1,6 +1,9 @@
 Wibawa::Engine.routes.draw do
   root to: "dashboard#show"
 
+  # Model Context Protocol endpoint. Answers 404 until config.mcp_authenticate_with is set.
+  match "mcp", to: "mcp#handle", via: %i[get post delete]
+
   scope ":resource" do
     get    "/",                       to: "resources#index",   as: :resources
     post   "/",                       to: "resources#create"

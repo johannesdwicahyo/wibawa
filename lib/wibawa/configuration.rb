@@ -47,6 +47,10 @@ module Wibawa
     # :system uses the operating system's UI font.
     attr_accessor :font
 
+    # Lets the MCP server create, update and delete records and run member
+    # actions. Off by default: agents can only read.
+    attr_accessor :mcp_write
+
     # Swap any built-in component for your own subclass:
     #   config.components[:index_table] = "Admin::IndexTableComponent"
     attr_accessor :components
@@ -76,6 +80,8 @@ module Wibawa
       @brand_color = nil
       @font = :bundled
       @components = {}
+      @mcp_write = false
+      @mcp_authenticate = nil
     end
 
     # Runs as a before_action inside Wibawa's controllers:
@@ -86,6 +92,20 @@ module Wibawa
 
     def authenticate
       @authenticate
+    end
+
+    # Turns on the MCP server at <mount path>/mcp. The block gets the bearer
+    # token an agent sent and returns the user it belongs to, or nil:
+    #   config.mcp_authenticate_with { |token| ApiToken.find_by(digest: Digest::SHA256.hexdigest(token))&.user&.then { |user| user if user.admin? } }
+    # This block is the admin gate for agents: `authenticate_with` does not run
+    # on the MCP endpoint, so return only users who may use the admin. That
+    # user then goes through the same authorization as in the browser.
+    def mcp_authenticate_with(&block)
+      @mcp_authenticate = block
+    end
+    
+    def mcp_authenticate
+      @mcp_authenticate
     end
 
     # Shorthand: config.authorize_with { |user, action, subject| user.admin? }

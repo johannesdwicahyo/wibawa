@@ -108,37 +108,11 @@ module Wibawa
     private
 
     def load_resource
-      @resource = Wibawa.registry.fetch(params[:resource])
-      resource.controller_blocks.each { |block| singleton_class.class_eval(&block) }
+      use_resource(params[:resource])
     end
 
     def load_record
       @record = find_record
-    end
-
-    def model = resource.model
-
-    # ---- Hooks: override per resource with `controller do ... end` ---------
-
-    # Base relation for index, batch and record lookup.
-    def scoped_collection
-      model.all
-    end
-
-    def authorized_collection
-      wibawa_authorizer.scope(scoped_collection)
-    end
-
-    def find_record
-      authorized_collection.find(params[:id])
-    end
-
-    def build_record
-      scoped_collection.new
-    end
-
-    def record_params
-      params.fetch(:record, {}).permit(*resource.permitted_attributes)
     end
 
     def after_save_path
@@ -149,17 +123,7 @@ module Wibawa
       end
     end
 
-    def per_page
-      requested = params[:per_page].to_i
-      default = resource.index_options[:per_page] || Wibawa.config.per_page
-      requested.positive? ? [requested, Wibawa.config.max_per_page].min : default
-    end
-
     # ---- Helpers -----------------------------------------------------------
-
-    def ensure_action!(action)
-      raise Wibawa::ResourceNotFound unless resource.action?(action)
-    end
 
     def batch_destroy(records)
       destroyed = 0

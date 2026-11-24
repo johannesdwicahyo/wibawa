@@ -1,5 +1,7 @@
 module Wibawa
   class ApplicationController < Wibawa.config.parent_controller.constantize
+    include Wibawa::ResourceAccess
+
     layout "wibawa/application"
 
     protect_from_forgery with: :exception
@@ -37,22 +39,6 @@ module Wibawa
         when Proc then instance_exec(&setting)
         when Symbol, String then respond_to?(setting, true) ? send(setting) : nil
         end
-    end
-
-    def wibawa_authorizer
-      @wibawa_authorizer ||= Wibawa::Authorization.build(wibawa_current_user)
-    end
-
-    def wibawa_authorized?(action, subject)
-      wibawa_authorizer.authorized?(action, subject)
-    end
-
-    def wibawa_authorize!(action, subject)
-      raise Wibawa::NotAuthorized unless wibawa_authorized?(action, subject)
-    end
-
-    def wibawa_presenter
-      @wibawa_presenter ||= Wibawa::Presenter.new(view_context)
     end
   end
 end
