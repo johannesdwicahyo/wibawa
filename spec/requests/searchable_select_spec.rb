@@ -30,6 +30,37 @@ RSpec.describe "Wibawa searchable select", type: :request do
     end
   end
 
+  describe "has_many fields" do
+    let!(:other) { Order.create!(number: "B-2", customer: budi) }
+
+    it "is a multi-select while the table is short, and keeps chosen ids it does not list" do
+      get "/admin/customers/#{sari.id}/edit"
+      expect(response.body).to include('multiple="multiple"', ">A-1<", ">B-2<")
+
+      limited = Class.new(Wibawa::Authorization::Allow) do
+        def scope(relation) = relation.klass == Order ? relation.where.not(number: "A-1") : relation
+      end
+      Wibawa.config.authorization = limited
+      get "/admin/customers/#{sari.id}/edit"
+      expect(response.body).not_to include(">A-1<")
+      expect(response.body).to include(%(<input type="hidden" name="record[order_ids][]" value="#{order.id}"))
+    end
+
+    it "becomes a search box with one chip per chosen record" do
+      stub_const("Wibawa::ComboboxComponent::THRESHOLD", 1)
+      get "/admin/customers/#{sari.id}/edit"
+      expect(response.body).to include("data-multiple", 'data-url="/admin/customers/options/Order"', "data-wb-combo-chip-template",
+                                       %(name="record[order_ids][]" value="#{order.id}"), ">A-1<")
+      expect(response.body).not_to include(">B-2<", "multiple=\"multiple\"")
+
+      get "/admin/customers/options/Order", params: { q: "B-2" }
+      expect(response.body).to include(%(data-value="#{other.id}"))
+
+      patch "/admin/customers/#{sari.id}", params: { record: { order_ids: ["", order.id, other.id] } }
+      expect(sari.reload.orders).to contain_exactly(order, other)
+    end
+  end
+
   it "searches the target model, and only models the resource points at" do
     get "/admin/orders/options/Customer", params: { q: "bud" }
     expect(response.body).to include(%(data-value="#{budi.id}"), "Budi")

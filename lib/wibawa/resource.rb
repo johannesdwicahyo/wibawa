@@ -231,11 +231,11 @@ module Wibawa
       @permitted || attributes_for(form_items, model)
     end
 
-    # { "Customer" => Customer }: the belongs_to targets of this resource's form
-    # fields (nested ones too) and filters. Only these can be searched through
+    # { "Customer" => Customer }: the models this resource's form fields (nested
+    # ones too) and filters let you choose from. Only these can be searched through
     # the options endpoint.
     def option_classes
-      classes = belongs_to_classes(form_items, model)
+      classes = choice_classes(form_items, model)
       filters.each do |filter|
         ref = model.reflect_on_association(filter.name)
         classes << ref.klass if ref&.macro == :belongs_to && !ref.polymorphic?
@@ -260,13 +260,13 @@ module Wibawa
 
     private
 
-    def belongs_to_classes(items, klass)
+    def choice_classes(items, klass)
       items.flat_map do |item|
         ref = klass.reflect_on_association(item.name) unless item.kind == :section
         case item.kind
-        when :section then belongs_to_classes(item.children, klass)
-        when :has_many then ref ? belongs_to_classes(item.children, ref.klass) : []
-        else ref&.macro == :belongs_to && !ref.polymorphic? ? [ref.klass] : []
+        when :section then choice_classes(item.children, klass)
+        when :has_many then ref ? choice_classes(item.children, ref.klass) : []
+        else ref && !ref.polymorphic? && %i[belongs_to has_many has_and_belongs_to_many].include?(ref.macro) ? [ref.klass] : []
         end
       end
     end

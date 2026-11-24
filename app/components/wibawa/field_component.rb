@@ -138,7 +138,7 @@ module Wibawa
       when :time then form.time_field(attribute, html_options)
       when :select then form.select(attribute, select_options, { include_blank: blank_option }, html_options)
       when :belongs_to then searchable? ? combobox_html : form.select(attribute, belongs_to_options, { include_blank: blank_option }, html_options)
-      when :many then form.select(attribute, many_options, {}, html_options(multiple: true, size: 6))
+      when :many then searchable? ? combobox_html(multiple: true) : many_select_html
       when :rich_text then rich_text_html
       when :attachment then attachment_html
       else form.text_field(attribute, html_options)
@@ -196,7 +196,7 @@ module Wibawa
       collection.map { |item| item.is_a?(Array) ? item : [Util.humanize(item.to_s), item] }
     end
 
-    # A belongs_to becomes a search box once its table is too long to list.
+    # An association becomes a search box once its table is too long to list.
     # `searchable: true` or `false` on the field decides it by hand.
     def searchable?
       return false if field.options[:collection]
@@ -205,11 +205,22 @@ module Wibawa
       choice.nil? ? Wibawa::ComboboxComponent.needed?(reflection.klass) : choice
     end
 
-    def combobox_html
+    def combobox_html(multiple: false)
       render Wibawa::ComboboxComponent.new(
-        name: form.field_name(attribute), klass: reflection.klass, value: record.public_send(attribute),
-        resource_key: helpers.params[:resource], id: form.field_id(attribute), input_html: html_options
+        name: form.field_name(attribute, multiple: multiple), klass: reflection.klass, value: record.public_send(attribute),
+        resource_key: helpers.params[:resource], id: form.field_id(attribute), multiple: multiple,
+        input_html: html_options.except(*(multiple ? [:required] : []))
       )
+    end
+
+    # Chosen ids the list does not offer (past the limit, or outside the user's
+    # scope) ride along as hidden inputs, so saving the form never drops them.
+    def many_select_html
+      options = many_options
+      offered = options.map { |_, id| id.to_s }
+      kept = Array(record.public_send(attribute)).map(&:to_s) - offered
+      safe_join([form.select(attribute, options, {}, html_options(multiple: true, size: 6))] +
+                kept.map { |id| helpers.hidden_field_tag(form.field_name(attribute, multiple: true), id, id: nil) })
     end
 
     def belongs_to_options
