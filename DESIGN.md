@@ -1,6 +1,6 @@
 # Wibawa design spec
 
-**Status: draft, waiting for sign-off.** Nothing below is built yet except the items under "Already fixed". The logo is decided (kawung); status style and font bundling are still open.
+**Status: built**, except the items under "Not built yet" at the end. Logo: kawung. Status style: dot plus word. Font: bundled.
 
 Sources: [Impeccable](https://impeccable.style) ("Operate" mode, for product UI), [Taste Skill](https://www.tasteskill.dev) (system and motion rules), and the DESIGN.md format from [xiaopu-ai/web-design](https://github.com/xiaopu-ai/web-design). That last skill is written for landing pages; its scroll effects, WebGL and "three wow moments" rules are deliberately not applied to an admin panel. They will apply to the docs site (roadmap M3).
 
@@ -50,7 +50,7 @@ Every interactive control gets default, hover, focus-visible, active, disabled a
 - **Status.** A 6 px dot plus the word, in ink, replaces the filled pill. A full column of red, amber and green pills is the loudest thing on the index page while carrying one word of information. The pill stays available with `as: :badge`.
 - **Index table.** Header row on `surface-2`, sticky under the toolbar. Row height 40 px, with a `density: :compact` option at 32 px. Selected rows tint with primary at 6%. Row actions appear on hover and focus on desktop, always on touch.
 - **Scopes.** Keep the underline tabs. Counts become plain tabular numbers in `ink-2`, no pill.
-- **Filters.** Keep the right-hand panel at xl and above. Below xl it becomes a `<dialog>` sheet instead of a hidden div, so focus is trapped and Escape closes it. Active filters show as removable chips above the table.
+- **Filters.** One toolbar: search box, then a Filters button that opens a popover (a bottom sheet on phones). It is a native `<details>`, closed by Escape or a click outside. Active filters show as removable chips above the table, and the button carries their count. There is no side panel; the table gets the full width.
 - **Forms.** Input width follows content: numbers and dates 12rem, selects 20rem, text full width (max 40rem). Today a date field stretches 720 px. Errors under the field with `aria-describedby`; first invalid field takes focus. Nested rows keep the current layout.
 - **Dashboard.** Stat tiles stay, value at 24 px (never larger than the page title). Tables get a header row.
 - **Empty and loading.** Empty states say what the resource is and offer the create action. Turbo navigation shows a 2 px progress bar in primary; no spinners inside content.
@@ -73,7 +73,10 @@ Level L1 of the web-design skill: state feedback only.
 
 - Hover 150 ms, press 90 ms, sheet open 200 ms and close 120 ms, ease `cubic-bezier(.2,.8,.2,1)`. No bounce.
 - Animate opacity and transform only.
-- No entrance animation on page load, no scroll effects.
+- Page changes and the theme switch cross-fade in 150 ms (view transitions; browsers without them switch at once).
+- Things that appear fade in over 180 ms: the batch bar, flash messages, a new nested row, the filter sheet. They leave at once.
+- The button that submitted a form shows a spinner until the server answers. No other spinners.
+- No staggered entrances, no scroll effects.
 - `prefers-reduced-motion`: color still changes, movement jumps to its end state. Already present; keep.
 
 ## 8. Do and don't
@@ -99,7 +102,7 @@ Don't:
 
 ## 9. Responsive
 
-- Breakpoints: 640, 1024 (sidebar appears), 1280 (filter panel docks).
+- Breakpoints: 640 (filter sheet becomes a popover), 1024 (sidebar appears).
 - Below 640: page actions collapse to primary plus an overflow menu; tables scroll horizontally inside their card with the first column sticky.
 - Touch targets 44 px. No horizontal page scroll at 390 px (now covered by a spec).
 
@@ -113,8 +116,13 @@ Found while auditing the current UI, and fixed because they were defects rather 
 - Enum columns were right-aligned as if they were numbers.
 - Sidebar group labels were below 4.5:1.
 
-## Open decisions
+## Not built yet
 
-1. ~~Logo direction~~ Decided: A, the kawung mark (`design/logo/wibawa-symbol.svg`). The indigo stays.
-2. **Status as dot plus word** by default instead of pills. This is the most visible change.
-3. **Bundle the font** (adds about 80 KB to the gem) or default to system fonts.
+These are in the spec above but were left out of the first build; they are tracked in ROADMAP M1.
+
+- Sticky table header (the table scrolls inside its own container, so it needs a layout change)
+- `density: :compact` rows
+- Collapsible icon rail for the sidebar
+- Overflow menu for page actions and a sticky first column on phones
+- Loading and disabled states on every control (buttons have them; selects and row actions do not)
+- State colors still use Tailwind's emerald, amber, rose and sky rather than the hues listed in section 2

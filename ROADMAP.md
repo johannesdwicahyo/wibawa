@@ -22,7 +22,9 @@ Make the repository safe to open to contributors.
 Something a team can put in front of real staff.
 
 - [ ] Brand: kawung mark chosen and in the README; still to do: final wordmark, colour, favicon, usage guide
-- [ ] UI redesign to `DESIGN.md`: contrast, type scale, quieter status, states for every control
+- [x] UI redesign to `DESIGN.md`: color tokens, bundled font, 13 px floor, status as dot plus word, sized form fields
+- [x] Motion (page cross-fade, save spinner) and a single filter toolbar with chips
+- [ ] Rest of `DESIGN.md` (see its "Not built yet" list): sticky header, compact density, collapsible sidebar, phone overflow menu
 - [ ] Secure by default: refuse to serve in production until `authenticate_with` is configured (opt out explicitly)
 - [ ] System specs for the JavaScript: nested rows (add, remove, reorder), batch selection, filters panel, theme toggle, mobile sidebar
 - [ ] Verify what the README promises but nobody has run: Pundit and ActionPolicy adapters, Active Storage attachments, Action Text, Sprockets, the `id` locale, `wibawa:component`
@@ -37,10 +39,13 @@ Something a team can put in front of real staff.
 
 The things the first users will ask for in week one.
 
+- [ ] MCP server: resources and actions as tools for AI agents, mounted in the engine (official `mcp` gem). Read-only by default; every call goes through the same authorization as the UI
+- [ ] Reports: `Wibawa.report` takes a relation or SQL and gives a table, a chart and CSV. Reads from any database Rails is connected to, so a warehouse needs no special code
+- [ ] Command palette (Cmd+K) across resources
 - [ ] Searchable select for large `belongs_to` collections (today: first 500 records)
 - [ ] Custom pages: `Wibawa.page "Reports" do … end` with their own menu entry
 - [ ] Filters on `has_many` and through associations
-- [ ] Per-user saved filters *(candidate)*
+- [ ] Saved views: a named set of filters, scope and sort *(candidate)*
 - [ ] Change history hook for audit gems (PaperTrail, Audited) *(candidate)*
 - [ ] CSV import *(candidate)*
 

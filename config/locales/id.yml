@@ -24,6 +24,8 @@ id:
       one: "1 berkas"
       other: "%{count} berkas"
     filters: "Filter"
+    active_filters: "Filter aktif"
+    remove_filter: "Hapus filter: %{name}"
     from: "Dari"
     navigation: "Navigasi utama"
     new: "Baru"

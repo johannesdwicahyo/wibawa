@@ -3,8 +3,8 @@
     <%= helpers.form_tag batch_resources_path(resource: resource.key), id: batch_form_id, method: :post, class: "hidden" do %><% end %>
 
     <div data-wb-batch-bar hidden
-         class="flex flex-wrap items-center gap-2 border-b border-zinc-200 bg-primary/[0.06] px-4 py-2.5 dark:border-white/10 dark:bg-primary/15">
-      <p class="mr-2 text-sm font-medium text-zinc-900 dark:text-white">
+         class="flex flex-wrap items-center gap-2 border-b border-line bg-primary/[0.06] px-4 py-2.5 dark:bg-primary/15">
+      <p class="mr-2 text-sm font-medium text-ink">
         <span data-wb-selected-count>0</span> <%= t("wibawa.selected") %>
       </p>
       <% batch_actions.each do |action| %>
@@ -19,8 +19,8 @@
 
   <% if records.empty? %>
     <div class="flex flex-col items-center px-6 py-16 text-center">
-      <span class="grid size-12 place-items-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-white/5 dark:text-zinc-400"><%= icon("inbox", size: "size-6") %></span>
-      <p class="mt-4 text-sm font-medium text-zinc-900 dark:text-white"><%= empty_message %></p>
+      <%= icon("inbox", size: "size-6", class: "text-ink-3") %>
+      <p class="mt-4 text-sm font-medium text-ink"><%= empty_message %></p>
       <% if !query.filtered? && can_create? %>
         <%= link_to new_resource_path(resource: resource.key), class: wibawa_button_class(:primary, "mt-5") do %>
           <%= icon("plus", size: "size-4") %><%= t("wibawa.new_record", resource: resource.singular_label) %>
@@ -31,20 +31,20 @@
     <div class="relative overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead>
-          <tr class="border-b border-zinc-200 bg-zinc-50/80 text-left dark:border-white/10 dark:bg-white/[0.02]">
+          <tr class="border-b border-line bg-surface-2 text-left">
             <% if selectable? %>
               <th scope="col" class="w-10 py-2.5 pl-4 pr-1">
                 <input type="checkbox" data-wb-select-all aria-label="<%= t('wibawa.select_all') %>"
-                       class="size-4 rounded border-zinc-300 text-primary accent-[var(--color-primary)]">
+                       class="size-4 rounded border-line text-primary accent-[var(--color-primary)]">
               </th>
             <% end %>
             <% columns.each do |column| %>
               <th scope="col" aria-sort="<%= aria_sort(column) %>"
-                  class="<%= class_names('whitespace-nowrap px-4 py-2.5 font-medium text-zinc-600 dark:text-zinc-400', 'text-right' => numeric?(column)) %>">
+                  class="<%= class_names('whitespace-nowrap px-4 py-2.5 font-medium text-ink-2', 'text-right' => numeric?(column)) %>">
                 <% if sortable?(column) %>
-                  <%= link_to sort_url(column), class: class_names("group inline-flex items-center gap-1 hover:text-zinc-950 dark:hover:text-white", "flex-row-reverse" => numeric?(column), "text-zinc-950 dark:text-white" => sorted?(column)) do %>
+                  <%= link_to sort_url(column), class: class_names("group inline-flex items-center gap-1 hover:text-ink", "flex-row-reverse" => numeric?(column), "text-ink" => sorted?(column)) do %>
                     <%= column.label %>
-                    <%= icon(sort_icon(column), size: "size-3.5", class: class_names("text-zinc-400", "opacity-0 group-hover:opacity-100" => !sorted?(column))) %>
+                    <%= icon(sort_icon(column), size: "size-3.5", class: class_names("text-ink-3", "opacity-0 group-hover:opacity-100" => !sorted?(column))) %>
                   <% end %>
                 <% else %>
                   <%= column.label %>
@@ -54,22 +54,22 @@
             <% if row_actions? %><th scope="col" class="px-4 py-2.5"><span class="sr-only"><%= t("wibawa.actions") %></span></th><% end %>
           </tr>
         </thead>
-        <tbody class="divide-y divide-zinc-100 dark:divide-white/[0.06]">
+        <tbody class="divide-y divide-line">
           <% records.each do |record| %>
-            <tr class="group/row hover:bg-zinc-50 has-[:checked]:bg-primary/[0.04] dark:hover:bg-white/[0.03] dark:has-[:checked]:bg-primary/10">
+            <tr class="group/row transition-colors hover:bg-surface-2 has-[:checked]:bg-primary/[0.04] dark:has-[:checked]:bg-primary/10">
               <% if selectable? %>
-                <td class="w-10 py-2.5 pl-4 pr-1">
+                <td class="w-10 py-2 pl-4 pr-1">
                   <input type="checkbox" name="ids[]" value="<%= record.id %>" form="<%= batch_form_id %>" data-wb-select
                          aria-label="<%= t('wibawa.select_record', name: presenter.display_name(record)) %>"
-                         class="size-4 rounded border-zinc-300 accent-[var(--color-primary)]">
+                         class="size-4 rounded border-line accent-[var(--color-primary)]">
                 </td>
               <% end %>
               <% columns.each do |column| %>
-                <td class="<%= class_names('px-4 py-2.5 align-middle text-zinc-700 dark:text-zinc-300', 'text-right' => numeric?(column), 'max-w-xs' => !numeric?(column)) %>"><%= cell(record, column) %></td>
+                <td class="<%= class_names('px-4 py-2 align-middle text-ink', 'text-right' => numeric?(column), 'max-w-xs' => !numeric?(column)) %>"><%= cell(record, column) %></td>
               <% end %>
               <% if row_actions? %>
-                <td class="whitespace-nowrap px-3 py-1.5 text-right">
-                  <div class="inline-flex items-center gap-0.5">
+                <td class="whitespace-nowrap px-3 py-1 text-right">
+                  <div class="inline-flex items-center gap-0.5 transition-opacity lg:opacity-0 lg:group-hover/row:opacity-100 lg:group-focus-within/row:opacity-100 pointer-coarse:opacity-100">
                     <%= custom_row_actions(record) %>
                     <% if show_row_action?(:show) && wibawa_authorized?(:show, record) %>
                       <%= link_to resource_path(resource: resource.key, id: record), class: wibawa_button_class(:ghost, "p-1.5"), title: t("wibawa.view") do %>

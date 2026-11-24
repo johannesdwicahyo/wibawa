@@ -12,6 +12,15 @@ RSpec.describe "Wibawa admin", type: :request do
     end
   end
 
+it "shows active filters as chips that remove one filter and keep the rest" do
+    get "/admin/orders?search=Sari&q[status]=pending"
+    expect(response.body).to include("<details data-wb-filters", "Remove filter: Status", ">Pending<")
+    expect(response.body).to include('href="/admin/orders?search=Sari"')
+  
+    get "/admin/orders"
+    expect(response.body).not_to include("Remove filter")
+  end
+
   # Regression: the nested builder used the component as its template, so
   # f.label hit NestedFieldsComponent#label and every form page raised.
   it "renders new and edit forms, including nested fields" do
@@ -49,6 +58,24 @@ RSpec.describe "Wibawa admin", type: :request do
   it "keeps screen-reader text inside the scrolling table wrapper" do
     get "/admin/orders"
     expect(response.body).to include('class="relative overflow-x-auto"')
+  end
+
+  it "shows a status as a dot plus the word, and as a pill only when asked" do
+    get "/admin/orders"
+    expect(response.body).to include("bg-amber-500").and include("Pending")
+    expect(response.body).not_to include("ring-amber-600/20")
+  end
+  
+  it "serves its own font and calls no third party" do
+    get "/admin/orders"
+    expect(response.body).to include("@font-face").and include("wibawa/plus-jakarta-sans-latin")
+    expect(response.body).not_to match(/googleapis|gstatic/)
+  
+    Wibawa.config.font = :system
+    get "/admin/orders"
+    expect(response.body).not_to include("@font-face")
+  ensure
+    Wibawa.config.font = :bundled
   end
 
   it "exports CSV" do

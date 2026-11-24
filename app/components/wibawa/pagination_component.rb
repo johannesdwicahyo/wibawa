@@ -30,9 +30,9 @@ module Wibawa
     end
 
     def nav_class(enabled)
-      class_names("inline-flex size-8 items-center justify-center rounded-lg text-sm",
-                  "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10" => enabled,
-                  "pointer-events-none text-zinc-300 dark:text-zinc-700" => !enabled)
+      class_names("inline-flex size-8 items-center justify-center rounded-control text-sm",
+                  "text-ink hover:bg-surface-2" => enabled,
+                  "pointer-events-none text-ink-3" => !enabled)
     end
   end
 end

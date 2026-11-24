@@ -15,8 +15,9 @@ module Wibawa
       warning: "bg-amber-50 text-amber-800 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/30",
       danger: "bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30",
       info: "bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-500/10 dark:text-sky-400 dark:ring-sky-500/30",
-      neutral: "bg-zinc-100 text-zinc-700 ring-zinc-500/20 dark:bg-zinc-500/10 dark:text-zinc-300 dark:ring-zinc-500/30"
+      neutral: "bg-surface-2 text-ink ring-line"
     }.freeze
+    DOT_CLASSES = { success: "bg-emerald-500", warning: "bg-amber-500", danger: "bg-rose-500", info: "bg-sky-500", neutral: "bg-ink-3" }.freeze
     BADGE_BASE = "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap".freeze
     STATUS_NAMES = %w[status state stage].freeze
 
@@ -54,6 +55,7 @@ module Wibawa
       case as&.to_sym
       when :money then money(value, options[:currency])
       when :badge then badge(value)
+      when :status then status(value)
       when :boolean then boolean(value)
       when :date then view.l(value.to_date, format: options[:format] || :default)
       when :datetime then datetime(value, options[:format])
@@ -124,13 +126,26 @@ module Wibawa
       view.tag.span(label, class: "#{BADGE_BASE} #{BADGE_CLASSES.fetch(color, BADGE_CLASSES[:neutral])}")
     end
 
+    # A status in a table: colored dot plus the word in ink. Quieter than a
+    # column of filled pills; use `as: :badge` when you want the pill.
+    def status(value)
+      label = value.is_a?(Symbol) || value.is_a?(String) ? Util.humanize(value) : value.to_s
+      dot(label, Wibawa.config.badge_color_for(value))
+    end
+    
+    def dot(label, color)
+      mark = view.tag.span("", class: "size-1.5 shrink-0 rounded-full #{DOT_CLASSES.fetch(color, DOT_CLASSES[:neutral])}", "aria-hidden": "true")
+      view.tag.span(view.safe_join([mark, label]), class: "flex items-center gap-2 whitespace-nowrap")
+    end
+
     def empty
-      view.tag.span("—", class: "text-zinc-400 dark:text-zinc-600")
+      view.tag.span("—", class: "text-ink-3")
     end
 
     private
 
-    def link_class = "font-medium text-primary hover:underline underline-offset-2"
+    # Ink, not the accent: the accent is kept for the primary action and selection.
+    def link_class = "font-medium text-ink underline-offset-4 hover:underline"
 
     def auto(value, record:, name:)
       case value
@@ -145,7 +160,7 @@ module Wibawa
       when Hash then json(value)
       else
         if enum?(record, name) || STATUS_NAMES.include?(name.to_s)
-          badge(value)
+          status(value)
         elsif defined?(ActionText::RichText) && value.is_a?(ActionText::RichText)
           view.truncate(value.to_plain_text, length: 80)
         elsif value.respond_to?(:attached?)
@@ -162,7 +177,7 @@ module Wibawa
 
     def collection(records, more:)
       links = records.first(3).map { |r| link_to_record(r) }
-      links << view.tag.span("…", class: "text-zinc-400") if more
+      links << view.tag.span("…", class: "text-ink-3") if more
       view.safe_join(links, ", ")
     end
 
@@ -181,11 +196,7 @@ module Wibawa
     end
 
     def boolean(value)
-      if value
-        badge(view.t("wibawa.yes", default: "Yes"), color: :success)
-      else
-        badge(view.t("wibawa.no", default: "No"), color: :neutral)
-      end
+      value ? dot(view.t("wibawa.yes", default: "Yes"), :success) : dot(view.t("wibawa.no", default: "No"), :neutral)
     end
 
     def datetime(value, format = nil)
@@ -205,7 +216,7 @@ module Wibawa
       src = value.respond_to?(:attached?) ? (value.attached? ? view.url_for(value) : nil) : value.to_s
       return empty if src.blank?
 
-      view.image_tag(src, class: "h-10 w-10 rounded-md object-cover ring-1 ring-zinc-950/10 dark:ring-white/10", loading: "lazy", alt: "")
+      view.image_tag(src, class: "h-10 w-10 rounded-md object-cover ring-1 ring-line", loading: "lazy", alt: "")
     end
 
     def attachment(value)
@@ -225,7 +236,7 @@ module Wibawa
     end
 
     def json(value)
-      view.tag.pre(JSON.pretty_generate(value.as_json), class: "max-h-64 overflow-auto rounded-md bg-zinc-50 p-3 text-xs dark:bg-zinc-900")
+      view.tag.pre(JSON.pretty_generate(value.as_json), class: "max-h-64 overflow-auto rounded-md bg-surface-2 p-3 text-xs")
     end
   end
 end

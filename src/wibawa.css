@@ -1,4 +1,4 @@
-/* Source for app/assets/builds/wibawa.css. Rebuild with `npm run build:css`. */
+/* Source for app/assets/builds/wibawa.css. Rebuild with `npm run build:css`. See DESIGN.md. */
 @import "tailwindcss" source(none);
 
 @source "../app/components";
@@ -11,37 +11,101 @@
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Nothing under 13px: text-xs is the floor. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+
+  --radius-control: 0.375rem;
+  --radius-card: 0.625rem;
+
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Brand tokens. Override --wb-primary (config.brand_color) or any of these in your own CSS. */
+/* Semantic colors. Components use these names only; the values switch with the theme. */
 @theme inline {
+  --color-canvas: var(--wb-canvas);
+  --color-surface: var(--wb-surface);
+  --color-surface-2: var(--wb-surface-2);
+  --color-line: var(--wb-line);
+  --color-ink: var(--wb-ink);
+  --color-ink-2: var(--wb-ink-2);
+  --color-ink-3: var(--wb-ink-3);
   --color-primary: var(--wb-primary-effective);
   --color-on-primary: var(--wb-on-primary);
-  --color-sidebar: var(--wb-sidebar);
-  --color-canvas: var(--wb-canvas);
+  --color-rail: var(--wb-rail);
 }
 
+/* Tokens. Override --wb-primary (config.brand_color) or any of these in your own CSS. */
 :root {
-  --wb-primary: #2f3e9e;            /* indigo, as in batik dye */
+  --wb-primary: oklch(42% 0.15 264);   /* indigo, as in batik dye */
   --wb-primary-effective: var(--wb-primary);
-  --wb-on-primary: #fff;              /* text on a solid primary button */
-  --wb-sidebar: #1b2154;
-  --wb-canvas: #f5f6f8;
+  --wb-on-primary: #fff;               /* label on a solid primary button */
+  --wb-canvas: oklch(97.5% 0.004 80);  /* neutrals lean slightly warm, after soga brown */
+  --wb-surface: oklch(100% 0 0);
+  --wb-surface-2: oklch(96% 0.005 80);
+  --wb-line: oklch(90% 0.006 80);
+  --wb-ink: oklch(22% 0.02 265);
+  --wb-ink-2: oklch(47% 0.015 265);    /* labels and meta, 4.5:1 or better */
+  --wb-ink-3: oklch(62% 0.01 265);     /* icons, placeholders, disabled: never body text */
+  --wb-rail: oklch(27% 0.09 266);
 }
 
 .dark {
-  --wb-primary-effective: color-mix(in oklab, var(--wb-primary) 55%, white);
-  --wb-on-primary: #0c0e1b;           /* the dark-mode primary is light, so its label is dark (white was 2.9:1) */
-  --wb-sidebar: #10133a;
-  --wb-canvas: #0c0e1b;
+  /* Same hue as the brand color, relit for a dark ground. Its label turns dark to keep contrast. */
+  --wb-primary-effective: oklch(from var(--wb-primary) 72% calc(c * 0.75) h);
+  --wb-on-primary: oklch(17% 0.015 265);
+  --wb-canvas: oklch(17% 0.015 265);
+  --wb-surface: oklch(21% 0.015 265);
+  --wb-surface-2: oklch(24% 0.015 265);
+  --wb-line: oklch(30% 0.015 265);
+  --wb-ink: oklch(95% 0.005 265);
+  --wb-ink-2: oklch(72% 0.01 265);
+  --wb-ink-3: oklch(55% 0.01 265);
+  --wb-rail: oklch(19% 0.05 266);
   color-scheme: dark;
 }
 
 @layer base {
-  html { -webkit-tap-highlight-color: transparent; }
-  ::selection { background: color-mix(in oklab, var(--wb-primary) 22%, transparent); }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    accent-color: var(--color-primary);
+    caret-color: var(--color-primary);
+    scrollbar-color: var(--color-line) transparent;
+  }
+  ::selection { background: color-mix(in oklab, var(--color-primary) 22%, transparent); }
   :focus-visible { outline-color: var(--color-primary); }
   [hidden] { display: none !important; }
+  h1, h2 { text-wrap: balance; }
+}
+
+/* Turbo's navigation bar is the only loading indicator. */
+.turbo-progress-bar { height: 2px; background: var(--color-primary); }
+
+/* Motion (DESIGN.md section 7). Things arrive with a short fade; they leave at once. */
+@keyframes wb-drop { from { opacity: 0; translate: 0 -4px; } }
+@keyframes wb-fade { from { opacity: 0; } }
+@keyframes wb-spin { to { rotate: 360deg; } }
+
+/* Page changes and the theme switch cross-fade (Turbo view transitions). */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }
+
+[data-wb-batch-bar], [data-wb-flash], .wb-enter, [data-wb-filters][open] > div { animation: wb-drop 180ms var(--default-transition-timing-function); }
+[data-wb-sidebar-backdrop] { animation: wb-fade 200ms; }
+
+/* A button waiting for the server. */
+[data-wb-busy] { cursor: progress; }
+[data-wb-busy] > svg { display: none; }
+[data-wb-busy]::before {
+  content: "";
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: wb-spin 600ms linear infinite;
 }
 
 /* Kawung motif behind the sidebar footer: four petals around a point, repeated. */
@@ -53,9 +117,11 @@
 
 /* Action Text editor */
 .wb-trix trix-editor, trix-editor.wb-trix {
-  @apply min-h-36 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-inset ring-zinc-300 dark:bg-white/5 dark:ring-white/15;
+  @apply min-h-36 rounded-control bg-surface px-3 py-2 text-sm ring-1 ring-inset ring-line;
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  [data-wb-busy]::before { animation: none !important; }
 }

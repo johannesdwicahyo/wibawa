@@ -1,16 +1,16 @@
 <nav class="-mx-1 mb-4 overflow-x-auto" aria-label="<%= t('wibawa.scopes') %>">
-  <ul class="flex min-w-max gap-1 border-b border-zinc-200 px-1 dark:border-white/10">
+  <ul class="flex min-w-max gap-1 border-b border-line px-1">
     <% scopes.each do |scope| %>
       <% active = current?(scope) %>
       <li>
         <%= link_to url_for_scope(scope),
               "aria-current": (active ? "page" : nil),
               class: class_names("-mb-px flex items-center gap-2 border-b-2 px-3 pb-2.5 pt-1 text-sm font-medium transition-colors",
-                                 "border-primary text-zinc-950 dark:text-white" => active,
-                                 "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200" => !active) do %>
+                                 "border-primary text-ink" => active,
+                                 "border-transparent text-ink-2 hover:border-line hover:text-ink" => !active) do %>
           <%= scope.label %>
           <% if (count = count_for(scope)) %>
-            <span class="<%= class_names('rounded-full px-1.5 py-px text-xs tabular-nums', active ? 'bg-primary/10 text-primary' : 'bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-zinc-300') %>"><%= count %></span>
+            <span class="text-xs font-normal tabular-nums text-ink-2"><%= count %></span>
           <% end %>
         <% end %>
       </li>

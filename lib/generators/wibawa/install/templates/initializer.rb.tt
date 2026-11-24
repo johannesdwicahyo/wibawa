@@ -26,12 +26,12 @@ Wibawa.configure do |config|
   config.currency = "USD"
 
   # Any CSS color for buttons, links and focus rings.
-  # config.brand_color = "#2f3e9e"
+  # config.brand_color = "#0f766e"
 
   # Rows per page, and whether scopes show record counts (turn off for huge tables).
   # config.per_page = 50
   # config.scope_counts = true
 
-  # Use system fonts instead of loading Plus Jakarta Sans from Google Fonts.
-  # config.font_stylesheet = nil
+  # Plus Jakarta Sans ships inside the gem. Use the system UI font instead:
+  # config.font = :system
 end

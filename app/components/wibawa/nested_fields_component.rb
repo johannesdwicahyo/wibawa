@@ -54,8 +54,7 @@ module Wibawa
       hidden << builder.hidden_field(:_destroy, value: child.marked_for_destruction? ? "1" : "0", data: { wb_destroy: true }) if allow_destroy?
 
       content_tag(:div, data: { wb_nested_item: true }, hidden: child.marked_for_destruction?,
-                        class: "flex items-start gap-3 rounded-lg bg-zinc-50 p-3 ring-1 ring-inset ring-zinc-200 " \
-                               "dark:bg-white/[0.03] dark:ring-white/10") do
+                        class: "flex items-start gap-3 border-b border-line pb-3") do
         safe_join([
           (handle if sortable),
           content_tag(:div, class: "grid min-w-0 flex-1 gap-3 #{GRID_COLS[field.children.size.clamp(1, 4)]}") do
@@ -73,7 +72,7 @@ module Wibawa
 
     def handle
       content_tag(:button, type: "button", data: { wb_drag_handle: true }, draggable: true,
-                           class: "mt-6 cursor-grab rounded p-1 text-zinc-400 hover:text-zinc-700 active:cursor-grabbing dark:hover:text-zinc-200",
+                           class: "mt-6 cursor-grab rounded p-1 text-ink-3 hover:text-ink active:cursor-grabbing",
                            "aria-label": t("wibawa.form.reorder")) do
         icon("grip", size: "size-4")
       end
@@ -81,7 +80,7 @@ module Wibawa
 
     def remove_button
       content_tag(:button, type: "button", data: { wb_nested_remove: true },
-                           class: "mt-6 rounded p-1 text-zinc-400 hover:text-rose-600",
+                           class: "mt-6 rounded p-1 text-ink-3 hover:text-rose-600",
                            "aria-label": t("wibawa.form.remove")) do
         icon("x", size: "size-4")
       end

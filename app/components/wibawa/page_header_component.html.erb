@@ -1,18 +1,18 @@
 <header class="mb-6">
   <% if breadcrumbs.any? %>
     <nav aria-label="<%= t('wibawa.breadcrumbs') %>" class="mb-2">
-      <ol class="flex flex-wrap items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+      <ol class="flex flex-wrap items-center gap-1 text-sm text-ink-2">
         <% breadcrumbs.each_with_index do |(label, url), i| %>
           <% if i.positive? %><li aria-hidden="true"><%= icon("chevron-right", size: "size-3.5") %></li><% end %>
-          <li><%= url ? link_to(label, url, class: "hover:text-zinc-900 dark:hover:text-white") : label %></li>
+          <li><%= url ? link_to(label, url, class: "hover:text-ink") : label %></li>
         <% end %>
       </ol>
     </nav>
   <% end %>
   <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
     <div class="min-w-0">
-      <h1 class="text-2xl font-semibold tracking-tight text-zinc-950 sm:text-[28px] dark:text-white"><%= title %></h1>
-      <% if subtitle %><p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400"><%= subtitle %></p><% end %>
+      <h1 class="text-2xl font-semibold tracking-tight text-ink"><%= title %></h1>
+      <% if subtitle %><p class="mt-1 text-sm text-ink-2"><%= subtitle %></p><% end %>
     </div>
     <% if actions.any? %>
       <div class="flex flex-wrap items-center gap-2">

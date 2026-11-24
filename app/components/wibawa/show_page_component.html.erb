@@ -5,11 +5,11 @@
     <% kind = items.first.first %>
     <% if kind == :row %>
       <section class="<%= card_class %>">
-        <dl class="divide-y divide-zinc-100 dark:divide-white/[0.06]">
+        <dl class="divide-y divide-line">
           <% items.each do |(_, column)| %>
             <div class="grid gap-1 px-5 py-3 sm:grid-cols-[13rem_1fr] sm:gap-6">
-              <dt class="text-sm text-zinc-500 dark:text-zinc-400"><%= column.options[:label] || record.class.human_attribute_name(column.name) %></dt>
-              <dd class="min-w-0 break-words text-sm text-zinc-900 dark:text-zinc-100"><%= presenter.cell(record, column) %></dd>
+              <dt class="text-sm text-ink-2"><%= column.options[:label] || record.class.human_attribute_name(column.name) %></dt>
+              <dd class="min-w-0 break-words text-sm text-ink"><%= presenter.cell(record, column) %></dd>
             </div>
           <% end %>
         </dl>
@@ -18,7 +18,7 @@
       <% items.each do |item| %>
         <% if item.first == :panel %>
           <section class="<%= card_class %>">
-            <h2 class="border-b border-zinc-100 px-5 py-3 text-sm font-semibold dark:border-white/[0.06]"><%= item[1] %></h2>
+            <h2 class="border-b border-line px-5 py-3 text-sm font-semibold"><%= item[1] %></h2>
             <div class="px-5 py-4 text-sm"><%= panel_content(item[2]) %></div>
           </section>
         <% elsif item.first == :table %>
@@ -26,24 +26,24 @@
           <% rows = association_records(name, options[:limit]) %>
           <% cols = association_columns(name, builder) %>
           <section class="<%= card_class %> overflow-hidden">
-            <h2 class="flex items-center gap-2 border-b border-zinc-100 px-5 py-3 text-sm font-semibold dark:border-white/[0.06]">
+            <h2 class="flex items-center gap-2 border-b border-line px-5 py-3 text-sm font-semibold">
               <%= association_title(name, options) %>
-              <span class="rounded-full bg-zinc-100 px-1.5 text-xs font-medium tabular-nums text-zinc-600 dark:bg-white/10 dark:text-zinc-300"><%= rows.size %><%= "+" if rows.size >= options[:limit] %></span>
+              <span class="text-xs font-normal tabular-nums text-ink-2"><%= rows.size %><%= "+" if rows.size >= options[:limit] %></span>
             </h2>
             <% if rows.empty? %>
-              <p class="px-5 py-6 text-sm text-zinc-500"><%= t("wibawa.none") %></p>
+              <p class="px-5 py-6 text-sm text-ink-2"><%= t("wibawa.none") %></p>
             <% else %>
               <div class="relative overflow-x-auto">
                 <table class="min-w-full text-sm">
                   <thead>
-                    <tr class="border-b border-zinc-100 text-left dark:border-white/[0.06]">
-                      <% cols.each do |c| %><th scope="col" class="whitespace-nowrap px-5 py-2 font-medium text-zinc-500 dark:text-zinc-400"><%= c.label %></th><% end %>
+                    <tr class="border-b border-line text-left">
+                      <% cols.each do |c| %><th scope="col" class="whitespace-nowrap px-5 py-2 font-medium text-ink-2"><%= c.label %></th><% end %>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-zinc-100 dark:divide-white/[0.06]">
+                  <tbody class="divide-y divide-line">
                     <% rows.each do |row| %>
                       <tr>
-                        <% cols.each do |c| %><td class="px-5 py-2.5 text-zinc-700 dark:text-zinc-300"><%= presenter.cell(row, c) %></td><% end %>
+                        <% cols.each do |c| %><td class="px-5 py-2.5 text-ink"><%= presenter.cell(row, c) %></td><% end %>
                       </tr>
                     <% end %>
                   </tbody>

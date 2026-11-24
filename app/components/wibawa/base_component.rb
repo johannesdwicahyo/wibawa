@@ -13,7 +13,7 @@ module Wibawa
     def t(key, **options) = helpers.t(key, **options)
 
     def card_class
-      "rounded-xl bg-white ring-1 ring-zinc-950/[0.07] shadow-xs dark:bg-white/[0.03] dark:ring-white/10"
+      "rounded-card bg-surface ring-1 ring-line"
     end
 
     # Current index query string minus the given keys, for building links.
