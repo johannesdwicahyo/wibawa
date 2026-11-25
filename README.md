@@ -381,12 +381,13 @@ The index table is one component that loops rows and formats cells with plain me
 
 ```sh
 bundle install
-bundle exec rake             # DSL unit tests, then request specs against the Rails app in spec/dummy
+bundle exec rake             # DSL unit tests, then request and system specs against the Rails app in spec/dummy
+bundle exec rspec spec/requests   # skip the browser
 npm install
 npm run build:css            # rebuild app/assets/builds/wibawa.css after changing classes
 ```
 
-Commit the rebuilt CSS; CI fails if it's out of date.
+The system specs (`spec/system`) drive headless Chrome, so Chrome or Chromium must be installed. Commit the rebuilt CSS; CI fails if it's out of date.
 
 ## License
 
