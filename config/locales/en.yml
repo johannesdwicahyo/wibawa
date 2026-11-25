@@ -60,7 +60,6 @@ en:
     reports: "Reports"
     run_report: "Run"
     report_empty: "This report has no rows."
-    report_truncated: "Showing the first %{count} rows. Export CSV for all of them."
     active_filters: "Active filters"
     remove_filter: "Remove filter: %{name}"
     from: "From"

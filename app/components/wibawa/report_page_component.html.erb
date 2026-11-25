@@ -1,24 +1,26 @@
 <%= render wibawa_component(:page_header, Wibawa::PageHeaderComponent).new(title: report.title, subtitle: report.description, actions: header_actions) %>
 
+<%# Always present: the page-size select below the table submits through it. %>
+<form id="<%= FORM_ID %>" action="<%= helpers.report_path(report: report.key) %>" method="get" data-turbo-action="advance" hidden></form>
 <% if report.params.any? %>
-  <form action="<%= helpers.report_path(report: report.key) %>" method="get" data-turbo-action="advance" class="mb-4 flex flex-wrap items-end gap-3">
+  <div class="mb-4 flex flex-wrap items-end gap-3">
     <% report.params.each do |param| %>
       <div>
         <label for="<%= param_id(param) %>" class="mb-1.5 block text-sm font-medium text-ink"><%= param.label %></label>
         <% if param.as == :select %>
           <%= helpers.select_tag param_name(param), helpers.options_for_select(options_for(param), values[param.name]),
-                include_blank: t("wibawa.any"), id: param_id(param), class: "#{wibawa_input_class} min-w-40" %>
+                include_blank: t("wibawa.any"), id: param_id(param), form: FORM_ID, class: "#{wibawa_input_class} min-w-40" %>
         <% else %>
           <input type="<%= { date: 'date', number: 'number' }.fetch(param.as, 'text') %>" id="<%= param_id(param) %>" name="<%= param_name(param) %>"
-                 value="<%= values[param.name] %>" step="any" class="<%= wibawa_input_class %> w-44">
+                 value="<%= values[param.name] %>" step="any" form="<%= FORM_ID %>" class="<%= wibawa_input_class %> w-44">
         <% end %>
       </div>
     <% end %>
-    <button type="submit" class="<%= wibawa_button_class(:primary) %>"><%= t("wibawa.run_report") %></button>
-  </form>
+    <button type="submit" form="<%= FORM_ID %>" class="<%= wibawa_button_class(:primary) %>"><%= t("wibawa.run_report") %></button>
+  </div>
 <% end %>
 
-<% if rows.empty? %>
+<% if empty? %>
   <div class="<%= card_class %> flex flex-col items-center px-6 py-16 text-center">
     <%= icon("inbox", size: "size-6", class: "text-ink-3") %>
     <p class="mt-4 text-sm font-medium text-ink"><%= t("wibawa.report_empty") %></p>
@@ -109,7 +111,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-line">
-          <% shown_rows.each do |row| %>
+          <% rows.each do |row| %>
             <tr class="transition-colors hover:bg-surface-2">
               <% columns.each do |column| %>
                 <td class="<%= class_names('px-4 py-2 align-middle text-ink', 'text-right tabular-nums' => numeric?(column)) %>"><%= cell(row, column) %></td>
@@ -120,7 +122,5 @@
       </table>
     </div>
   </div>
-  <% if truncated? %>
-    <p class="mt-3 text-sm text-ink-2"><%= t("wibawa.report_truncated", count: Wibawa::Report::MAX_ROWS) %></p>
-  <% end %>
+  <%= render wibawa_component(:pagination, Wibawa::PaginationComponent).new(page: page, form_id: FORM_ID) %>
 <% end %>

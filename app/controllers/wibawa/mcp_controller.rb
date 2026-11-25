@@ -57,7 +57,8 @@ module Wibawa
         description: "Run a report and get its rows. Prefer this over paging through records when a report answers the question.",
         properties: {
           report: { type: "string", description: "Report key from list_reports" },
-          params: { type: "object", description: "Parameter name => value. Dates as YYYY-MM-DD. Omitted parameters use their defaults." }
+          params: { type: "object", description: "Parameter name => value. Dates as YYYY-MM-DD. Omitted parameters use their defaults." },
+          page: { type: "integer", minimum: 1, description: "1,000 rows per page. Ask for the next page when has_next is true." }
         },
         required: %w[report]
       },
@@ -176,10 +177,10 @@ module Wibawa
       report = Wibawa.registry.report(params[:report]) || raise(Wibawa::ResourceNotFound)
       wibawa_authorize!(:show, report)
       values = report.values(params[:params])
-      rows = report.run(values)
+      page = Wibawa::ReportPaginator.new(report.result(values), page: params[:page], per_page: Wibawa::Report::MAX_ROWS)
       { report: report.key, params: values.transform_values { |value| json_value(value) },
-        rows: rows.first(Wibawa::Report::MAX_ROWS).map { |row| row.transform_values { |value| json_value(value) } },
-        total: rows.size, truncated: rows.size > Wibawa::Report::MAX_ROWS }
+        rows: page.records.map { |row| row.transform_values { |value| json_value(value) } },
+        page: page.page, total: page.total_count, has_next: page.next? }
     end
 
     def tool_create_record

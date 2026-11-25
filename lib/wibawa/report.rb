@@ -20,11 +20,10 @@ module Wibawa
   # warehouse is just another entry in database.yml. Instead of SQL you can
   # give a block: `query { |params| Order.where(...).group(:status).count }`.
   #
-  # ponytail: the whole result is loaded, and the page shows the first
-  # MAX_ROWS rows. Reports are meant for aggregates; page a raw table through a
-  # resource instead.
+  # The page shows one page of rows at a time. Give the query an ORDER BY, or
+  # the database may hand rows out in a different order from page to page.
   class Report
-    MAX_ROWS = 1000
+    MAX_ROWS = 1000 # rows per MCP call
     MAX_SERIES = 6 # the validated colours in wibawa.css (--wb-series-1..6)
 
     Param = Struct.new(:name, :options) do
@@ -126,10 +125,11 @@ module Wibawa
       params.to_h { |param| [param.name, param.cast(raw[param.name.to_s])] }
     end
 
-    # The result as an array of string-keyed hashes.
-    def run(values)
-      rows_from(@sql ? run_sql(values) : @query.call(values))
-    end
+    # One run of the report: `rows(limit:, offset:)` for a page, `total`, `all`.
+    def result(values) = Result.new(*source(values))
+
+    # The whole result as an array of string-keyed hashes.
+    def run(values) = result(values).all
 
     def columns(rows)
       return @table.columns unless @table.columns.empty?
@@ -139,14 +139,17 @@ module Wibawa
 
     private
 
-    def run_sql(values)
-      statement = ActiveRecord::Base.sanitize_sql_array([@sql, values])
-      (@on || ActiveRecord::Base).with_connection { |connection| connection.select_all(statement) }
+    # [SQL, the class whose database runs it] or [nil, nil, rows] when a
+    # `query` block returned something that is not a relation.
+    def source(values)
+      return [ActiveRecord::Base.sanitize_sql_array([@sql, values]), @on || ActiveRecord::Base] if @sql
+
+      result = @query.call(values)
+      result.is_a?(ActiveRecord::Relation) ? [result.to_sql, result.klass] : [nil, nil, rows_from(result)]
     end
 
     def rows_from(result)
       case result
-      when ActiveRecord::Relation then result.klass.with_connection { |connection| connection.select_all(result.to_sql) }.to_a
       when ActiveRecord::Result then result.to_a
       when Hash then hash_rows(result)
       else Array(result).map { |row| (row.respond_to?(:attributes) ? row.attributes : row.to_h).transform_keys(&:to_s) }
@@ -159,6 +162,43 @@ module Wibawa
       x = names[0] || @chart_options&.fetch(:x) || "name"
       y = names[1] || @chart_options&.fetch(:y)&.first || "value"
       hash.map { |group, value| { x => Array(group).join(" / "), y => value } }
+    end
+
+    # Rows of one run. SQL is paged by the database (LIMIT and OFFSET added to
+    # the query, the total from a COUNT around it), so a large result is never
+    # loaded whole. Everything else is paged in memory: a `query` block that
+    # returns a hash or an array, SQL that ends in its own LIMIT, and any SQL
+    # the database refuses to page (SQL Server and Oracle spell LIMIT differently).
+    class Result
+      OWN_LIMIT = /\b(limit|offset|fetch|for\s+update)\b[^()]*\z/i
+
+      def initialize(sql, on = nil, rows = nil)
+        @sql = sql&.strip&.delete_suffix(";")
+        @on = on
+        @all = rows
+        @paged = !!@sql && !@sql.match?(OWN_LIMIT)
+      end
+
+      def rows(limit:, offset: 0)
+        paged { select("#{@sql}\nLIMIT #{limit.to_i} OFFSET #{offset.to_i}") } || all.slice(offset, limit) || []
+      end
+
+      def total
+        @total ||= paged { select("SELECT COUNT(*) AS total FROM (#{@sql}\n) wibawa_rows").first["total"].to_i } || all.size
+      end
+
+      def all = @all ||= select(@sql)
+
+      private
+
+      def select(sql) = @on.with_connection { |connection| connection.select_all(sql) }.to_a
+
+      def paged
+        yield if @paged
+      rescue ActiveRecord::StatementInvalid
+        @paged = false # this SQL cannot be paged; `all` raises if it cannot run at all
+        nil
+      end
     end
   end
 end

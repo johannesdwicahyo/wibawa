@@ -303,7 +303,7 @@ end
 - **Columns** take the same `as:` formats as index columns. Leave them out to show every column the query returns.
 - **Authorization.** Reports are checked as `:show` on the `Wibawa::Report` object: `config.authorize_with { |user, action, subject| ... }` receives it as `subject`, and Pundit looks for `Wibawa::ReportPolicy#show?`.
 
-The page shows the first 1,000 rows and the CSV has all of them. Reports are meant for aggregates; nothing stops a report's SQL from writing, so point reports at a read-only database user where you can.
+The table is paged like an index page, and the CSV has every row. A report's SQL is paged by the database (`LIMIT` and `OFFSET` are added to it), so a large result is never loaded whole; give it an `ORDER BY` so the pages stay in order. Results the database cannot page are paged in memory: a `query` block that returns a hash or an array, SQL that ends in its own `LIMIT`, and SQL Server or Oracle. The chart always draws the start of the result. Nothing stops a report's SQL from writing, so point reports at a read-only database user where you can.
 
 ## MCP server (AI agents)
 
@@ -327,7 +327,7 @@ The endpoint is `<mount path>/mcp` (for example `/admin/mcp`). Agents send `Auth
 | `list_resources` | Resources with their columns, scopes and filters | |
 | `list_records` | A page of records; scope, search, filters, sort | |
 | `get_record` | One record's detail fields | |
-| `list_reports`, `run_report` | Your [reports](#reports) and their parameters; runs one and returns its rows | |
+| `list_reports`, `run_report` | Your [reports](#reports) and their parameters; runs one and returns its rows, 1,000 per page | |
 | `create_record`, `update_record`, `delete_record` | Write through the form's strong params | yes |
 | `run_action` | Run a `member_action` on a record | yes |
 
