@@ -62,6 +62,24 @@ RSpec.describe "Wibawa reports", type: :request do
     expect(response.body.lines.size).to eq(4)
   end
 
+  it "streams the CSV in batches" do
+    stub_const("Wibawa::CsvExporter::BATCH_SIZE", 2)
+    queries = []
+    callback = ->(*, payload) { queries << payload[:sql][/LIMIT.*/] if payload[:sql].include?("FROM orders") }
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") do
+      get "/admin/reports/order_list.csv"
+      expect(response.body).to eq("﻿Number,Total\n'=B-1,5\nA-1,10\nA-2,15\n")
+    end
+    expect(queries).to eq(["LIMIT 2 OFFSET 0", "LIMIT 2 OFFSET 2"])
+    expect(response.headers["Content-Disposition"]).to include("attachment", "order_list-")
+
+    # Paged in memory (own LIMIT), and an empty result: still a header row.
+    get "/admin/reports/top_orders.csv"
+    expect(response.body.lines.size).to eq(3)
+    get "/admin/reports/orders_by_status.csv", params: { p: { number: "nope" } }
+    expect(response.body).to eq("﻿Status,Orders,Revenue\n")
+  end
+
   it "pages in memory what the database cannot page" do
     # SQL with its own LIMIT, and a grouped hash from a query block.
     get "/admin/reports/top_orders", params: { per_page: 1, page: 2 }

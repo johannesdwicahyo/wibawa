@@ -166,14 +166,7 @@ module Wibawa
 
     def stream_csv(relation)
       exporter = Wibawa::CsvExporter.new(resource, relation, wibawa_presenter)
-      response.headers["Content-Type"] = "text/csv; charset=utf-8"
-      response.headers["Content-Disposition"] =
-        ActionDispatch::Http::ContentDisposition.format(disposition: "attachment", filename: exporter.filename)
-      response.headers["Cache-Control"] = "no-cache"
-      response.headers["X-Accel-Buffering"] = "no"
-      response.headers["Last-Modified"] = Time.now.httpdate # stops Rack::ETag from buffering the stream
-      response.headers.delete("Content-Length")
-      self.response_body = exporter.lines
+      stream_csv_lines(exporter.filename, exporter.lines)
     end
   end
 end

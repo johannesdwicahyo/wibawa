@@ -14,8 +14,7 @@ module Wibawa
           # The chart draws the start of the result, whichever page the table is on.
           @chart_rows = @report.chart_options ? result.rows(limit: Wibawa::ReportPageComponent::CHART_POINTS) : []
         end
-        # ponytail: the CSV is built in memory from the whole result; stream it if exports get large.
-        format.csv { send_data csv(result.all), filename: "#{@report.key}-#{Time.now.strftime('%Y%m%d-%H%M')}.csv", type: "text/csv; charset=utf-8" }
+        format.csv { stream_csv_lines("#{@report.key}-#{Time.now.strftime('%Y%m%d-%H%M')}.csv", csv_lines(result)) }
       end
     end
 
@@ -26,13 +25,27 @@ module Wibawa
       requested.positive? ? [requested, Wibawa.config.max_per_page].min : Wibawa.config.per_page
     end
 
-    def csv(rows)
-      columns = @report.columns(rows)
-      body = CSV.generate do |out|
-        out << columns.map(&:label)
-        rows.each { |row| out << columns.map { |column| safe(row[column.name.to_s]) } }
+    # CSV lines, fetched one batch at a time so a large export is never held in
+    # memory. The first batch is read here, before the download starts, so a
+    # query that fails shows the error page and not a broken file.
+    # ponytail: batches use OFFSET, which slows down deep into a huge result;
+    # page by a key column if exports reach millions of rows.
+    def csv_lines(result)
+      size = Wibawa::CsvExporter::BATCH_SIZE
+      batch = result.rows(limit: size)
+      columns = @report.columns(batch)
+
+      Enumerator.new do |out|
+        out << "﻿" # BOM so Excel opens UTF-8 correctly
+        out << CSV.generate_line(columns.map(&:label))
+        offset = 0
+        loop do
+          batch.each { |row| out << CSV.generate_line(columns.map { |column| safe(row[column.name.to_s]) }) }
+          break if batch.size < size
+
+          batch = result.rows(limit: size, offset: offset += size)
+        end
       end
-      "﻿#{body}" # BOM so Excel opens UTF-8 correctly
     end
 
     # Neutralize spreadsheet formulas (CSV injection), as the resource export does.
