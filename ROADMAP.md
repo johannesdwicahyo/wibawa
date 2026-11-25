@@ -26,7 +26,8 @@ Something a team can put in front of real staff.
 - [x] Motion (page cross-fade, save spinner) and a single filter toolbar with chips
 - [ ] Rest of `DESIGN.md` (see its "Not built yet" list): sticky header, compact density, collapsible sidebar, phone overflow menu
 - [x] Secure by default: refuse to serve outside development and test until `authenticate_with` is configured (opt out explicitly)
-- [ ] System specs for the JavaScript: nested rows (add, remove, reorder), batch selection, filters panel, theme toggle, mobile sidebar
+- [x] System specs for the JavaScript: nested rows (add, remove, reorder), batch selection, filters, theme toggle, mobile sidebar, command palette, searchable select
+- [ ] System specs still to write: searchable multi-select, saved views, CSV import upload, a real mouse drag
 - [ ] Verify what the README promises but nobody has run: Pundit and ActionPolicy adapters, Active Storage attachments, Action Text, Sprockets, the `id` locale, `wibawa:component`
 - [ ] Accessibility pass to WCAG 2.2 AA (keyboard, focus order, contrast in both themes)
 - [ ] CSV export by primary-key batches instead of OFFSET

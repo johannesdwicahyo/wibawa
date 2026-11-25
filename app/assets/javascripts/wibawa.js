@@ -295,7 +295,10 @@ function addNested(button) {
   const html = template.innerHTML.replaceAll(marker, index)
   list.insertAdjacentHTML("beforeend", html)
   renumber(fieldset)
-  list.lastElementChild?.classList.add("wb-enter")
+  const row = list.lastElementChild
+  // The class comes off once the row has faded in, or moving the row would replay it.
+  row?.addEventListener("animationend", () => row.classList.remove("wb-enter"), { once: true })
+  row?.classList.add("wb-enter")
   list.lastElementChild?.querySelector("input:not([type=hidden]), select, textarea")?.focus()
 }
 

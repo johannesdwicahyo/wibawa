@@ -7,6 +7,7 @@ require "rails"
 require "active_record/railtie"
 require "action_controller/railtie"
 require "action_view/railtie"
+require "propshaft" # serves the gem's CSS and JavaScript to the system specs
 require "wibawa"
 
 module Dummy
@@ -83,4 +84,7 @@ ActiveRecord::Schema.define do
   end
 end
 
-Dummy::Application.routes.draw { mount Wibawa::Engine, at: "/admin" }
+Dummy::Application.routes.draw do
+  mount Wibawa::Engine, at: "/admin"
+  get "/favicon.ico", to: ->(_env) { [204, {}, []] } # browsers ask for one
+end
