@@ -36,6 +36,20 @@ module Wibawa
       (pages + reports).group_by(&:group).sort_by { |name, _| name ? 1 : 0 }
     end
 
+    # The whole menu as [[group name or nil, [entries...]], ...]: resources
+    # first, then pages and reports. A page or report whose group has the same
+    # name as a resource group joins it, so no heading appears twice.
+    def menu_groups
+      merged = groups.map do |name, resources|
+        [ name, resources.map { |resource| Entry.new(resource.label, resources_path(resource: resource.key), resource.menu_icon, active?(resource), name) } ]
+      end
+      extra_groups.each do |name, entries|
+        existing = merged.find { |group, _| group == name }
+        existing ? existing.last.concat(entries) : merged << [ name, entries ]
+      end
+      merged
+    end
+
     def on?(controller, param, key) = helpers.controller_name == controller && helpers.params[param] == key
 
     def active?(resource) = resource.key == @current_key

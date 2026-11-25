@@ -4,7 +4,8 @@ module Wibawa
 
     def create
       view = SavedView.new(resource_key: resource.key, owner: SavedView.owner_key(wibawa_current_user),
-                           name: params[:name].to_s.strip, query: params[:query].to_s)
+                           name: params[:name].to_s.strip,
+                           query: SavedView.normalize(params[:query].to_s, default_per_page: SavedView.default_per_page(resource)))
       if view.save
         redirect_to index_url(view.query), notice: t("wibawa.flash.view_saved", name: view.name), status: :see_other
       else

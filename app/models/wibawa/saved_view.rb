@@ -19,13 +19,18 @@ module Wibawa
     end
 
     # Normalizes a query string or params hash to the allowed keys, in a stable order.
-    def self.normalize(query)
+    # The default page size is left out: the index form always sends it, and
+    # a view should match the same filters with or without it.
+    def self.normalize(query, default_per_page: nil)
       params = query.is_a?(String) ? Rack::Utils.parse_nested_query(query) : query.to_h
       params = params.slice(*KEYS)
       # The filter form sends every filter, the empty ones too; a view keeps only the ones in use.
       params["q"] = params["q"].compact_blank if params["q"].respond_to?(:compact_blank)
+      params.delete("per_page") if default_per_page && params["per_page"].to_i == default_per_page
       params.compact_blank.to_query
     end
+
+    def self.default_per_page(resource) = resource.index_options[:per_page] || Wibawa.config.per_page
 
     def query=(value)
       super(self.class.normalize(value.to_s))
