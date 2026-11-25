@@ -23,7 +23,8 @@ Make the repository safe to open to contributors.
 
 Something a team can put in front of real staff.
 
-- [ ] Brand: kawung mark chosen and in the README; still to do: final wordmark, colour, favicon, usage guide
+- [x] Brand: kawung mark chosen and in the README; a favicon ships in the gem; wordmark, colour and favicon drafts in `design/brand/`
+- [ ] Brand: choose the wordmark, colour and favicon from the drafts, then finish the usage guide and export the files
 - [x] UI redesign to `DESIGN.md`: color tokens, bundled font, 13 px floor, status as dot plus word, sized form fields
 - [x] Motion (page cross-fade, save spinner) and a single filter toolbar with chips
 - [x] Rest of `DESIGN.md`: sticky header, compact density, collapsible sidebar, phone overflow menu and pinned first column, state color tokens
@@ -32,7 +33,8 @@ Something a team can put in front of real staff.
 - [x] System specs for the searchable multi-select, saved views, CSV import upload and a real mouse drag
 - [x] Verify what the README promises: Pundit and ActionPolicy adapters, Active Storage attachments, Action Text, Sprockets, the `id` locale, `wibawa:component` (each now has a spec)
 - [x] Accessibility pass to WCAG 2.2 AA: automated axe-core audit of every page type in both themes and two widths, plus keyboard specs
-- [ ] Accessibility: a manual screen-reader pass (VoiceOver, NVDA), text spacing and 200% zoom
+- [x] Accessibility: text spacing, text at 200% and 200% zoom, as specs
+- [ ] Accessibility: a manual screen-reader pass (VoiceOver, NVDA)
 - [x] CSV export by primary-key batches instead of OFFSET
 - [x] README with screenshots, and a seeded demo app in the repo (`bundle exec rake demo`)
 - [ ] Publish to RubyGems with MFA and trusted publishing

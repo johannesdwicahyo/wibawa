@@ -117,6 +117,7 @@ Target: WCAG 2.2 AA. `spec/system/accessibility_spec.rb` runs axe-core on every 
 - Closing a popover with Escape puts focus back on its button. The command palette and the searchable select tell assistive technology which option is active.
 - Focus is always visible (white on the sidebar) and is not left under a sticky bar.
 - Targets are 24 px or larger, 44 px on touch.
+- Text can be widened (line, letter and word spacing), set to 200%, or zoomed to 200% without losing content; all sizes are in rem.
 - Charts are images with a name; the table under each one carries the same numbers.
 
 ## Already fixed

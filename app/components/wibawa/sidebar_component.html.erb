@@ -5,7 +5,7 @@
   <div class="flex h-16 shrink-0 items-center gap-3 px-5 lg:rail:px-3">
     <%= link_to root_path, title: title, class: "flex min-w-0 items-center gap-3 rounded-control" do %>
       <span class="grid size-8 shrink-0 place-items-center rounded-control bg-white text-sm font-bold text-rail"><%= default_title? ? helpers.wibawa_mark : initials %></span>
-      <span class="truncate text-[15px] font-semibold tracking-tight lg:rail:hidden"><%= title %></span>
+      <span class="truncate text-[0.9375rem] font-semibold tracking-tight lg:rail:hidden"><%= title %></span>
     <% end %>
     <button type="button" data-wb-sidebar-close class="ml-auto rounded-md p-1 text-white/70 hover:text-white lg:hidden" aria-label="<%= t('wibawa.close_menu') %>">
       <%= icon("x") %>

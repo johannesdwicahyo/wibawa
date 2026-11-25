@@ -143,6 +143,60 @@ RSpec.describe "Wibawa accessibility", type: :system do
     end
   end
 
+  # Elements that cut off their own text: content wider or taller than a box that hides overflow.
+  # Marked truncation (an ellipsis, a scroll area) is deliberate and left out.
+  CLIPPED = <<~JS.freeze
+    [...document.querySelectorAll("main *, [data-wb-sidebar] *")].filter((el) => {
+      if (!el.childNodes.length || !el.offsetParent || !el.textContent.trim()) return false
+      const style = getComputedStyle(el)
+      if (style.textOverflow === "ellipsis" || el.closest(".sr-only, .truncate, [hidden]")) return false
+      const hidesX = ["hidden", "clip"].includes(style.overflowX), hidesY = ["hidden", "clip"].includes(style.overflowY)
+      return (hidesX && el.scrollWidth > el.clientWidth + 1) || (hidesY && el.scrollHeight > el.clientHeight + 1)
+    }).map((el) => el.tagName.toLowerCase() + "." + [...el.classList].slice(0, 3).join(".") + ": " + el.textContent.trim().slice(0, 30))
+  JS
+
+  def problems(name)
+    found = page.evaluate_script(CLIPPED).map { |element| "#{name}: clipped #{element}" }
+    found << "#{name}: scrolls sideways" unless page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")
+    found
+  end
+
+  it "would notice clipped text and sideways scrolling" do
+    visit "/admin"
+    expect(problems("page")).to eq([])
+    page.execute_script(%q{document.querySelector("main").insertAdjacentHTML("beforeend", '<p style="width:40px;overflow:hidden;white-space:nowrap">A long line that cannot fit</p><div style="width:200vw">wide</div>')})
+    expect(problems("page")).to contain_exactly(a_string_including("clipped p", "A long line"), "page: scrolls sideways")
+  end
+
+  it "loses no text when the reader widens line, paragraph, letter and word spacing (WCAG 1.4.12)" do
+    spacing = "* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }"
+    found = PAGES.flat_map do |name, path|
+      visit format(path, id: order.id)
+      page.execute_script("document.head.insertAdjacentHTML('beforeend', '<style>#{spacing}</style>')")
+      problems(name)
+    end
+    expect(found.join("\n")).to eq("")
+  end
+
+  it "stays usable with text at 200% (WCAG 1.4.4)" do
+    found = PAGES.flat_map do |name, path|
+      visit format(path, id: order.id)
+      page.execute_script("document.documentElement.style.fontSize = '200%'")
+      problems(name)
+    end
+    expect(found.join("\n")).to eq("")
+  end
+
+  it "stays usable at 200% browser zoom, which halves the window to 640 px" do
+    page.current_window.resize_to(640, 450)
+    found = PAGES.flat_map do |name, path|
+      visit format(path, id: order.id)
+      heading = page.evaluate_script("(() => { const r = document.querySelector('h1').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth })()")
+      problems(name) + (heading ? [] : [ "#{name}: the page title is cut off" ])
+    end
+    expect(found.join("\n")).to eq("")
+  end
+
   it "fits a 320 px wide screen without sideways scrolling" do
     page.current_window.resize_to(320, 700)
     wide = PAGES.filter_map do |name, path|

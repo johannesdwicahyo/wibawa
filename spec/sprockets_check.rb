@@ -43,7 +43,7 @@ page = browser.get("/admin/things")
 abort "Sprockets: the index page answered #{page.status}" unless page.status == 200 && page.body.include?("Kawung")
 
 assets = page.body.scan(%r{(?:href|src)="(/assets/[^"]+)"}).flatten + page.body.scan(%r{url\("(/assets/[^"]+)"\)}).flatten
-missing = [ %w[wibawa .css], %w[wibawa .js], %w[turbo .js], %w[plus-jakarta-sans-latin- .woff2] ].reject do |name, extension|
+missing = [ %w[wibawa .css], %w[wibawa .js], %w[turbo .js], %w[plus-jakarta-sans-latin- .woff2], %w[favicon .svg] ].reject do |name, extension|
   assets.any? { |path| path.include?(name) && path.end_with?(extension) }
 end
 abort "Sprockets: the page does not link #{missing.map(&:join).join(', ')}" if missing.any?

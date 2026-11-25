@@ -40,6 +40,10 @@ module Wibawa
     # Path (string or proc run in the view) for the sign-out link, and its HTTP method.
     attr_accessor :logout_path, :logout_method
 
+    # The browser-tab icon. nil uses the Wibawa mark; give an asset name or URL
+    # for your own ("admin-icon.png"), or false to add none.
+    attr_accessor :favicon
+
     # Any CSS color. Sets the --wb-primary variable used for buttons and links.
     attr_accessor :brand_color
 
