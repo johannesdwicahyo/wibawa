@@ -92,3 +92,5 @@ end
 Wibawa.report :top_orders do
   sql "SELECT number FROM orders WHERE number LIKE '%' ORDER BY number LIMIT 2" # a bare % and no params
 end
+
+Wibawa.resource Product

@@ -216,6 +216,25 @@ RSpec.describe "Wibawa in the browser", type: :system do
     end
   end
 
+  describe "uploads and rich text" do
+    it "attaches a file and saves what was typed in the editor" do
+      visit "/admin/products/new"
+      fill_in "Name", with: "Kain"
+      attach_file "Photo", File.expand_path("../fixtures/files/kawung.png", __dir__)
+      expect(page).to have_css("trix-toolbar button", minimum: 5) # the editor loaded
+      find("trix-editor").click
+      find("trix-editor").send_keys("Hand drawn in Solo")
+      find("[data-wb-form] [type=submit]", match: :first).click
+
+      expect(page).to have_no_css("[data-wb-form]")
+      product = Product.last
+      expect(product.photo).to be_attached
+      expect(product.description.to_plain_text).to eq("Hand drawn in Solo")
+      expect(page).to have_css("img[src*='/rails/active_storage/']")
+      expect(page).to have_text("Hand drawn in Solo")
+    end
+  end
+
   describe "command palette" do
     it "opens on Ctrl+K, filters pages, finds records and follows Enter" do
       visit "/admin"

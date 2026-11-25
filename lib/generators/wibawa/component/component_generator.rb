@@ -10,8 +10,10 @@ module Wibawa
       argument :component, type: :string, desc: "e.g. index_table, sidebar, show_page, form_page, filters, dashboard"
       class_option :namespace, type: :string, default: "Admin"
 
+      source_root File.expand_path("../../../../app/components/wibawa", __dir__)
+
       def copy_component
-        source_dir = File.expand_path("../../../../app/components/wibawa", __dir__)
+        source_dir = self.class.source_root
         source_template = File.join(source_dir, "#{component}_component.html.erb")
         raise Thor::Error, "Unknown component: #{component}" unless File.exist?(File.join(source_dir, "#{component}_component.rb"))
 
@@ -23,7 +25,7 @@ module Wibawa
             end
           end
         RUBY
-        copy_file source_template, File.join(dir, "#{component}_component.html.erb") if File.exist?(source_template)
+        copy_file "#{component}_component.html.erb", File.join(dir, "#{component}_component.html.erb") if File.exist?(source_template)
 
         say ""
         say "Add to config/initializers/wibawa.rb:", :green

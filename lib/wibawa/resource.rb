@@ -321,13 +321,20 @@ module Wibawa
     end
 
     def default_show_columns
-      names = [:id] + content_attribute_names
+      names = [:id] + content_attribute_names + declared_content_names
       names += %i[created_at updated_at].select { |n| model.column_names.include?(n.to_s) }
       names.map { |n| Column.new(n, {}, nil) }
     end
 
     def default_form_items
-      content_attribute_names.map { |n| Field.new(:field, n, {}, []) }
+      (content_attribute_names + declared_content_names).map { |n| Field.new(:field, n, {}, []) }
+    end
+
+    # Active Storage attachments and Action Text attributes: declared on the model, not columns of its table.
+    def declared_content_names
+      attachments = model.respond_to?(:attachment_reflections) ? model.attachment_reflections.keys : []
+      rich_texts = model.respond_to?(:rich_text_association_names) ? model.rich_text_association_names.map { |name| name.to_s.delete_prefix("rich_text_") } : []
+      (attachments + rich_texts).map(&:to_sym)
     end
 
     def attributes_for(items, klass)
