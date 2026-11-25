@@ -9,7 +9,7 @@
           <% items.each do |(_, column)| %>
             <div class="grid gap-1 px-5 py-3 sm:grid-cols-[13rem_1fr] sm:gap-6">
               <dt class="text-sm text-ink-2"><%= column.options[:label] || record.class.human_attribute_name(column.name) %></dt>
-              <dd class="min-w-0 break-words text-sm text-ink"><%= presenter.cell(record, column) %></dd>
+              <dd class="min-w-0 break-words text-sm text-ink"><%= value(column) %></dd>
             </div>
           <% end %>
         </dl>

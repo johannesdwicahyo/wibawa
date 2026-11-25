@@ -150,6 +150,17 @@ select[aria-busy="true"] { cursor: progress; opacity: 0.6; }
   background-position: center top;
 }
 
+/* Rich text shown on a record's page: enough to keep what the editor can make readable. */
+.wb-rich { line-height: 1.6; }
+.wb-rich > * + *, .wb-rich .trix-content > * + * { margin-top: 0.5rem; }
+.wb-rich h1 { font-size: 1rem; font-weight: 600; }
+.wb-rich a { text-decoration: underline; text-underline-offset: 4px; }
+.wb-rich ul { list-style: disc; padding-left: 1.25rem; }
+.wb-rich ol { list-style: decimal; padding-left: 1.25rem; }
+.wb-rich blockquote { border-left: 2px solid var(--color-line); padding-left: 0.75rem; color: var(--color-ink-2); }
+.wb-rich pre { overflow-x: auto; border-radius: var(--radius-control); background: var(--color-surface-2); padding: 0.75rem; font-size: 0.8125rem; }
+.wb-rich img { max-width: 100%; height: auto; border-radius: var(--radius-control); }
+
 /* Action Text editor */
 .wb-trix trix-editor, trix-editor.wb-trix {
   @apply min-h-36 rounded-control bg-surface px-3 py-2 text-sm ring-1 ring-inset ring-line;

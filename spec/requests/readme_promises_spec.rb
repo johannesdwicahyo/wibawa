@@ -29,7 +29,7 @@ RSpec.describe "README promises", type: :request do
 
       get "/admin/products/#{product.id}"
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("<img", "kawung.png", "Hand drawn", "1 file")
+      expect(response.body).to include("<img", "kawung.png", "1 file", 'class="wb-rich"', "Hand <strong>drawn</strong>") # rich text whole and formatted
 
       get "/admin/products/#{product.id}/edit"
       expect(response.body).to include("kawung.png", "Hand &lt;strong&gt;drawn&lt;/strong&gt;").or include("kawung.png", "<strong>drawn</strong>")

@@ -18,6 +18,7 @@ First release.
 - A seeded demo app in `demo/` (`bundle exec rake demo`)
 - Fixed: a report with SQL containing `%` and no params raised an error
 - Fixed, found by running each README promise: Action Text fields crashed the form and showed as the word "description"; attachments crashed the show page; a single image showed as "1 file"; attachments and rich text were missing from inferred forms; `wibawa:component` did not copy the template
+- Rich text is shown whole and formatted on a record's page; pages and reports join a resource group of the same name in the sidebar
 - Search and filters share one toolbar: a Filters popover, with active filters as removable chips
 - Page changes cross-fade; the button that saved a form shows a spinner
 - Searchable select: `belongs_to` fields and filters, and `has_many` fields, turn into a search box once the table passes 100 records

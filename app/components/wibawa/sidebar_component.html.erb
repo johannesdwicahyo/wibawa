@@ -26,29 +26,13 @@
       <%= icon("home", class: "opacity-80") %><span class="lg:rail:hidden"><%= t("wibawa.dashboard") %></span>
     <% end %>
 
-    <% groups.each do |name, resources| %>
+    <% menu_groups.each do |name, entries| %>
       <% if name %>
         <p class="<%= group_class %>"><%= name %></p>
       <% else %>
         <div class="mt-1"></div>
       <% end %>
       <ul class="space-y-0.5">
-        <% resources.each do |resource| %>
-          <li>
-            <%= link_to resources_path(resource: resource.key), class: link_class(active?(resource)), title: resource.label, "aria-current": (active?(resource) ? "page" : nil) do %>
-              <%= icon(resource.menu_icon, class: "opacity-80") %>
-              <span class="truncate lg:rail:hidden"><%= resource.label %></span>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    <% end %>
-
-    <% extra_groups.each do |name, entries| %>
-      <% if name %>
-        <p class="<%= group_class %>"><%= name %></p>
-      <% end %>
-      <ul class="<%= name ? 'space-y-0.5' : 'mt-0.5 space-y-0.5' %>">
         <% entries.each do |entry| %>
           <li>
             <%= link_to entry.url, class: link_class(entry.active), title: entry.label, "aria-current": (entry.active ? "page" : nil) do %>

@@ -37,4 +37,12 @@ RSpec.describe "Wibawa custom pages", type: :request do
     get "/admin/pages/nope"
     expect(response).to have_http_status(:not_found)
   end
+  it "shares a sidebar heading with resources in a group of the same name" do
+    Wibawa.registry.fetch("line_items").menu(group: "System")
+    get "/admin"
+    expect(response.body.scan(">System</p>").size).to eq(1)
+    expect(response.body).to match(%r{>System</p>.*?href="/admin/line_items".*?href="/admin/pages/maintenance"}m)
+  ensure
+    Wibawa.load! # put the menu back
+  end
 end

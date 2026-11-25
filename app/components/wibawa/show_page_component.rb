@@ -13,6 +13,17 @@ module Wibawa
       [ [ resource.label, resource.action?(:index) ? resources_path(resource: resource.key) : nil ], [ title, nil ] ]
     end
 
+    # A row's value. Rich text is shown whole and formatted here (a table cell
+    # gets a plain excerpt); Action Text sanitizes it when it renders.
+    def value(column)
+      rich = record.public_send(column.name) if column.block.nil? && column.as.nil? && rich_text?(column.name)
+      rich.present? ? content_tag(:div, rich.to_s, class: "wb-rich") : presenter.cell(record, column)
+    end
+
+    def rich_text?(name)
+      record.class.respond_to?(:rich_text_association_names) && record.class.rich_text_association_names.include?(:"rich_text_#{name}")
+    end
+
     def header_actions
       list = resource.member_actions.filter_map do |action|
         next unless wibawa_authorized?(action.name, record)

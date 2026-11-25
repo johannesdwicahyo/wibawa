@@ -32,6 +32,13 @@ RSpec.describe "Wibawa saved views", type: :request do
 
     post "/admin/orders/views", params: { name: "", query: query }
     expect(Wibawa::SavedView.count).to eq(1)
+
+    # The default page size is not part of a view; another size is.
+    post "/admin/orders/views", params: { name: "Default size", query: "#{query}&per_page=50" }
+    post "/admin/orders/views", params: { name: "Big pages", query: "#{query}&per_page=100" }
+    expect(Wibawa::SavedView.order(:id).last(2).map(&:query)).to eq([ query, "per_page=100&#{query}" ])
+    get "/admin/orders?#{query}&per_page=50"
+    expect(response.body).to include('aria-current="true"')
   end
 
   it "keeps each user's views to themselves" do

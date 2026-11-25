@@ -71,7 +71,7 @@ RSpec.describe "Wibawa in the browser, continued", type: :system do
         click_button "Save"
       end
       expect(page).to have_css("[data-wb-saved-views] summary", text: "Paid only") # the button names the view in use
-      expect(Wibawa::SavedView.pluck(:name, :query)).to eq([ [ "Paid only", "per_page=50&q%5Bstatus%5D=paid" ] ]) # no empty filters
+      expect(Wibawa::SavedView.pluck(:name, :query)).to eq([ [ "Paid only", "q%5Bstatus%5D=paid" ] ]) # no empty filters, no default page size
 
       visit "/admin/orders"
       expect(page).to have_css("tbody tr", count: 3)
