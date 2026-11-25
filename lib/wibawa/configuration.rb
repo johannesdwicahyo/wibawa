@@ -96,8 +96,18 @@ module Wibawa
 
     # Runs as a before_action inside Wibawa's controllers:
     #   config.authenticate_with { redirect_to main_app.root_path unless Current.user&.admin? }
-    def authenticate_with(&block)
-      @authenticate = block
+    #
+    # Outside development and test, Wibawa refuses every request until this is
+    # set, so a forgotten initializer cannot publish the admin. If something
+    # else already guards it, say which instead of giving a block:
+    #   config.authenticate_with :parent_controller  # a before_action in parent_controller
+    #   config.authenticate_with :none               # the network does (VPN, basic auth in the proxy)
+    def authenticate_with(elsewhere = nil, &block)
+      unless block || %i[parent_controller none].include?(elsewhere)
+        raise ArgumentError, "authenticate_with takes a block, :parent_controller or :none"
+      end
+
+      @authenticate = block || elsewhere
     end
 
     def authenticate
