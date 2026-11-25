@@ -7,7 +7,7 @@ First release.
 - One-file-per-model resource DSL: menu, scopes, filters, search, index columns, show, form, CSV
 - Batch actions (with built-in batch delete) and member actions
 - Nested `has_many` forms with add, remove and drag-to-reorder
-- Streaming CSV export with formula-injection protection
+- Streaming CSV export with formula-injection protection, in the index page's sort order and without OFFSET
 - Authorization adapters: Pundit, ActionPolicy, or a proc
 - Secure by default: outside development and test, every request is refused until `config.authenticate_with` is set
 - ViewComponent UI with prebuilt Tailwind CSS, dark mode, English and Indonesian locales

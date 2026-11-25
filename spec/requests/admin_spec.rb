@@ -84,6 +84,20 @@ it "shows active filters as chips that remove one filter and keep the rest" do
     expect(response.body).to include("A-1")
   end
 
+  it "exports a sorted CSV in primary-key batches, never by OFFSET" do
+    stub_const("Wibawa::CsvExporter::BATCH_SIZE", 2)
+    %w[C-3 B-2 D-4].each { |number| Order.create!(number: number, customer: customer, total: 1) }
+
+    queries = []
+    callback = ->(*, payload) { queries << payload[:sql] if payload[:sql].include?(%q(FROM "orders")) }
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") do
+      get "/admin/orders.csv", params: { sort: "number", direction: "desc" }
+      expect(response.body.lines.drop(1).map { |line| line[/[A-D]-\d/] }).to eq(%w[D-4 C-3 B-2 A-1])
+    end
+    expect(queries.grep(/OFFSET/)).to eq([])
+    expect(queries.grep(/"orders"."id" IN/).size).to eq(2) # four orders, two per batch
+  end
+
   it "runs member and batch actions" do
     post "/admin/orders/#{order.id}/actions/pay"
     expect(order.reload).to be_paid
