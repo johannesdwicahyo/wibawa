@@ -34,13 +34,13 @@ module Wibawa
     end
 
     def boolean_options
-      [[t("wibawa.yes"), "true"], [t("wibawa.no"), "false"]]
+      [ [ t("wibawa.yes"), "true" ], [ t("wibawa.no"), "false" ] ]
     end
 
     # Filters that are in effect, each with a link that removes just that one.
     def chips
       @chips ||= filters.filter_map do |filter|
-        keys = ["", "_from", "_to"].map { |suffix| "#{filter.name}#{suffix}" }
+        keys = [ "", "_from", "_to" ].map { |suffix| "#{filter.name}#{suffix}" }
         next unless keys.any? { |key| Array(query.filter_value(key)).any?(&:present?) }
 
         { label: filter.label, value: chip_value(filter), url: url_without(keys) }
@@ -52,14 +52,14 @@ module Wibawa
     def chip_value(filter)
       case type_for(filter)
       when :date_range, :number_range
-        [value(filter, "_from"), value(filter, "_to")].map { |v| v.presence || "…" }.join(" – ")
+        [ value(filter, "_from"), value(filter, "_to") ].map { |v| v.presence || "…" }.join(" – ")
       when :select
         if (target = combobox_class(filter))
           record = authorized_scope(target).find_by(target.primary_key => value(filter))
           return record ? presenter.display_name(record) : "##{value(filter)}"
         end
 
-        labels = select_options(filter).to_h { |label, v| [v.to_s, label] }
+        labels = select_options(filter).to_h { |label, v| [ v.to_s, label ] }
         Array(value(filter)).compact_blank.map { |v| labels.fetch(v.to_s, v) }.join(", ")
       when :boolean
         t(ActiveModel::Type::Boolean.new.cast(value(filter)) ? "wibawa.yes" : "wibawa.no")
@@ -82,11 +82,11 @@ module Wibawa
 
       klass, column = Wibawa::Query.target(model, filter.name)
       if (ref = choice_reflection(filter))
-        authorized_scope(ref.klass).limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
+        authorized_scope(ref.klass).limit(COLLECTION_LIMIT).map { |r| [ presenter.display_name(r), r.id ] }
       elsif (enum = klass.defined_enums[column])
-        enum.keys.map { |k| [Util.humanize(k), k] }
+        enum.keys.map { |k| [ Util.humanize(k), k ] }
       else
-        klass.distinct.order(column).limit(COLLECTION_LIMIT).pluck(column).compact.map { |v| [v.to_s, v] }
+        klass.distinct.order(column).limit(COLLECTION_LIMIT).pluck(column).compact.map { |v| [ v.to_s, v ] }
       end
     end
 
@@ -98,7 +98,7 @@ module Wibawa
     end
 
     def normalize(collection)
-      collection.map { |item| item.is_a?(Array) ? item : [Util.humanize(item.to_s), item] }
+      collection.map { |item| item.is_a?(Array) ? item : [ Util.humanize(item.to_s), item ] }
     end
   end
 end

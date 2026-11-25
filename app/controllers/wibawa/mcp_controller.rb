@@ -122,7 +122,7 @@ module Wibawa
         args.except(:filters, :attributes).merge(q: args[:filters], record: args[:attributes]).compact
       )
       use_resource(args[:resource]) if args[:resource]
-      MCP::Tool::Response.new([{ type: "text", text: send(:"tool_#{name}").to_json }])
+      MCP::Tool::Response.new([ { type: "text", text: send(:"tool_#{name}").to_json } ])
     rescue Wibawa::ResourceNotFound, ActiveRecord::RecordNotFound
       failure("Not found.")
     rescue Wibawa::NotAuthorized
@@ -131,7 +131,7 @@ module Wibawa
       failure(e.message)
     end
 
-    def failure(message) = MCP::Tool::Response.new([{ type: "text", text: message }], error: true)
+    def failure(message) = MCP::Tool::Response.new([ { type: "text", text: message } ], error: true)
 
     # The shared hooks (find_record, record_params, per_page, Query) read `params`.
     def params = @tool_params || super
@@ -143,7 +143,7 @@ module Wibawa
         info = {
           resource: r.key, label: r.label, columns: r.index_columns.map(&:name), scopes: r.scopes.map(&:name),
           searchable: r.search_fields.present?,
-          filters: r.filters.to_h { |f| [f.name, Wibawa::Query.filter_type(r.model, f)] }
+          filters: r.filters.to_h { |f| [ f.name, Wibawa::Query.filter_type(r.model, f) ] }
         }
         info.merge!(actions: r.member_actions.map(&:name), writable_attributes: r.permitted_attributes) if Wibawa.config.mcp_write
         info
@@ -238,7 +238,7 @@ module Wibawa
 
     # Only the columns the resource declares, as in the browser.
     def serialize(record, columns)
-      { id: record.id }.merge(columns.to_h { |column| [column.name, json_value(wibawa_presenter.raw(record, column))] })
+      { id: record.id }.merge(columns.to_h { |column| [ column.name, json_value(wibawa_presenter.raw(record, column)) ] })
     end
 
     def json_value(value)

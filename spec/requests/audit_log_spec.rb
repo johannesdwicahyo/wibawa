@@ -35,18 +35,18 @@ RSpec.describe "Wibawa audit log", type: :request do
     patch "/admin/orders/#{order.id}", params: { record: { number: "A-9" } }
     patch "/admin/orders/#{order.id}", params: { record: { number: "" } } # invalid: nothing happened
     post "/admin/orders/#{order.id}/actions/pay"
-    post "/admin/orders/batch", params: { batch_action: "destroy", ids: [order.id] }
+    post "/admin/orders/batch", params: { batch_action: "destroy", ids: [ order.id ] }
     delete "/admin/orders/#{Order.find_by!(number: 'B-2').id}"
 
     expect(entries.pluck(:action)).to eq(%w[create update pay batch_destroy destroy])
-    expect(entries.pluck(:via, :actor, :actor_label).uniq).to eq([["web", "AdminUser:7", "Budi"]])
+    expect(entries.pluck(:via, :actor, :actor_label).uniq).to eq([ [ "web", "AdminUser:7", "Budi" ] ])
     expect(entries.second).to have_attributes(resource_key: "orders", record_id: order.id.to_s, record_label: "A-9",
                                               data: { "number" => %w[A-1 A-9] })
-    expect(entries.fourth.data).to eq("ids" => [order.id.to_s], "count" => 1)
+    expect(entries.fourth.data).to eq("ids" => [ order.id.to_s ], "count" => 1)
   end
 
   it "masks secrets and cannot be edited" do
-    expect(Wibawa::AuditEntry.filter("password_digest" => %w[a b], "name" => %w[x y], "updated_at" => [1, 2]))
+    expect(Wibawa::AuditEntry.filter("password_digest" => %w[a b], "name" => %w[x y], "updated_at" => [ 1, 2 ]))
       .to eq("password_digest" => "[FILTERED]", "name" => %w[x y])
 
     entry = Wibawa::AuditEntry.record!(user: nil, action: :update, resource: Wibawa.registry["orders"], via: "web", record: order)

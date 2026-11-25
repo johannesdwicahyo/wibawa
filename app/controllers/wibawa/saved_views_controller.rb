@@ -31,7 +31,7 @@ module Wibawa
     end
 
     def index_url(query)
-      [resources_path(resource: resource.key), query.presence].compact.join("?")
+      [ resources_path(resource: resource.key), query.presence ].compact.join("?")
     end
   end
 end

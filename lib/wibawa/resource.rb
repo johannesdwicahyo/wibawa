@@ -68,19 +68,19 @@ module Wibawa
     #   actions :all, except: [:destroy]
     #   actions :index, :show
     def actions(*list, except: [])
-      list = CRUD_ACTIONS if list.empty? || list == [:all]
+      list = CRUD_ACTIONS if list.empty? || list == [ :all ]
       list = list.map(&:to_sym)
-      list |= [:create] if list.include?(:new)
-      list |= [:update] if list.include?(:edit)
+      list |= [ :create ] if list.include?(:new)
+      list |= [ :update ] if list.include?(:edit)
       excluded = Array(except).map(&:to_sym)
-      excluded |= [:create] if excluded.include?(:new)
-      excluded |= [:update] if excluded.include?(:edit)
+      excluded |= [ :create ] if excluded.include?(:new)
+      excluded |= [ :update ] if excluded.include?(:edit)
       @allowed_actions = list - excluded
     end
 
     #   index density: :compact   # 32 px rows instead of 40
     def index(per_page: nil, sort: nil, count: true, density: nil, &block)
-      raise Error, "Unknown density #{density.inspect} (use :compact)" unless [nil, :compact, "compact"].include?(density)
+      raise Error, "Unknown density #{density.inspect} (use :compact)" unless [ nil, :compact, "compact" ].include?(density)
 
       @index = IndexBuilder.new(per_page: per_page, sort: sort, count: count, density: density)
       @index.instance_eval(&block) if block
@@ -218,7 +218,7 @@ module Wibawa
     def show_items
       return @show.items if @show && !@show.items.empty?
 
-      default_show_columns.map { |c| [:row, c] }
+      default_show_columns.map { |c| [ :row, c ] }
     end
 
     def form_items
@@ -286,7 +286,7 @@ module Wibawa
         case item.kind
         when :section then choice_classes(item.children, klass)
         when :has_many then ref ? choice_classes(item.children, ref.klass) : []
-        else ref && !ref.polymorphic? && %i[belongs_to has_many has_and_belongs_to_many].include?(ref.macro) ? [ref.klass] : []
+        else ref && !ref.polymorphic? && %i[belongs_to has_many has_and_belongs_to_many].include?(ref.macro) ? [ ref.klass ] : []
         end
       end
     end
@@ -294,7 +294,7 @@ module Wibawa
     def content_attribute_names
       return [] unless model.respond_to?(:columns)
 
-      foreign_keys = belongs_to_reflections.to_h { |r| [r.foreign_key.to_s, r.name] }
+      foreign_keys = belongs_to_reflections.to_h { |r| [ r.foreign_key.to_s, r.name ] }
       model.columns.filter_map do |c|
         next if c.name.match?(HIDDEN_ATTRIBUTES)
         next if c.name.end_with?("_type") && foreign_keys.key?(c.name.sub(/_type\z/, "_id"))
@@ -314,14 +314,14 @@ module Wibawa
         col = model.columns_hash[n.to_s]
         col && %i[text json jsonb binary].include?(col.type)
       end
-      cols = [Column.new(:id, { link: true }, nil)]
+      cols = [ Column.new(:id, { link: true }, nil) ]
       names.first(6).each { |n| cols << Column.new(n, {}, nil) }
       cols << Column.new(:created_at, {}, nil) if model.column_names.include?("created_at")
       cols
     end
 
     def default_show_columns
-      names = [:id] + content_attribute_names + declared_content_names
+      names = [ :id ] + content_attribute_names + declared_content_names
       names += %i[created_at updated_at].select { |n| model.column_names.include?(n.to_s) }
       names.map { |n| Column.new(n, {}, nil) }
     end
@@ -348,9 +348,9 @@ module Wibawa
 
           nested = attributes_for(item.children, ref.klass)
           nested << item.options[:sortable].to_sym if item.options[:sortable]
-          [{ "#{item.name}_attributes": [:id, :_destroy, *nested].uniq }]
+          [ { "#{item.name}_attributes": [ :id, :_destroy, *nested ].uniq } ]
         else
-          [attribute_for_field(item, klass)]
+          [ attribute_for_field(item, klass) ]
         end
       end
     end

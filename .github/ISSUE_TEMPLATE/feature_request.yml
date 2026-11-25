@@ -1,0 +1,22 @@
+name: Feature request
+description: Something Wibawa should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do in your admin, and what makes it hard or impossible today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you have in mind
+      description: How it could look in a resource file, if you have an idea. ROADMAP.md lists what is already planned.
+      render: ruby
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What you do today
+      description: A workaround, another gem, or nothing.

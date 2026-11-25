@@ -8,7 +8,7 @@ module Wibawa
 
     def items
       resources = groups.flat_map(&:last)
-      [Item.new(t("wibawa.dashboard"), root_path, "home", nil)] +
+      [ Item.new(t("wibawa.dashboard"), root_path, "home", nil) ] +
         resources.map { |r| Item.new(r.label, resources_path(resource: r.key), r.menu_icon, nil) } +
         extra_groups.flat_map(&:last).map { |entry| Item.new(entry.label, entry.url, entry.icon, entry.group) } +
         resources.select { |r| r.action?(:new) && wibawa_authorized?(:new, r.model) }.map do |r|

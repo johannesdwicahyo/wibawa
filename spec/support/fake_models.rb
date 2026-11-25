@@ -1,11 +1,5 @@
-$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
-require "minitest/autorun"
-require "wibawa"
-require "wibawa/paginator"
-require "wibawa/csv_exporter"
-require "wibawa/authorization"
-
-# A stand-in for an ActiveRecord model: enough reflection for the DSL.
+# Stand-ins for ActiveRecord models, for specs of the DSL that need no database.
+# FakeModel has enough reflection for the DSL.
 class FakeModel
   Reflection = Struct.new(:name, :macro, :foreign_key, :klass) do
     def polymorphic? = false

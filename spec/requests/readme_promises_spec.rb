@@ -21,10 +21,10 @@ RSpec.describe "README promises", type: :request do
     end
 
     it "saves uploads and rich text, and shows them" do
-      post "/admin/products", params: { record: { name: "Kain", photo: photo, documents: [notes], description: "<div>Hand <strong>drawn</strong></div>" } }
+      post "/admin/products", params: { record: { name: "Kain", photo: photo, documents: [ notes ], description: "<div>Hand <strong>drawn</strong></div>" } }
       product = Product.last
       expect(product.photo).to be_attached
-      expect(product.documents.map { |file| file.filename.to_s }).to eq(["notes.txt"])
+      expect(product.documents.map { |file| file.filename.to_s }).to eq([ "notes.txt" ])
       expect(product.description.to_plain_text).to eq("Hand drawn")
 
       get "/admin/products/#{product.id}"
@@ -123,7 +123,7 @@ RSpec.describe "README promises", type: :request do
   describe "the Indonesian locale" do
     around { |example| I18n.with_locale(:id, &example) }
 
-    def keys(hash, prefix = nil) = hash.flat_map { |key, value| value.is_a?(Hash) ? keys(value, [prefix, key].compact.join(".")) : [[prefix, key].compact.join(".")] }
+    def keys(hash, prefix = nil) = hash.flat_map { |key, value| value.is_a?(Hash) ? keys(value, [ prefix, key ].compact.join(".")) : [ [ prefix, key ].compact.join(".") ] }
 
     it "has every key the English one has, and the same placeholders" do
       en, id = %w[en id].map { |locale| YAML.load_file("config/locales/#{locale}.yml").fetch(locale) }
@@ -139,8 +139,8 @@ RSpec.describe "README promises", type: :request do
     end
 
     it "renders every kind of page without a missing translation" do
-      ["/admin", "/admin/orders", "/admin/orders/#{order.id}", "/admin/orders/#{order.id}/edit", "/admin/orders/new", "/admin/orders/import",
-       "/admin/reports/orders_by_status", "/admin/pages/maintenance", "/admin/products/new"].each do |path|
+      [ "/admin", "/admin/orders", "/admin/orders/#{order.id}", "/admin/orders/#{order.id}/edit", "/admin/orders/new", "/admin/orders/import",
+       "/admin/reports/orders_by_status", "/admin/pages/maintenance", "/admin/products/new" ].each do |path|
         get path
         expect(response).to have_http_status(:ok), path
         expect(response.body).not_to match(/translation missing|Translation missing/i), path

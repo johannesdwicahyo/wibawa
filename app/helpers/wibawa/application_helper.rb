@@ -62,14 +62,14 @@ module Wibawa
       stroke = %w[grip more].include?(name.to_s) ? "2.5" : "1.5"
       tag.svg(tag.path(d: path), viewBox: "0 0 20 20", fill: "none", stroke: "currentColor",
                                  "stroke-width": stroke, "stroke-linecap": "round", "stroke-linejoin": "round",
-                                 "aria-hidden": "true", class: [size, "shrink-0", binding.local_variable_get(:class)].compact.join(" "))
+                                 "aria-hidden": "true", class: [ size, "shrink-0", binding.local_variable_get(:class) ].compact.join(" "))
     end
 
     # The Wibawa mark: kawung, four table cells around one point.
     def wibawa_mark(size: "size-5")
       tag.svg(tag.path(d: MARK_PATH), viewBox: "0 0 256 256", fill: "currentColor", "aria-hidden": "true", class: "#{size} shrink-0")
     end
-    
+
     # @font-face for the bundled typeface. Inline so asset URLs work under both Propshaft and Sprockets.
     def wibawa_font_face
       faces = { "latin" => FONT_LATIN_RANGE, "latin-ext" => FONT_LATIN_EXT_RANGE }.map do |subset, range|
@@ -78,9 +78,9 @@ module Wibawa
       end
       tag.style(faces.join.html_safe, nonce: content_security_policy_nonce)
     end
-    
+
     def wibawa_button_class(style = :secondary, extra = nil)
-      [BUTTON_BASE, BUTTON_STYLES.fetch(style.to_sym), extra].compact.join(" ")
+      [ BUTTON_BASE, BUTTON_STYLES.fetch(style.to_sym), extra ].compact.join(" ")
     end
 
     def wibawa_input_class(errors = false)

@@ -22,8 +22,8 @@ module Wibawa
       return form.hidden_field(attribute) if type == :hidden
 
       content_tag(:div, class: class_names("min-w-0", width_class(type) => !@compact), data: { wb_field: field.name }) do
-        parts = type == :boolean ? [boolean_html] : [label_html, input_html(type)]
-        safe_join((parts + [hint_html, error_html]).compact)
+        parts = type == :boolean ? [ boolean_html ] : [ label_html, input_html(type) ]
+        safe_join((parts + [ hint_html, error_html ]).compact)
       end
     end
 
@@ -110,7 +110,7 @@ module Wibawa
     end
 
     def label_html
-      text = required? ? safe_join([label_text, content_tag(:span, " *", class: "text-danger", "aria-hidden": "true")]) : label_text
+      text = required? ? safe_join([ label_text, content_tag(:span, " *", class: "text-danger", "aria-hidden": "true") ]) : label_text
       form.label(attribute, text, class: label_class)
     end
 
@@ -170,8 +170,8 @@ module Wibawa
       return if helpers.content_for?(:wibawa_editor)
 
       helpers.content_for(:wibawa_editor, "loaded")
-      helpers.content_for(:head, safe_join([helpers.stylesheet_link_tag("trix", "data-turbo-track": "reload"),
-                                            helpers.javascript_include_tag("trix", "actiontext", defer: true, "data-turbo-track": "reload")]))
+      helpers.content_for(:head, safe_join([ helpers.stylesheet_link_tag("trix", "data-turbo-track": "reload"),
+                                            helpers.javascript_include_tag("trix", "actiontext", defer: true, "data-turbo-track": "reload") ]))
     end
 
     def attachment_html
@@ -184,7 +184,7 @@ module Wibawa
       return input unless current.attached?
 
       existing = content_tag(:div, presenter.format(current, nil, record: record), class: "mb-2 text-sm")
-      safe_join([existing, input])
+      safe_join([ existing, input ])
     end
 
     def number_step
@@ -205,7 +205,7 @@ module Wibawa
       collection = field.options[:collection]
       collection = helpers.instance_exec(&collection) if collection.is_a?(Proc)
       collection ||= klass.defined_enums[name.to_s]&.keys || []
-      collection.map { |item| item.is_a?(Array) ? item : [Util.humanize(item.to_s), item] }
+      collection.map { |item| item.is_a?(Array) ? item : [ Util.humanize(item.to_s), item ] }
     end
 
     # An association becomes a search box once its table is too long to list.
@@ -221,7 +221,7 @@ module Wibawa
       render Wibawa::ComboboxComponent.new(
         name: form.field_name(attribute, multiple: multiple), klass: reflection.klass, value: record.public_send(attribute),
         resource_key: helpers.params[:resource], id: form.field_id(attribute), multiple: multiple,
-        input_html: html_options.except(*(multiple ? [:required] : []))
+        input_html: html_options.except(*(multiple ? [ :required ] : []))
       )
     end
 
@@ -231,7 +231,7 @@ module Wibawa
       options = many_options
       offered = options.map { |_, id| id.to_s }
       kept = Array(record.public_send(attribute)).map(&:to_s) - offered
-      safe_join([form.select(attribute, options, {}, html_options(multiple: true, size: 6))] +
+      safe_join([ form.select(attribute, options, {}, html_options(multiple: true, size: 6)) ] +
                 kept.map { |id| helpers.hidden_field_tag(form.field_name(attribute, multiple: true), id, id: nil) })
     end
 
@@ -239,11 +239,11 @@ module Wibawa
       scope = field.options[:collection]
       scope = helpers.instance_exec(&scope) if scope.is_a?(Proc)
       records = scope || authorized_scope(reflection.klass).limit(COLLECTION_LIMIT)
-      records.map { |r| r.is_a?(Array) ? r : [presenter.display_name(r), r.id] }
+      records.map { |r| r.is_a?(Array) ? r : [ presenter.display_name(r), r.id ] }
     end
 
     def many_options
-      authorized_scope(reflection.klass).limit(COLLECTION_LIMIT).map { |r| [presenter.display_name(r), r.id] }
+      authorized_scope(reflection.klass).limit(COLLECTION_LIMIT).map { |r| [ presenter.display_name(r), r.id ] }
     end
 
     def hint_html
@@ -252,7 +252,7 @@ module Wibawa
     end
 
     def error_id = "#{form.object_name}_#{attribute}_error".gsub(/[^\w-]+/, "_")
-    
+
     # Inputs are as wide as what goes in them, not as wide as the page.
     def width_class(type)
       case type

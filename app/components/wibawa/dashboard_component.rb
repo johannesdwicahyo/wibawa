@@ -30,7 +30,7 @@ module Wibawa
       return table.builder.columns if table.builder
 
       res = table_resource(table)
-      cols = res ? res.index_columns.first(5) : [Wibawa::Column.new(:id, {}, nil)]
+      cols = res ? res.index_columns.first(5) : [ Wibawa::Column.new(:id, {}, nil) ]
       cols.map.with_index { |c, i| i.zero? ? Wibawa::Column.new(c.name, c.options.merge(link: true), c.block) : c }
     end
 
@@ -42,7 +42,7 @@ module Wibawa
     # Default dashboard: a card per resource the user can open.
     def resources
       Wibawa.registry.select { |r| r.menu? && r.action?(:index) && wibawa_authorized?(:index, r.model) }
-                     .sort_by { |r| [r.menu_priority, r.label.to_s] }
+                     .sort_by { |r| [ r.menu_priority, r.label.to_s ] }
     end
   end
 end

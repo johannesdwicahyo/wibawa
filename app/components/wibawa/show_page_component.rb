@@ -10,7 +10,7 @@ module Wibawa
     def title = presenter.display_name(record)
 
     def breadcrumbs
-      [[resource.label, resource.action?(:index) ? resources_path(resource: resource.key) : nil], [title, nil]]
+      [ [ resource.label, resource.action?(:index) ? resources_path(resource: resource.key) : nil ], [ title, nil ] ]
     end
 
     def header_actions
@@ -58,7 +58,7 @@ module Wibawa
 
       klass = record.class.reflect_on_association(name)&.klass
       related = klass && Wibawa.registry.for_model(klass)
-      related ? related.index_columns.reject { |c| c.name == :created_at } : [Wibawa::Column.new(:id, { link: true }, nil)]
+      related ? related.index_columns.reject { |c| c.name == :created_at } : [ Wibawa::Column.new(:id, { link: true }, nil) ]
     end
   end
 end

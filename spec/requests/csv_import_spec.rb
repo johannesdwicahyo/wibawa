@@ -5,7 +5,7 @@ RSpec.describe "Wibawa CSV import", type: :request do
   let!(:order) { Order.create!(number: "A-1", customer: customer) }
 
   def upload(csv)
-    file = Tempfile.new(["orders", ".csv"]).tap { |f| f.write(csv) and f.rewind }
+    file = Tempfile.new([ "orders", ".csv" ]).tap { |f| f.write(csv) and f.rewind }
     post "/admin/orders/import", params: { file: Rack::Test::UploadedFile.new(file.path, "text/csv") }
   end
 
@@ -29,7 +29,7 @@ RSpec.describe "Wibawa CSV import", type: :request do
 
     expect(response).to redirect_to("/admin/orders")
     expect(flash[:notice]).to eq("Import finished: 2 created, 1 updated.")
-    expect(Order.order(:number).pluck(:number, :status)).to eq([["=C-3", "pending"], ["A-1", "paid"], ["B-2", "paid"]])
+    expect(Order.order(:number).pluck(:number, :status)).to eq([ [ "=C-3", "pending" ], [ "A-1", "paid" ], [ "B-2", "paid" ] ])
     expect(order.reload.customer).to eq(customer) # the empty cell did not clear it
   end
 
@@ -38,7 +38,7 @@ RSpec.describe "Wibawa CSV import", type: :request do
 
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.body).to include("Nothing was imported", "Line 3:", "Number can&#39;t be blank", "Line 4:", "nonsense")
-    expect(Order.pluck(:number)).to eq(["A-1"])
+    expect(Order.pluck(:number)).to eq([ "A-1" ])
   end
 
   it "rejects columns it does not know, including ones the form does not expose" do

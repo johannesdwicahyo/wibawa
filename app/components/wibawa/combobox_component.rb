@@ -17,9 +17,9 @@ module Wibawa
       resource = Wibawa.registry.for_model(klass)
       scope = if term.empty?
                 scope
-              elsif resource&.search_fields.present?
+      elsif resource&.search_fields.present?
                 Wibawa::Query.new(resource, scope, { search: term }).filtered_base
-              else
+      else
                 text = klass.columns.select { |c| %i[string text citext].include?(c.type) }.map(&:name)
                 columns = Wibawa.config.display_name_methods.map(&:to_s) & text
                 columns = text if columns.empty? # no name-like column: search every text column
@@ -27,7 +27,7 @@ module Wibawa
                 matches = columns.map { |c| klass.arel_table[c].matches(like, "\\", false) }
                 matches << klass.arel_table[klass.primary_key].eq(term) if term.match?(/\A\d+\z/)
                 matches.empty? ? scope.none : scope.where(matches.reduce { |a, b| a.or(b) })
-              end
+      end
       scope.reorder(klass.primary_key => :desc).limit(RESULTS)
     end
 
@@ -89,7 +89,7 @@ module Wibawa
     def chosen
       ids = Array(@value).compact_blank
       visible = authorized_scope(@klass).where(@klass.primary_key => ids).index_by { |record| record.id.to_s }
-      ids.map { |id| [visible[id.to_s] ? presenter.display_name(visible[id.to_s]) : "##{id}", id] }
+      ids.map { |id| [ visible[id.to_s] ? presenter.display_name(visible[id.to_s]) : "##{id}", id ] }
     end
 
     # Looked up inside the user's scope, so an id typed into the URL is never

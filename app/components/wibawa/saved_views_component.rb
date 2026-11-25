@@ -14,7 +14,7 @@ module Wibawa
 
     def current_query = @current_query ||= Wibawa::SavedView.normalize(request.query_parameters)
     def current = views.find { |view| view.query == current_query && current_query.present? }
-    def url_for_view(view) = [resources_path(resource: resource.key), view.query.presence].compact.join("?")
+    def url_for_view(view) = [ resources_path(resource: resource.key), view.query.presence ].compact.join("?")
     def create_url = helpers.saved_views_path(resource: resource.key)
     def destroy_url(view) = helpers.saved_view_path(resource: resource.key, id: view)
   end

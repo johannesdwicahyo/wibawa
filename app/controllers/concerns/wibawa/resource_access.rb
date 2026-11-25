@@ -79,7 +79,7 @@ module Wibawa
     def per_page
       requested = params[:per_page].to_i
       default = resource.index_options[:per_page] || Wibawa.config.per_page
-      requested.positive? ? [requested, Wibawa.config.max_per_page].min : default
+      requested.positive? ? [ requested, Wibawa.config.max_per_page ].min : default
     end
   end
 end

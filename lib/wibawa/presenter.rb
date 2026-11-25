@@ -41,9 +41,9 @@ module Wibawa
       value = raw(record, column)
       html = if column.block && value.is_a?(ActiveSupport::SafeBuffer) && column.as.nil?
                value
-             else
+      else
                format(value, column.as, record: record, column: column)
-             end
+      end
       column.link? ? link_to_record(record, html) : html
     end
 
@@ -131,10 +131,10 @@ module Wibawa
       label = value.is_a?(Symbol) || value.is_a?(String) ? Util.humanize(value) : value.to_s
       dot(label, Wibawa.config.badge_color_for(value))
     end
-    
+
     def dot(label, color)
       mark = view.tag.span("", class: "size-1.5 shrink-0 rounded-full #{DOT_CLASSES.fetch(color, DOT_CLASSES[:neutral])}", "aria-hidden": "true")
-      view.tag.span(view.safe_join([mark, label]), class: "flex items-center gap-2 whitespace-nowrap")
+      view.tag.span(view.safe_join([ mark, label ]), class: "flex items-center gap-2 whitespace-nowrap")
     end
 
     def empty
@@ -183,9 +183,9 @@ module Wibawa
       currency = (currency || Wibawa.config.currency).to_s.upcase
       text = if (formatter = Wibawa.config.money_format)
                formatter.call(value, currency, view)
-             else
+      else
                view.number_to_currency(value, **CURRENCIES.fetch(currency) { { unit: "#{currency} " } })
-             end
+      end
       view.tag.span(text, class: "tabular-nums whitespace-nowrap")
     end
 

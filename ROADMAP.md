@@ -9,11 +9,13 @@ Make the repository safe to open to contributors.
 - [x] Fix the form crash, the mobile table overflow and singular resource labels
 - [x] Request specs that boot the engine in a real Rails app (`spec/dummy`)
 - [x] Put the project under git and push to GitHub
-- [ ] CI matrix: Ruby 3.2–3.4 × Rails 7.2, 8.0, 8.1
+- [x] CI matrix written: Ruby 3.2–3.4 × Rails 7.2, 8.0, 8.1 (run by hand on Ruby 3.4 against all three)
+- [ ] CI matrix green on GitHub, once Actions can run
 - [x] Commit `package-lock.json`, so the "CSS is up to date" check is repeatable
-- [ ] RuboCop (rubocop-rails-omakase) in CI
-- [ ] Fill in the gemspec (email, homepage) and add CONTRIBUTING, CODE_OF_CONDUCT, SECURITY and issue/PR templates
-- [ ] Port the Minitest unit tests to RSpec so there is one test framework
+- [x] RuboCop (rubocop-rails-omakase) in CI and in `bundle exec rake`
+- [x] CONTRIBUTING, CODE_OF_CONDUCT, SECURITY and issue/PR templates
+- [ ] Gemspec email, and private vulnerability reporting switched on in the repository settings
+- [x] Port the Minitest unit tests to RSpec so there is one test framework
 
 **Exit:** a stranger can clone, run `bundle exec rake` and get green on every matrix cell.
 

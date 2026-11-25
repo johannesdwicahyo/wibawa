@@ -30,7 +30,7 @@ module Demo
   end
 end
 
-Wibawa.config.load_paths = [File.expand_path("wibawa", __dir__)]
+Wibawa.config.load_paths = [ File.expand_path("wibawa", __dir__) ]
 
 DemoUser = Struct.new(:id, :name)
 DEMO_USER = DemoUser.new(1, "Demo admin")
@@ -144,5 +144,5 @@ end
 Demo::Application.routes.draw do
   mount Wibawa::Engine, at: "/admin"
   root to: redirect("/admin")
-  get "/favicon.ico", to: ->(_env) { [204, {}, []] }
+  get "/favicon.ico", to: ->(_env) { [ 204, {}, [] ] }
 end

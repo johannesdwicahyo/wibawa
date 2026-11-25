@@ -22,12 +22,12 @@ module Wibawa
     # [LineItem, "product"] for "line_items.product".
     def self.target(model, name)
       association, column = name.to_s.split(".", 2)
-      return [model, association] unless column
+      return [ model, association ] unless column
 
       ref = model.reflect_on_association(association.to_sym)
       raise Error, "#{model} has no association :#{association} (used in filter #{name.inspect})" unless ref
 
-      [ref.klass, column]
+      [ ref.klass, column ]
     end
 
     # Infer a filter's input type from the model when `as:` is omitted.
@@ -119,13 +119,13 @@ module Wibawa
     # "customer.name" => [customers arel table, Customer, "name"], records the join.
     def resolve_field(field, joins)
       assoc, column = field.split(".", 2)
-      return [model.arel_table, model, assoc] unless column
+      return [ model.arel_table, model, assoc ] unless column
 
       ref = model.reflect_on_association(assoc.to_sym)
       raise Error, "#{model} has no association :#{assoc} (used in search/filter)" unless ref
 
       joins << assoc.to_sym
-      [ref.klass.arel_table, ref.klass, column]
+      [ ref.klass.arel_table, ref.klass, column ]
     end
 
     def condition_for(table, klass, column, term)
@@ -167,7 +167,7 @@ module Wibawa
     end
 
     def filter_active?(key)
-      ["", "_from", "_to"].any? { |suffix| Array(filter_value("#{key}#{suffix}")).any?(&:present?) }
+      [ "", "_from", "_to" ].any? { |suffix| Array(filter_value("#{key}#{suffix}")).any?(&:present?) }
     end
 
     # `rel` is a relation on `klass`; `key` is the name the value was submitted under.

@@ -35,7 +35,7 @@ module Wibawa
       result = Result.new(0, 0, [])
       table = CSV.parse(text.to_s.dup.force_encoding(Encoding::UTF_8).delete_prefix("﻿"), headers: true, skip_blanks: true)
       mapping = map_headers(table.headers.compact, result)
-      result.errors << [nil, I18n.t("wibawa.import.too_many", count: MAX_ROWS)] if table.size > MAX_ROWS
+      result.errors << [ nil, I18n.t("wibawa.import.too_many", count: MAX_ROWS) ] if table.size > MAX_ROWS
       return result unless result.ok?
 
       model.transaction do
@@ -48,7 +48,7 @@ module Wibawa
       result.created = result.updated = 0 unless result.ok?
       result
     rescue CSV::MalformedCSVError => e
-      Result.new(0, 0, [[e.line_number, e.message]])
+      Result.new(0, 0, [ [ e.line_number, e.message ] ])
     end
 
     private
@@ -56,10 +56,10 @@ module Wibawa
     # { "Customer" => :customer_id }: a header may be the attribute name or its
     # human label, in any case. Unknown headers stop the import.
     def map_headers(headers, result)
-      known = attributes.flat_map { |attribute| [[normalize(attribute), attribute], [normalize(model.human_attribute_name(attribute)), attribute]] }.to_h
-      mapping = headers.to_h { |header| [header, known[normalize(header)]] }
+      known = attributes.flat_map { |attribute| [ [ normalize(attribute), attribute ], [ normalize(model.human_attribute_name(attribute)), attribute ] ] }.to_h
+      mapping = headers.to_h { |header| [ header, known[normalize(header)] ] }
       unknown = mapping.select { |_, attribute| attribute.nil? }.keys
-      result.errors << [1, I18n.t("wibawa.import.unknown_columns", columns: unknown.join(", "))] if unknown.any?
+      result.errors << [ 1, I18n.t("wibawa.import.unknown_columns", columns: unknown.join(", ")) ] if unknown.any?
       mapping
     end
 
@@ -68,7 +68,7 @@ module Wibawa
     def import_row(row, mapping, line, result)
       # Blank cells are left out: a new record keeps its defaults and an
       # existing one keeps its value. An import never wipes data.
-      values = mapping.to_h { |header, attribute| [attribute, clean(row[header])] }.compact
+      values = mapping.to_h { |header, attribute| [ attribute, clean(row[header]) ] }.compact
       record = (key && values[key].present? && @find_in.find_by(key => values[key])) || @build.call
       action = record.new_record? ? :create : :update
       # As in the form: an update is authorized on the record as it is stored,
@@ -79,14 +79,14 @@ module Wibawa
       allowed = @authorize.call(action, record) if action == :create
 
       if !allowed
-        result.errors << [line, I18n.t("wibawa.flash.not_authorized")]
+        result.errors << [ line, I18n.t("wibawa.flash.not_authorized") ]
       elsif record.save
         action == :create ? result.created += 1 : result.updated += 1
       else
-        result.errors << [line, record.errors.full_messages.to_sentence]
+        result.errors << [ line, record.errors.full_messages.to_sentence ]
       end
     rescue ArgumentError, ActiveRecord::ActiveRecordError => e # e.g. a value that is not one of an enum's
-      result.errors << [line, e.message]
+      result.errors << [ line, e.message ]
     end
 
     # A leading apostrophe that the export added to defuse a
