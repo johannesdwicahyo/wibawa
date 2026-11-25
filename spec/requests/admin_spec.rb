@@ -57,13 +57,13 @@ it "shows active filters as chips that remove one filter and keep the rest" do
 
   it "keeps screen-reader text inside the scrolling table wrapper" do
     get "/admin/orders"
-    expect(response.body).to include('class="relative overflow-x-auto"')
+    expect(response.body).to include('class="relative max-h-[calc(100dvh-8rem)] overflow-auto"')
   end
 
   it "shows a status as a dot plus the word, and as a pill only when asked" do
     get "/admin/orders"
-    expect(response.body).to include("bg-amber-500").and include("Pending")
-    expect(response.body).not_to include("ring-amber-600/20")
+    expect(response.body).to include("bg-warning").and include("Pending")
+    expect(response.body).not_to include("ring-warning/25")
   end
   
   it "serves its own font and calls no third party" do

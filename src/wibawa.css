@@ -8,6 +8,8 @@
 @source "../app/assets/javascripts";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* The sidebar collapsed to icons (desktop only): `lg:rail:w-14`. */
+@custom-variant rail (&:where(.wb-rail, .wb-rail *));
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -27,6 +29,10 @@
 @theme inline {
   --color-canvas: var(--wb-canvas);
   --color-surface: var(--wb-surface);
+  --color-success: var(--wb-success);
+  --color-warning: var(--wb-warning);
+  --color-danger: var(--wb-danger);
+  --color-info: var(--wb-info);
   --color-surface-2: var(--wb-surface-2);
   --color-line: var(--wb-line);
   --color-ink: var(--wb-ink);
@@ -50,6 +56,11 @@
   --wb-ink-2: oklch(47% 0.015 265);    /* labels and meta, 4.5:1 or better */
   --wb-ink-3: oklch(62% 0.01 265);     /* icons, placeholders, disabled: never body text */
   --wb-rail: oklch(27% 0.09 266);
+  /* State only: text, dots, rings and 10% tints. Each is 4.5:1 or better as text on a surface. */
+  --wb-success: oklch(45% 0.12 155);
+  --wb-warning: oklch(52% 0.12 75);
+  --wb-danger: oklch(50% 0.18 25);
+  --wb-info: oklch(48% 0.13 240);
   /* Chart series, in this fixed order. Checked for colour-blind separation between neighbours; re-check before changing one. */
   --wb-series-1: #2a78d6;
   --wb-series-2: #eb6834;
@@ -70,13 +81,17 @@
   --wb-ink: oklch(95% 0.005 265);
   --wb-ink-2: oklch(72% 0.01 265);
   --wb-ink-3: oklch(55% 0.01 265);
---wb-rail: oklch(19% 0.05 266);
---wb-series-1: #3987e5;
---wb-series-2: #d95926;
---wb-series-3: #199e70;
---wb-series-4: #c98500;
---wb-series-5: #d55181;
---wb-series-6: #0ca30c;
+  --wb-rail: oklch(19% 0.05 266);
+  --wb-success: oklch(78% 0.14 155);
+  --wb-warning: oklch(80% 0.13 75);
+  --wb-danger: oklch(77% 0.13 25);
+  --wb-info: oklch(76% 0.11 240);
+  --wb-series-1: #3987e5;
+  --wb-series-2: #d95926;
+  --wb-series-3: #199e70;
+  --wb-series-4: #c98500;
+  --wb-series-5: #d55181;
+  --wb-series-6: #0ca30c;
   color-scheme: dark;
 }
 
@@ -106,6 +121,9 @@
 
 [data-wb-batch-bar], [data-wb-flash], .wb-enter, [data-wb-popover][open] > div, [data-wb-palette][open] { animation: wb-drop 180ms var(--default-transition-timing-function); }
 [data-wb-sidebar-backdrop] { animation: wb-fade 200ms; }
+
+/* A select that submitted its form and waits for the page. */
+select[aria-busy="true"] { cursor: progress; opacity: 0.6; }
 
 /* A button waiting for the server. */
 [data-wb-busy] { cursor: progress; }

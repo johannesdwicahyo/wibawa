@@ -253,6 +253,17 @@ function toggleTheme() {
   document.startViewTransition ? document.startViewTransition(flip) : flip()
 }
 
+// ---- Sidebar rail (desktop) ---------------------------------------------------
+
+const RAIL_KEY = "wibawa-rail"
+const syncRail = () => $$("[data-wb-rail-toggle]").forEach((el) => el.setAttribute("aria-pressed", document.documentElement.classList.contains("wb-rail")))
+
+function toggleRail() {
+  const on = document.documentElement.classList.toggle("wb-rail")
+  try { localStorage.setItem(RAIL_KEY, on ? "1" : "0") } catch (_) {}
+  syncRail()
+}
+
 // ---- Batch selection -------------------------------------------------------
 
 function syncBatchBar() {
@@ -358,7 +369,7 @@ document.addEventListener("dragend", () => {
 document.addEventListener("click", (event) => {
   const target = event.target.closest?.(
     "[data-wb-sidebar-open], [data-wb-sidebar-close], [data-wb-sidebar-backdrop], " +
-    "[data-wb-theme-toggle], [data-wb-dismiss], [data-wb-nested-add], [data-wb-nested-remove]"
+    "[data-wb-theme-toggle], [data-wb-rail-toggle], [data-wb-dismiss], [data-wb-nested-add], [data-wb-nested-remove]"
   )
   closePopovers(event.target.closest?.("details[data-wb-popover]"))
   if (!target) return
@@ -367,6 +378,7 @@ document.addEventListener("click", (event) => {
   else if (target.matches("[data-wb-sidebar-close]")) setSidebar(false)
   else if (target.matches("[data-wb-sidebar-backdrop]")) setSidebar(false)
   else if (target.matches("[data-wb-theme-toggle]")) toggleTheme()
+  else if (target.matches("[data-wb-rail-toggle]")) toggleRail()
   else if (target.matches("[data-wb-dismiss]")) target.closest("[data-wb-flash]")?.remove()
   else if (target.matches("[data-wb-nested-add]")) addNested(target)
   else if (target.matches("[data-wb-nested-remove]")) removeNested(target)
@@ -406,6 +418,7 @@ document.addEventListener("keydown", (event) => {
 document.addEventListener("turbo:load", () => {
   setSidebar(false)
   syncBatchBar()
+  syncRail()
   lastChecked = null
   const mac = /Mac|iPhone|iPad/.test(navigator.platform)
   $$("[data-wb-palette-kbd]").forEach((el) => { el.textContent = mac ? "⌘K" : "Ctrl K" })
@@ -415,7 +428,13 @@ document.addEventListener("turbo:render", () => document.querySelector('[data-wb
 document.addEventListener("turbo:morph", syncBatchBar)
 
 // The button that submitted a form shows a spinner until the response arrives.
-document.addEventListener("turbo:submit-start", (event) => event.detail.formSubmission.submitter?.setAttribute("data-wb-busy", ""))
+// A select that submits on change dims until the new page arrives.
+document.addEventListener("turbo:submit-start", (event) => {
+  event.detail.formSubmission.submitter?.setAttribute("data-wb-busy", "")
+  $$("select[data-wb-autosubmit]").forEach((el) => { if (el.form === event.target) el.setAttribute("aria-busy", "true") })
+})
 document.addEventListener("turbo:submit-end", (event) => {
-  if (!event.detail.success) event.detail.formSubmission.submitter?.removeAttribute("data-wb-busy")
+  if (event.detail.success) return
+  event.detail.formSubmission.submitter?.removeAttribute("data-wb-busy")
+  $$("select[aria-busy]").forEach((el) => el.removeAttribute("aria-busy"))
 })

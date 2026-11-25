@@ -81,6 +81,8 @@ en:
     time_ago: "%{time} ago"
     to: "To"
     toggle_theme: "Toggle dark mode"
+    toggle_sidebar: "Collapse or expand the sidebar"
+    more_actions: "More actions"
     view: "View"
     view_all: "View all"
     "yes": "Yes"

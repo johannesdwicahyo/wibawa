@@ -42,6 +42,21 @@ module Wibawa
       NUMERIC_TYPES.include?(model.columns_hash[column.name.to_s]&.type) && model.reflect_on_association(column.name).nil?
     end
 
+    # Row height: 40 px, or 32 px with `index density: :compact`.
+    def row_pad = resource.index_options[:density].to_s == "compact" ? "h-8 py-0.5" : "h-10 py-1.5"
+
+    # The header stays put while the table scrolls inside its card. Its bottom
+    # line is a shadow: a border on a sticky cell scrolls away with the rows.
+    def th_class(*extra) = class_names("bg-surface-2 shadow-[inset_0_-1px_0_var(--color-line)]", *extra)
+
+    # On phones the first column stays in view while the others scroll sideways.
+    def pinned(column, surface)
+      return unless column.equal?(columns.first)
+
+      class_names("max-sm:sticky max-sm:left-0 max-sm:max-w-40 max-sm:overflow-hidden max-sm:text-ellipsis max-sm:whitespace-nowrap",
+                surface == :header ? "max-sm:bg-surface-2" : "max-sm:bg-surface max-sm:shadow-[inset_-1px_0_0_var(--color-line)]")
+    end
+
     def sortable?(column) = column.sort_expression(model).present?
     def sorted?(column) = query.sort_key == column.name.to_s
 

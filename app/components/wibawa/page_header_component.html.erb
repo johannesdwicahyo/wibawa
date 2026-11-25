@@ -15,8 +15,21 @@
       <% if subtitle %><p class="mt-1 text-sm text-ink-2"><%= subtitle %></p><% end %>
     </div>
     <% if actions.any? %>
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="<%= class_names('flex flex-wrap items-center gap-2', 'max-sm:hidden' => overflow.any?) %>">
         <% actions.each do |action| %><%= action_button(action) %><% end %>
+      </div>
+    <% end %>
+    <% if overflow.any? %>
+      <div class="relative flex w-full items-center gap-2 sm:hidden">
+        <% if primary %><%= action_button(primary) %><% end %>
+        <details data-wb-popover data-wb-more>
+          <summary class="<%= wibawa_button_class(:secondary, 'list-none px-2.5 [&::-webkit-details-marker]:hidden') %>" aria-label="<%= t('wibawa.more_actions') %>">
+            <%= icon("more") %>
+          </summary>
+          <div class="absolute inset-x-0 top-full z-30 mt-2 rounded-card bg-surface p-1 shadow-lg ring-1 ring-line">
+            <% overflow.each do |action| %><%= action_button(action, menu: true) %><% end %>
+          </div>
+        </details>
       </div>
     <% end %>
   </div>

@@ -110,7 +110,7 @@ module Wibawa
     end
 
     def label_html
-      text = required? ? safe_join([label_text, content_tag(:span, " *", class: "text-rose-500", "aria-hidden": "true")]) : label_text
+      text = required? ? safe_join([label_text, content_tag(:span, " *", class: "text-danger", "aria-hidden": "true")]) : label_text
       form.label(attribute, text, class: label_class)
     end
 
@@ -252,7 +252,7 @@ module Wibawa
     def error_html
       return nil if errors.empty?
 
-      content_tag(:p, errors.to_sentence.upcase_first, id: error_id, class: "mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400")
+      content_tag(:p, errors.to_sentence.upcase_first, id: error_id, class: "mt-1.5 text-xs font-medium text-danger")
     end
   end
 end

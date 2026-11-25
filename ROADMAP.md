@@ -24,7 +24,7 @@ Something a team can put in front of real staff.
 - [ ] Brand: kawung mark chosen and in the README; still to do: final wordmark, colour, favicon, usage guide
 - [x] UI redesign to `DESIGN.md`: color tokens, bundled font, 13 px floor, status as dot plus word, sized form fields
 - [x] Motion (page cross-fade, save spinner) and a single filter toolbar with chips
-- [ ] Rest of `DESIGN.md` (see its "Not built yet" list): sticky header, compact density, collapsible sidebar, phone overflow menu
+- [x] Rest of `DESIGN.md`: sticky header, compact density, collapsible sidebar, phone overflow menu and pinned first column, state color tokens
 - [x] Secure by default: refuse to serve outside development and test until `authenticate_with` is configured (opt out explicitly)
 - [x] System specs for the JavaScript: nested rows (add, remove, reorder), batch selection, filters, theme toggle, mobile sidebar, command palette, searchable select
 - [ ] System specs still to write: searchable multi-select, saved views, CSV import upload, a real mouse drag

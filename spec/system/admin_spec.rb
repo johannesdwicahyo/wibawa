@@ -153,6 +153,69 @@ RSpec.describe "Wibawa in the browser", type: :system do
     end
   end
 
+  describe "sidebar rail" do
+    it "collapses to icons and stays collapsed on the next page" do
+      visit "/admin"
+      width = -> { js("document.querySelector('[data-wb-sidebar]').getBoundingClientRect().width") }
+      expect(width.call).to eq(256)
+
+      find("[data-wb-rail-toggle]").click
+      expect(page).to have_css("[data-wb-rail-toggle][aria-pressed=true]")
+      expect(width.call).to eq(56)
+      expect(page).to have_no_css("[data-wb-sidebar] nav span", text: "Orders")
+
+      find("[data-wb-sidebar] nav a[title=Orders]").click
+      expect(page).to have_current_path("/admin/orders")
+      expect(width.call).to eq(56)
+      find("[data-wb-rail-toggle]").click
+      expect(width.call).to eq(256)
+    end
+  end
+
+  describe "index table" do
+    it "keeps its header in view while the rows scroll, and honours compact density" do
+      60.times { |i| Order.create!(number: "S-#{i}", customer: customer, total: 1) }
+      visit "/admin/orders"
+      top = js(<<~JS)
+        (() => {
+          const box = document.querySelector("[data-wb-table] .overflow-auto")
+          box.scrollTop = 800
+          return [box.scrollTop, Math.round(box.querySelector("th").getBoundingClientRect().top - box.getBoundingClientRect().top),
+                  Math.round(box.querySelector("tbody tr").getBoundingClientRect().height)]
+        })()
+      JS
+      expect(top).to eq([800, 0, 40])
+
+      orders.first.line_items.create!(product: "Tea", position: 1)
+      visit "/admin/line_items"
+      expect(js("Math.round(document.querySelector('tbody tr').getBoundingClientRect().height)")).to eq(32)
+    end
+  end
+
+  describe "page actions on a phone" do
+    it "folds secondary actions into a menu and keeps the first column in view" do
+      page.current_window.resize_to(390, 800)
+      visit "/admin/orders"
+      expect(page).to have_css("header a", text: "New Order", count: 1)
+      expect(page).to have_no_css("header a", text: "Import CSV")
+
+      find("[data-wb-more] summary").click
+      expect(page).to have_css("[data-wb-more] a", text: "Import CSV")
+      find("body").send_keys(:escape)
+      expect(page).to have_css("[data-wb-more]:not([open])")
+
+      left = js(<<~JS)
+        (() => {
+          const box = document.querySelector("[data-wb-table] .overflow-auto")
+          box.scrollLeft = 200
+          return [box.scrollLeft > 0, Math.round(box.querySelector("tbody td:nth-child(2)").getBoundingClientRect().left - box.getBoundingClientRect().left)]
+        })()
+      JS
+      expect(left).to eq([true, 0])
+      expect(js("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
+    end
+  end
+
   describe "command palette" do
     it "opens on Ctrl+K, filters pages, finds records and follows Enter" do
       visit "/admin"

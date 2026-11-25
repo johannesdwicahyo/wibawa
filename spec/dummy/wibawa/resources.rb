@@ -4,7 +4,9 @@ Wibawa.resource Customer do
     field :orders
   end
 end
-Wibawa.resource LineItem
+Wibawa.resource LineItem do
+  index density: :compact
+end
 
 Wibawa.resource Order do
   scope :all, default: true

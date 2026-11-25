@@ -1,6 +1,6 @@
 # Wibawa design spec
 
-**Status: built**, except the items under "Not built yet" at the end. Logo: kawung. Status style: dot plus word. Font: bundled.
+**Status: built.** Logo: kawung. Status style: dot plus word. Font: bundled.
 
 Sources: [Impeccable](https://impeccable.style) ("Operate" mode, for product UI), [Taste Skill](https://www.tasteskill.dev) (system and motion rules), and the DESIGN.md format from [xiaopu-ai/web-design](https://github.com/xiaopu-ai/web-design). That last skill is written for landing pages; its scroll effects, WebGL and "three wow moments" rules are deliberately not applied to an admin panel. They will apply to the docs site (roadmap M3).
 
@@ -25,7 +25,7 @@ The two colors of classical Javanese batik: indigo (*wedel*) for action, soga br
 | `--wb-primary` | `oklch(42% 0.15 264)` | `oklch(72% 0.11 264)` | Primary button, focus ring, current item |
 | `--wb-on-primary` | `#fff` | `oklch(17% 0.015 265)` | Label on a primary button |
 | `--wb-rail` | `oklch(27% 0.09 266)` | `oklch(19% 0.05 266)` | Sidebar |
-| success / warning / danger / info | hue 155 / 75 / 25 / 240 | same hues, lighter | State only |
+| `--wb-success` / `-warning` / `-danger` / `-info` | hue 155 / 75 / 25 / 240, lightness 45 to 52% | same hues, 76 to 80% | State only: text, dots, rings, 10% tints |
 
 Rules:
 
@@ -118,13 +118,13 @@ Found while auditing the current UI, and fixed because they were defects rather 
 - Enum columns were right-aligned as if they were numbers.
 - Sidebar group labels were below 4.5:1.
 
-## Not built yet
+## Built last
 
-These are in the spec above but were left out of the first build; they are tracked in ROADMAP M1.
+The six items that were left out of the first build are in:
 
-- Sticky table header (the table scrolls inside its own container, so it needs a layout change)
-- `density: :compact` rows
-- Collapsible icon rail for the sidebar
-- Overflow menu for page actions and a sticky first column on phones
-- Loading and disabled states on every control (buttons have them; selects and row actions do not)
-- State colors still use Tailwind's emerald, amber, rose and sky rather than the hues listed in section 2
+- **Sticky table header.** The table card is the scroller in both directions and is capped to the window height, so the header row stays in view.
+- **`index density: :compact`.** 32 px rows instead of 40.
+- **Sidebar rail.** A button in the sidebar footer collapses it to 56 px of icons on desktop; the choice is remembered in the browser. Labels become tooltips.
+- **Phones.** With two or more secondary page actions, they fold into a "more" menu next to the primary one. The first table column stays in view while the rest scrolls sideways.
+- **Loading and disabled states.** Inputs and selects dim when disabled; a select that submits on change dims until the new page arrives.
+- **State colors.** Success, warning, danger and info are tokens (`--wb-success` and so on) at hues 155 / 75 / 25 / 240, with separate light and dark values, each 4.5:1 or better as text.

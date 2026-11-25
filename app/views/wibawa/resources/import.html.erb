@@ -5,7 +5,7 @@
 
 <div class="max-w-3xl space-y-6">
   <% if @result && !@result.ok? %>
-    <div role="alert" class="rounded-control bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30">
+    <div role="alert" class="rounded-control bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-inset ring-danger/30">
       <p class="font-medium"><%= t("wibawa.import.failed") %></p>
       <ul class="mt-2 space-y-1">
         <% @result.errors.each do |line, message| %>

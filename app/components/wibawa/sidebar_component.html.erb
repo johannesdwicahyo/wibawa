@@ -1,11 +1,11 @@
 <div data-wb-sidebar-backdrop class="fixed inset-0 z-30 hidden bg-zinc-950/50 lg:hidden"></div>
 
 <aside data-wb-sidebar
-       class="wb-sidebar fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-rail text-white transition-transform duration-200 lg:translate-x-0">
-  <div class="flex h-16 shrink-0 items-center gap-3 px-5">
+       class="wb-sidebar fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col lg:rail:w-14 bg-rail text-white transition-transform duration-200 lg:translate-x-0">
+  <div class="flex h-16 shrink-0 items-center gap-3 px-5 lg:rail:px-3">
     <%= link_to root_path, class: "flex min-w-0 items-center gap-3 rounded-control focus-visible:outline-2 focus-visible:outline-white/60" do %>
       <span class="grid size-8 shrink-0 place-items-center rounded-control bg-white text-sm font-bold text-rail"><%= default_title? ? helpers.wibawa_mark : initials %></span>
-      <span class="truncate text-[15px] font-semibold tracking-tight"><%= title %></span>
+      <span class="truncate text-[15px] font-semibold tracking-tight lg:rail:hidden"><%= title %></span>
     <% end %>
     <button type="button" data-wb-sidebar-close class="ml-auto rounded-md p-1 text-white/70 hover:text-white lg:hidden" aria-label="<%= t('wibawa.close_menu') %>">
       <%= icon("x") %>
@@ -13,31 +13,31 @@
   </div>
 
   <div class="shrink-0 px-3 pb-3">
-    <button type="button" data-wb-palette-open
-            class="flex w-full items-center gap-3 rounded-control bg-white/[0.07] px-2.5 py-2 text-sm text-white/70 transition-colors hover:bg-white/12 hover:text-white">
+    <button type="button" data-wb-palette-open title="<%= t('wibawa.search') %>"
+            class="flex w-full items-center gap-3 rounded-control bg-white/[0.07] px-2.5 py-2 text-sm text-white/70 transition-colors hover:bg-white/12 hover:text-white lg:rail:justify-center lg:rail:px-0">
       <%= icon("search", size: "size-4") %>
-      <span class="flex-1 text-left"><%= t("wibawa.search") %></span>
-      <kbd data-wb-palette-kbd class="font-sans text-xs text-white/70">Ctrl K</kbd>
+      <span class="flex-1 text-left lg:rail:hidden"><%= t("wibawa.search") %></span>
+      <kbd data-wb-palette-kbd class="font-sans text-xs text-white/70 lg:rail:hidden">Ctrl K</kbd>
     </button>
   </div>
 
   <nav class="flex-1 overflow-y-auto px-3 pb-6" aria-label="<%= t('wibawa.navigation') %>">
-    <%= link_to root_path, class: link_class(dashboard_active?), "aria-current": (dashboard_active? ? "page" : nil) do %>
-      <%= icon("home", class: "opacity-80") %><span><%= t("wibawa.dashboard") %></span>
+    <%= link_to root_path, class: link_class(dashboard_active?), title: t("wibawa.dashboard"), "aria-current": (dashboard_active? ? "page" : nil) do %>
+      <%= icon("home", class: "opacity-80") %><span class="lg:rail:hidden"><%= t("wibawa.dashboard") %></span>
     <% end %>
 
     <% groups.each do |name, resources| %>
       <% if name %>
-        <p class="mb-1 mt-6 px-2.5 text-xs font-medium text-white/70"><%= name %></p>
+        <p class="<%= group_class %>"><%= name %></p>
       <% else %>
         <div class="mt-1"></div>
       <% end %>
       <ul class="space-y-0.5">
         <% resources.each do |resource| %>
           <li>
-            <%= link_to resources_path(resource: resource.key), class: link_class(active?(resource)), "aria-current": (active?(resource) ? "page" : nil) do %>
+            <%= link_to resources_path(resource: resource.key), class: link_class(active?(resource)), title: resource.label, "aria-current": (active?(resource) ? "page" : nil) do %>
               <%= icon(resource.menu_icon, class: "opacity-80") %>
-              <span class="truncate"><%= resource.label %></span>
+              <span class="truncate lg:rail:hidden"><%= resource.label %></span>
             <% end %>
           </li>
         <% end %>
@@ -46,14 +46,14 @@
 
     <% extra_groups.each do |name, entries| %>
       <% if name %>
-        <p class="mb-1 mt-6 px-2.5 text-xs font-medium text-white/70"><%= name %></p>
+        <p class="<%= group_class %>"><%= name %></p>
       <% end %>
       <ul class="<%= name ? 'space-y-0.5' : 'mt-0.5 space-y-0.5' %>">
         <% entries.each do |entry| %>
           <li>
-            <%= link_to entry.url, class: link_class(entry.active), "aria-current": (entry.active ? "page" : nil) do %>
+            <%= link_to entry.url, class: link_class(entry.active), title: entry.label, "aria-current": (entry.active ? "page" : nil) do %>
               <%= icon(entry.icon, class: "opacity-80") %>
-              <span class="truncate"><%= entry.label %></span>
+              <span class="truncate lg:rail:hidden"><%= entry.label %></span>
             <% end %>
           </li>
         <% end %>
@@ -62,12 +62,16 @@
   </nav>
 
   <div class="wb-kawung shrink-0 border-t border-white/10 px-3 py-3">
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 lg:rail:flex-col">
       <% if user_label %>
-        <p class="min-w-0 flex-1 truncate px-2.5 text-sm text-white/80" title="<%= user_label %>"><%= user_label %></p>
+        <p class="min-w-0 flex-1 truncate px-2.5 text-sm text-white/80 lg:rail:hidden" title="<%= user_label %>"><%= user_label %></p>
       <% else %>
-        <div class="flex-1"></div>
+        <div class="flex-1 lg:rail:hidden"></div>
       <% end %>
+      <button type="button" data-wb-rail-toggle aria-pressed="false" class="hidden rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white lg:block"
+              title="<%= t('wibawa.toggle_sidebar') %>" aria-label="<%= t('wibawa.toggle_sidebar') %>">
+        <%= icon("sidebar", size: "size-[18px]") %>
+      </button>
       <button type="button" data-wb-theme-toggle class="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white" aria-label="<%= t('wibawa.toggle_theme') %>">
         <span class="dark:hidden"><%= icon("moon", size: "size-[18px]") %></span>
         <span class="hidden dark:inline"><%= icon("sun", size: "size-[18px]") %></span>

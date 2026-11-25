@@ -3,7 +3,7 @@
 <%= form_with model: record, scope: :record, url: form_url, method: (new_record? ? :post : :patch),
               multipart: multipart?, class: "max-w-3xl", data: { wb_form: true } do |f| %>
   <% if errors? %>
-    <div role="alert" class="mb-6 rounded-control bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30">
+    <div role="alert" class="mb-6 rounded-control bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-inset ring-danger/30">
       <p class="font-medium"><%= t("wibawa.form.errors_heading", count: record.errors.count) %></p>
       <% if base_errors.any? %>
         <ul class="mt-1 list-disc pl-5"><% base_errors.each do |message| %><li><%= message %></li><% end %></ul>

@@ -66,7 +66,7 @@ class ResourceTest < Minitest::Test
     assert_equal %i[id total items], r.index_columns.map(&:name)
     assert r.index_columns.first.link?
     assert_equal "Items", r.index_columns.last.label
-    assert_equal({ per_page: 25, sort: "created_at desc", count: false }, r.index_options)
+    assert_equal({ per_page: 25, sort: "created_at desc", count: false, density: nil }, r.index_options)
     assert_equal [:show], r.row_actions[:only]
   end
 
