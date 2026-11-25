@@ -1,2 +1,2 @@
 <% content_for :title, @report.title %>
-<%= render wibawa_component(:report_page, Wibawa::ReportPageComponent).new(report: @report, values: @values, rows: @rows) %>
+<%= render wibawa_component(:report_page, Wibawa::ReportPageComponent).new(report: @report, values: @values, page: @page, chart_rows: @chart_rows) %>

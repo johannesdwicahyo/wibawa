@@ -62,4 +62,10 @@ module Wibawa
       end
     end
   end
+
+  # Pages a Report::Result with the same interface, for PaginationComponent.
+  class ReportPaginator < Paginator
+    def records = @records ||= @relation.rows(limit: per_page, offset: offset)
+    def total_count = @relation.total
+  end
 end

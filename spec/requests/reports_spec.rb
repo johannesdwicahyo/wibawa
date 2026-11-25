@@ -43,6 +43,38 @@ RSpec.describe "Wibawa reports", type: :request do
     expect { Wibawa::Report.new(:x) { query { [] } and chart(x: :a, y: %i[a b c d e f g]) } }.to raise_error(Wibawa::Error, /1 to 6 series/)
   end
 
+  it "pages the table in the database and keeps the CSV whole" do
+    queries = []
+    callback = ->(*, payload) { queries << payload[:sql] if payload[:sql].include?("FROM orders") }
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") do
+      get "/admin/reports/order_list", params: { per_page: 2, page: 2 }
+    end
+    # Numbers sort as =B-1, A-1, A-2: page 2 of 2 holds the last one.
+    expect(response.body).to include(">A-2<", "3–3 of 3", "page=1")
+    expect(response.body).not_to include(">A-1<")
+    expect(queries).to contain_exactly(a_string_ending_with("LIMIT 2 OFFSET 2"), a_string_starting_with("SELECT COUNT(*) AS total FROM ("))
+
+    get "/admin/reports/order_relation", params: { per_page: 2 }
+    expect(response.body).to include(">A-1<", "1–2 of 3")
+    expect(response.body).not_to include(">A-2<")
+
+    get "/admin/reports/order_list.csv", params: { per_page: 2 }
+    expect(response.body.lines.size).to eq(4)
+  end
+
+  it "pages in memory what the database cannot page" do
+    # SQL with its own LIMIT, and a grouped hash from a query block.
+    get "/admin/reports/top_orders", params: { per_page: 1, page: 2 }
+    expect(response.body).to include(">A-1<", "2–2 of 2")
+
+    Customer.create!(name: "Adi").orders.create!(number: "C-1", total: 1)
+    get "/admin/reports/orders_per_customer", params: { per_page: 1, page: 2 }
+    expect(response.body).to include(">Sari<", "2–2 of 2")
+
+    get "/admin/reports/order_list", params: { page: 9 }
+    expect(response).to have_http_status(:ok)
+  end
+
   it "binds params instead of interpolating them" do
     get "/admin/reports/orders_by_status", params: { p: { number: "A-%" } }
     expect(response.body).to include("$25.00")

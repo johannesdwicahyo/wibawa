@@ -60,7 +60,6 @@ id:
     reports: "Laporan"
     run_report: "Jalankan"
     report_empty: "Laporan ini tidak memiliki baris."
-    report_truncated: "Menampilkan %{count} baris pertama. Ekspor CSV untuk semuanya."
     active_filters: "Filter aktif"
     remove_filter: "Hapus filter: %{name}"
     from: "Dari"

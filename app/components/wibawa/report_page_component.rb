@@ -12,17 +12,21 @@ module Wibawa
     # and per series [series, raw value, height from the bottom (%)].
     Point = Struct.new(:label, :x, :marks)
 
-    def initialize(report:, values:, rows:)
+    FORM_ID = "wb-report-form"
+
+    # `page` holds the table's rows; `chart_rows` is the start of the result.
+    def initialize(report:, values:, page:, chart_rows: [])
       @report = report
       @values = values
-      @rows = rows
+      @page = page
+      @chart_rows = chart_rows
     end
 
-    attr_reader :report, :values, :rows
+    attr_reader :report, :values, :page, :chart_rows
 
-    def columns = @columns ||= report.columns(rows)
-    def shown_rows = rows.first(Wibawa::Report::MAX_ROWS)
-    def truncated? = rows.size > Wibawa::Report::MAX_ROWS
+    def rows = page.records
+    def columns = @columns ||= report.columns(rows.presence || chart_rows)
+    def empty? = rows.empty? && !page.prev?
 
     def header_actions
       [{ label: t("wibawa.export_csv"), icon: "download", style: :secondary, data: { turbo: false },
@@ -59,7 +63,7 @@ module Wibawa
     def bars
       return [] unless chart_type == :bar
 
-      shown = rows.first(CHART_BARS)
+      shown = chart_rows.first(CHART_BARS)
       max = shown.flat_map { |row| series.map { |one| row[one.name].to_f } }.max.to_f
       shown.map do |row|
         [row[report.chart_options[:x]].to_s.presence || "—",
@@ -80,7 +84,7 @@ module Wibawa
       end
     end
 
-    def line_rows = chart_type == :line ? rows.first(CHART_POINTS) : []
+    def line_rows = chart_type == :line ? chart_rows.first(CHART_POINTS) : []
 
     # One value axis for every series. It always includes zero, so the height of a line means something.
     def y_range

@@ -78,3 +78,15 @@ Wibawa.report :status_compare do
   sql "SELECT status, COUNT(*) AS orders, SUM(total) AS revenue FROM orders GROUP BY status ORDER BY status"
   chart x: :status, y: %i[orders revenue]
 end
+
+Wibawa.report :order_list do
+  sql "SELECT number, total FROM orders ORDER BY number; "
+end
+
+Wibawa.report :order_relation do
+  query { |_params| Order.select(:number, :total).order(:number) }
+end
+
+Wibawa.report :top_orders do
+  sql "SELECT number FROM orders ORDER BY number LIMIT 2"
+end

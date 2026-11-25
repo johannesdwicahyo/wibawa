@@ -74,7 +74,7 @@ RSpec.describe "Wibawa MCP server", type: :request do
     expect(listed).to include("title" => "Orders by status", "params" => [{ "name" => "number", "type" => "string", "default" => "%" }])
 
     all = call("run_report", report: "orders_by_status")
-    expect(all).to include("total" => 1, "truncated" => false, "params" => { "number" => "%" })
+    expect(all).to include("total" => 1, "page" => 1, "has_next" => false, "params" => { "number" => "%" })
     expect(all["rows"].first).to include("orders" => 2)
 
     expect(call("run_report", report: "orders_by_status", params: { number: "B-%" })["rows"].first).to include("orders" => 1)
