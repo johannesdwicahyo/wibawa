@@ -14,6 +14,7 @@ First release.
 - Design system in `DESIGN.md`: every color is a CSS variable, Plus Jakarta Sans ships in the gem (no third-party requests), statuses show as a dot plus the word
 - Sticky table header, `index density: :compact`, a sidebar that collapses to icons, and on phones an overflow menu for page actions with the first column pinned
 - State colors (success, warning, danger, info) are CSS variables too
+- Accessibility: audited against WCAG 2.2 AA with axe-core; skip link, reordering nested rows without dragging, focus that returns from popovers
 - Search and filters share one toolbar: a Filters popover, with active filters as removable chips
 - Page changes cross-fade; the button that saved a form shows a spinner
 - Searchable select: `belongs_to` fields and filters, and `has_many` fields, turn into a search box once the table passes 100 records

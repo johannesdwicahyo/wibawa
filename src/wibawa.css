@@ -97,6 +97,8 @@
 
 @layer base {
   html {
+    /* Keyboard focus is never left under the phone top bar or the form's sticky footer. */
+    scroll-padding: 4.5rem 0 5.5rem;
     -webkit-tap-highlight-color: transparent;
     accent-color: var(--color-primary);
     caret-color: var(--color-primary);
@@ -104,6 +106,8 @@
   }
   ::selection { background: color-mix(in oklab, var(--color-primary) 22%, transparent); }
   :focus-visible { outline-color: var(--color-primary); }
+  /* On the indigo sidebar the primary color would vanish; use white. */
+  .wb-sidebar :focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   [hidden] { display: none !important; }
   h1, h2 { text-wrap: balance; }
 }

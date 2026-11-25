@@ -29,7 +29,8 @@ Something a team can put in front of real staff.
 - [x] System specs for the JavaScript: nested rows (add, remove, reorder), batch selection, filters, theme toggle, mobile sidebar, command palette, searchable select
 - [ ] System specs still to write: searchable multi-select, saved views, CSV import upload, a real mouse drag
 - [ ] Verify what the README promises but nobody has run: Pundit and ActionPolicy adapters, Active Storage attachments, Action Text, Sprockets, the `id` locale, `wibawa:component`
-- [ ] Accessibility pass to WCAG 2.2 AA (keyboard, focus order, contrast in both themes)
+- [x] Accessibility pass to WCAG 2.2 AA: automated axe-core audit of every page type in both themes and two widths, plus keyboard specs
+- [ ] Accessibility: a manual screen-reader pass (VoiceOver, NVDA), text spacing and 200% zoom
 - [ ] CSV export by primary-key batches instead of OFFSET
 - [ ] README with screenshots, and a seeded demo app in the repo
 - [ ] Publish to RubyGems with MFA and trusted publishing

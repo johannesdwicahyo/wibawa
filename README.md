@@ -387,7 +387,7 @@ npm install
 npm run build:css            # rebuild app/assets/builds/wibawa.css after changing classes
 ```
 
-The system specs (`spec/system`) drive headless Chrome, so Chrome or Chromium must be installed. Commit the rebuilt CSS; CI fails if it's out of date.
+The system specs (`spec/system`) drive headless Chrome, so Chrome or Chromium must be installed. The accessibility specs need `npm install` for axe-core and are skipped without it. Commit the rebuilt CSS; CI fails if it's out of date.
 
 ## License
 

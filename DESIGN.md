@@ -108,6 +108,17 @@ Don't:
 - Below 640: page actions collapse to primary plus an overflow menu; tables scroll horizontally inside their card with the first column sticky.
 - Touch targets 44 px. No horizontal page scroll at 390 px (now covered by a spec).
 
+## 10. Accessibility
+
+Target: WCAG 2.2 AA. `spec/system/accessibility_spec.rb` runs axe-core on every kind of page in both themes at 1280 and 390 px, and with the filters, batch bar, palette, sidebar rail and form errors showing.
+
+- A "Skip to content" link is the first stop for the Tab key.
+- Everything a pointer can do, the keyboard can do. Nested rows reorder by dragging, by the arrow buttons, or by the arrow keys on the handle.
+- Closing a popover with Escape puts focus back on its button. The command palette and the searchable select tell assistive technology which option is active.
+- Focus is always visible (white on the sidebar) and is not left under a sticky bar.
+- Targets are 24 px or larger, 44 px on touch.
+- Charts are images with a name; the table under each one carries the same numbers.
+
 ## Already fixed
 
 Found while auditing the current UI, and fixed because they were defects rather than taste:

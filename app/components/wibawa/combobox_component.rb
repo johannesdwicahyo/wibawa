@@ -79,7 +79,7 @@ module Wibawa
           content_tag(:span, label, class: "truncate"),
           hidden_input(id),
           content_tag(:button, icon("x", size: "size-3.5"), type: "button", data: { wb_combo_remove: true },
-                               class: "rounded p-0.5 text-ink-3 hover:text-ink", "aria-label": "#{t('wibawa.form.remove')}: #{label}")
+                               class: "rounded p-1 text-ink-3 hover:text-ink", "aria-label": "#{t('wibawa.form.remove')}: #{label}")
         ])
       end
     end

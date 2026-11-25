@@ -12,6 +12,10 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci # axe-core, for the accessibility specs
       - run: bundle exec rake
   css:
     runs-on: ubuntu-latest
