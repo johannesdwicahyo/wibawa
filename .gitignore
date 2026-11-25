@@ -6,3 +6,4 @@
 Gemfile.lock
 .playwright-mcp/
 spec/dummy/tmp/
+demo/tmp/

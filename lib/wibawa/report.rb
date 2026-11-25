@@ -142,7 +142,8 @@ module Wibawa
     # [SQL, the class whose database runs it] or [nil, nil, rows] when a
     # `query` block returned something that is not a relation.
     def source(values)
-      return [ActiveRecord::Base.sanitize_sql_array([@sql, values]), @on || ActiveRecord::Base] if @sql
+      # Without params there is nothing to bind, and binding would read a bare % (LIKE, strftime) as a format.
+      return [params.empty? ? @sql : ActiveRecord::Base.sanitize_sql_array([@sql, values]), @on || ActiveRecord::Base] if @sql
 
       result = @query.call(values)
       result.is_a?(ActiveRecord::Relation) ? [result.to_sql, result.klass] : [nil, nil, rows_from(result)]

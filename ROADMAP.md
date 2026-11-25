@@ -32,7 +32,7 @@ Something a team can put in front of real staff.
 - [x] Accessibility pass to WCAG 2.2 AA: automated axe-core audit of every page type in both themes and two widths, plus keyboard specs
 - [ ] Accessibility: a manual screen-reader pass (VoiceOver, NVDA), text spacing and 200% zoom
 - [ ] CSV export by primary-key batches instead of OFFSET
-- [ ] README with screenshots, and a seeded demo app in the repo
+- [x] README with screenshots, and a seeded demo app in the repo (`bundle exec rake demo`)
 - [ ] Publish to RubyGems with MFA and trusted publishing
 
 **Exit:** the demo app passes the system specs in both themes at 390 px and 1440 px, and `gem install wibawa` works.
