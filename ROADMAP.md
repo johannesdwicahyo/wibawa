@@ -31,7 +31,7 @@ Something a team can put in front of real staff.
 - [ ] Verify what the README promises but nobody has run: Pundit and ActionPolicy adapters, Active Storage attachments, Action Text, Sprockets, the `id` locale, `wibawa:component`
 - [x] Accessibility pass to WCAG 2.2 AA: automated axe-core audit of every page type in both themes and two widths, plus keyboard specs
 - [ ] Accessibility: a manual screen-reader pass (VoiceOver, NVDA), text spacing and 200% zoom
-- [ ] CSV export by primary-key batches instead of OFFSET
+- [x] CSV export by primary-key batches instead of OFFSET
 - [x] README with screenshots, and a seeded demo app in the repo (`bundle exec rake demo`)
 - [ ] Publish to RubyGems with MFA and trusted publishing
 
