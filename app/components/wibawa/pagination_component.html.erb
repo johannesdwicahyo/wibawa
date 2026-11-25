@@ -11,7 +11,7 @@
 
   <ol class="flex items-center gap-1">
     <li>
-      <%= link_to page_url(page.page - 1), class: nav_class(page.prev?), rel: "prev", "aria-disabled": !page.prev? do %>
+      <%= content_tag :a, href: (page_url(page.page - 1) if page.prev?), class: nav_class(page.prev?), rel: "prev", role: ("link" unless page.prev?), "aria-disabled": (true unless page.prev?) do %>
         <%= icon("chevron-left", size: "size-4") %><span class="sr-only"><%= t("wibawa.pagination.previous") %></span>
       <% end %>
     </li>
@@ -27,7 +27,7 @@
       </li>
     <% end %>
     <li>
-      <%= link_to page_url(page.page + 1), class: nav_class(page.next?), rel: "next", "aria-disabled": !page.next? do %>
+      <%= content_tag :a, href: (page_url(page.page + 1) if page.next?), class: nav_class(page.next?), rel: "next", role: ("link" unless page.next?), "aria-disabled": (true unless page.next?) do %>
         <%= icon("chevron-right", size: "size-4") %><span class="sr-only"><%= t("wibawa.pagination.next") %></span>
       <% end %>
     </li>

@@ -6,6 +6,14 @@ const THEME_KEY = "wibawa-theme"
 
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector))
 
+// Tells assistive technology which option is active while focus stays in the text box.
+let optionId = 0
+function pointAt(input, option) {
+  if (!option) return input.removeAttribute("aria-activedescendant")
+  option.id ||= `wb-option-${++optionId}`
+  input.setAttribute("aria-activedescendant", option.id)
+}
+
 // ---- Sidebar (mobile) ------------------------------------------------------
 
 function setSidebar(open) {
@@ -20,7 +28,13 @@ function setSidebar(open) {
 // ---- Filters popover ---------------------------------------------------------
 
 // Filters and saved views. One open at a time; a click elsewhere or Escape closes them.
-const closePopovers = (except) => $$("details[data-wb-popover][open]").forEach((el) => { if (el !== except) el.removeAttribute("open") })
+// Focus that was inside a closing popover goes back to its button, not nowhere.
+const closePopovers = (except) => $$("details[data-wb-popover][open]").forEach((el) => {
+  if (el === except) return
+  const hadFocus = el.contains(document.activeElement)
+  el.removeAttribute("open")
+  if (hadFocus) el.querySelector("summary").focus()
+})
 
 // ---- Command palette (Cmd/Ctrl+K) ------------------------------------------
 
@@ -32,6 +46,7 @@ function setActiveOption(option) {
   $$("[aria-selected=true]", palette()).forEach((el) => el.setAttribute("aria-selected", "false"))
   option?.setAttribute("aria-selected", "true")
   option?.scrollIntoView({ block: "nearest" })
+  pointAt(palette().querySelector("[data-wb-palette-input]"), option)
 }
 
 // Selects the first visible option and shows "no matches" when there is none.
@@ -104,13 +119,18 @@ document.addEventListener("keydown", (event) => {
       movePalette(event.key === "ArrowDown" ? 1 : -1)
     } else if (event.key === "Enter") {
       event.preventDefault()
-      palette().querySelector("[aria-selected=true] a")?.click()
+      palette().querySelector("[aria-selected=true]")?.click()
     }
   }
 })
 
 document.addEventListener("click", (event) => {
   event.target.closest?.("[data-wb-combo-remove]")?.closest("li").remove()
+  // The skip link puts keyboard focus on the content, which a bare #anchor does not do everywhere.
+  if (event.target.closest?.("[data-wb-skip]")) {
+    event.preventDefault()
+    document.getElementById("wb-main")?.focus()
+  }
   if (event.target.closest?.("[data-wb-palette-open]")) openPalette()
   else if (event.target.matches?.("dialog[data-wb-palette]")) event.target.close() // the backdrop
 })
@@ -136,6 +156,7 @@ function comboParts(el) {
 
 function closeCombo({ input, list }) {
   list.hidden = true
+  pointAt(input, null)
   input.setAttribute("aria-expanded", "false")
 }
 
@@ -143,6 +164,7 @@ function comboActive(list, option) {
   $$("[aria-selected=true]", list).forEach((el) => el.setAttribute("aria-selected", "false"))
   option?.setAttribute("aria-selected", "true")
   option?.scrollIntoView({ block: "nearest" })
+  pointAt(list.closest("[data-wb-combobox]").querySelector("[role=combobox]"), option)
 }
 
 function loadCombo(parts, term, delay) {
@@ -335,6 +357,24 @@ function renumber(fieldset) {
   })
 }
 
+// Reorder without dragging: the arrow buttons, or the arrow keys on the handle.
+function moveNested(control, up) {
+  const item = control.closest("[data-wb-nested-item]")
+  const rows = $$("[data-wb-nested-item]", item.parentElement).filter((row) => !row.hidden)
+  const other = rows[rows.indexOf(item) + (up ? -1 : 1)]
+  if (!other) return
+  item.parentElement.insertBefore(item, up ? other : other.nextSibling)
+  renumber(item.closest("[data-wb-nested]"))
+  control.focus()
+}
+
+document.addEventListener("keydown", (event) => {
+  const handle = event.target.closest?.("[data-wb-drag-handle]")
+  if (!handle || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return
+  event.preventDefault()
+  moveNested(handle, event.key === "ArrowUp")
+})
+
 // Drag to reorder: the handle starts the drag, rows are drop targets.
 let dragging = null
 
@@ -369,7 +409,7 @@ document.addEventListener("dragend", () => {
 document.addEventListener("click", (event) => {
   const target = event.target.closest?.(
     "[data-wb-sidebar-open], [data-wb-sidebar-close], [data-wb-sidebar-backdrop], " +
-    "[data-wb-theme-toggle], [data-wb-rail-toggle], [data-wb-dismiss], [data-wb-nested-add], [data-wb-nested-remove]"
+    "[data-wb-theme-toggle], [data-wb-rail-toggle], [data-wb-dismiss], [data-wb-nested-add], [data-wb-nested-remove], [data-wb-nested-move]"
   )
   closePopovers(event.target.closest?.("details[data-wb-popover]"))
   if (!target) return
@@ -382,6 +422,7 @@ document.addEventListener("click", (event) => {
   else if (target.matches("[data-wb-dismiss]")) target.closest("[data-wb-flash]")?.remove()
   else if (target.matches("[data-wb-nested-add]")) addNested(target)
   else if (target.matches("[data-wb-nested-remove]")) removeNested(target)
+  else if (target.matches("[data-wb-nested-move]")) moveNested(target, target.dataset.wbNestedMove === "up")
 })
 
 document.addEventListener("change", (event) => {

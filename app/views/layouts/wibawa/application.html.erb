@@ -29,6 +29,7 @@
   </head>
 
   <body class="h-full bg-canvas font-sans text-ink antialiased">
+    <a href="#wb-main" data-wb-skip class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-control focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink focus:shadow-lg focus:ring-1 focus:ring-line"><%= t("wibawa.skip_to_content") %></a>
     <%= render wibawa_component(:sidebar, Wibawa::SidebarComponent).new(current_key: params[:resource]) %>
     <%= render wibawa_component(:command_palette, Wibawa::CommandPaletteComponent).new %>
 
@@ -43,7 +44,7 @@
         </button>
       </div>
 
-      <main class="mx-auto max-w-[1600px] px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-8">
+      <main id="wb-main" tabindex="-1" class="outline-none mx-auto max-w-[1600px] px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-8">
         <% flash.each do |type, message| %>
           <% next if message.blank? || !message.is_a?(String) %>
           <div data-wb-flash role="status"

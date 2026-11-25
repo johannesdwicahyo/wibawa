@@ -4,7 +4,7 @@
 
     <div data-wb-batch-bar hidden
          class="flex flex-wrap items-center gap-2 border-b border-line bg-primary/[0.06] px-4 py-2.5 dark:bg-primary/15">
-      <p class="mr-2 text-sm font-medium text-ink">
+      <p class="mr-2 text-sm font-medium text-ink" aria-live="polite">
         <span data-wb-selected-count>0</span> <%= t("wibawa.selected") %>
       </p>
       <% batch_actions.each do |action| %>
@@ -29,7 +29,7 @@
     </div>
   <% else %>
     <%# The card is the scroller in both directions, capped to the window, so the header can stick. %>
-    <div class="relative max-h-[calc(100dvh-8rem)] overflow-auto">
+    <div class="relative max-h-[calc(100dvh-8rem)] scroll-pt-12 overflow-auto">
       <table class="min-w-full text-sm">
         <thead class="sticky top-0 z-10">
           <tr class="bg-surface-2 text-left">

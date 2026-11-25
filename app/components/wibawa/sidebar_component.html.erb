@@ -3,7 +3,7 @@
 <aside data-wb-sidebar
        class="wb-sidebar fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col lg:rail:w-14 bg-rail text-white transition-transform duration-200 lg:translate-x-0">
   <div class="flex h-16 shrink-0 items-center gap-3 px-5 lg:rail:px-3">
-    <%= link_to root_path, class: "flex min-w-0 items-center gap-3 rounded-control focus-visible:outline-2 focus-visible:outline-white/60" do %>
+    <%= link_to root_path, title: title, class: "flex min-w-0 items-center gap-3 rounded-control" do %>
       <span class="grid size-8 shrink-0 place-items-center rounded-control bg-white text-sm font-bold text-rail"><%= default_title? ? helpers.wibawa_mark : initials %></span>
       <span class="truncate text-[15px] font-semibold tracking-tight lg:rail:hidden"><%= title %></span>
     <% end %>

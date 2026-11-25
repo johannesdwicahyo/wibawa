@@ -57,7 +57,7 @@ it "shows active filters as chips that remove one filter and keep the rest" do
 
   it "keeps screen-reader text inside the scrolling table wrapper" do
     get "/admin/orders"
-    expect(response.body).to include('class="relative max-h-[calc(100dvh-8rem)] overflow-auto"')
+    expect(response.body).to include('class="relative max-h-[calc(100dvh-8rem)] scroll-pt-12 overflow-auto"')
   end
 
   it "shows a status as a dot plus the word, and as a pill only when asked" do

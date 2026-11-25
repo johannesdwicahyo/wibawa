@@ -11,10 +11,11 @@
   </label>
 
   <div id="wb-palette-list" role="listbox" class="max-h-[50vh] overflow-y-auto p-2">
-    <ul data-wb-palette-static>
+    <ul data-wb-palette-static role="group" aria-label="<%= t('wibawa.navigation') %>">
       <% items.each do |item| %>
-        <li role="option" aria-selected="false" class="rounded-control aria-selected:bg-surface-2">
-          <%= link_to item.url, class: "flex items-center gap-3 px-3 py-2 text-sm text-ink" do %>
+        <%# The link itself is the option: a link nested inside an option is announced twice. %>
+        <li role="presentation">
+          <%= link_to item.url, role: "option", "aria-selected": "false", tabindex: -1, class: "flex items-center gap-3 rounded-control px-3 py-2 text-sm text-ink aria-selected:bg-surface-2" do %>
             <%= icon(item.icon, size: "size-4", class: "shrink-0 text-ink-3") %>
             <span class="min-w-0 flex-1 truncate"><%= item.label %></span>
             <% if item.hint %><span class="shrink-0 text-xs text-ink-2"><%= item.hint %></span><% end %>
@@ -22,7 +23,7 @@
         </li>
       <% end %>
     </ul>
-    <ul data-wb-palette-results></ul>
+    <ul data-wb-palette-results role="group" aria-label="<%= t('wibawa.palette.records') %>"></ul>
     <p data-wb-palette-empty hidden class="px-3 py-6 text-center text-sm text-ink-2"><%= t("wibawa.palette.empty") %></p>
   </div>
 </dialog>
