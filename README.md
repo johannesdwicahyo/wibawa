@@ -303,7 +303,7 @@ end
 - **Columns** take the same `as:` formats as index columns. Leave them out to show every column the query returns.
 - **Authorization.** Reports are checked as `:show` on the `Wibawa::Report` object: `config.authorize_with { |user, action, subject| ... }` receives it as `subject`, and Pundit looks for `Wibawa::ReportPolicy#show?`.
 
-The table is paged like an index page, and the CSV has every row. A report's SQL is paged by the database (`LIMIT` and `OFFSET` are added to it), so a large result is never loaded whole; give it an `ORDER BY` so the pages stay in order. Results the database cannot page are paged in memory: a `query` block that returns a hash or an array, SQL that ends in its own `LIMIT`, and SQL Server or Oracle. The chart always draws the start of the result. Nothing stops a report's SQL from writing, so point reports at a read-only database user where you can.
+The table is paged like an index page, and the CSV has every row, streamed in batches. A report's SQL is paged by the database (`LIMIT` and `OFFSET` are added to it), so a large result is never loaded whole; give it an `ORDER BY` so the pages stay in order. Results the database cannot page are paged in memory: a `query` block that returns a hash or an array, SQL that ends in its own `LIMIT`, and SQL Server or Oracle. The chart always draws the start of the result. Nothing stops a report's SQL from writing, so point reports at a read-only database user where you can.
 
 ## MCP server (AI agents)
 

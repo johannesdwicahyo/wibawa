@@ -46,7 +46,7 @@ The things the first users will ask for in week one.
 - [x] Reports as MCP tools (`list_reports`, `run_report`)
 - [x] Reports: several series on one chart
 - [x] Reports: paging for large results, in the database where it can be
-- [ ] Reports: stream the CSV export for very large results *(candidate)*
+- [x] Reports: streamed CSV export
 - [x] Command palette (Cmd+K): pages, new-record shortcuts and record search across resources
 - [x] Searchable select for large `belongs_to` collections, in forms and filters
 - [x] Searchable multi-select for `has_many` fields

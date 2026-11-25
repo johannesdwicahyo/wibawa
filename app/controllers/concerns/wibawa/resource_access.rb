@@ -64,6 +64,18 @@ module Wibawa
       params.fetch(:record, {}).permit(*resource.permitted_attributes)
     end
 
+    # Sends an Enumerator of CSV lines as a download, without buffering it.
+    def stream_csv_lines(filename, lines)
+      response.headers["Content-Type"] = "text/csv; charset=utf-8"
+      response.headers["Content-Disposition"] =
+        ActionDispatch::Http::ContentDisposition.format(disposition: "attachment", filename: filename)
+      response.headers["Cache-Control"] = "no-cache"
+      response.headers["X-Accel-Buffering"] = "no"
+      response.headers["Last-Modified"] = Time.now.httpdate # stops Rack::ETag from buffering the stream
+      response.headers.delete("Content-Length")
+      self.response_body = lines
+    end
+
     def per_page
       requested = params[:per_page].to_i
       default = resource.index_options[:per_page] || Wibawa.config.per_page
