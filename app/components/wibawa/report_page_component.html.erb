@@ -24,54 +24,77 @@
     <p class="mt-4 text-sm font-medium text-ink"><%= t("wibawa.report_empty") %></p>
   </div>
 <% else %>
-  <% if bars.any? %>
-    <%# One series, so no legend: the column header names it. Values stay in ink; the table below is the full view. %>
-    <div class="<%= card_class %> mb-4 p-5" role="img" aria-label="<%= chart_column.label %>">
-      <p class="mb-4 text-sm font-medium text-ink-2"><%= chart_column.label %></p>
-      <div class="grid grid-cols-[minmax(4rem,max-content)_1fr_max-content] items-center gap-x-3 gap-y-2 text-sm">
-        <% bars.each do |label, raw, percent| %>
-          <span class="max-w-48 truncate text-ink-2"><%= label %></span>
-          <span class="h-2.5" title="<%= label %>: <%= helpers.strip_tags(chart_value(raw).to_s) %>">
-            <span class="block h-full min-w-px rounded-r bg-primary" style="width: <%= percent %>%"></span>
-          </span>
-          <span class="text-right tabular-nums text-ink"><%= chart_value(raw) %></span>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
+  <% if bars.any? || line_points.size > 1 %>
+    <%# Text stays in ink; colour is on the marks only. The table below is the full view. %>
+    <div class="<%= card_class %> mb-4 p-5" role="img" aria-label="<%= chart_label %>">
+      <% if series.one? %>
+        <%# One series needs no legend: the title names it. %>
+        <p class="mb-4 text-sm font-medium text-ink-2"><%= chart_label %></p>
+      <% else %>
+        <ul class="mb-4 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-ink-2">
+          <% series.each do |one| %>
+            <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-sm" style="background: <%= one.color %>"></span><%= one.label %></li>
+          <% end %>
+        </ul>
+      <% end %>
 
-  <% if line_points.size > 1 %>
-    <%# One series, so no legend. The SVG stretches with the card; labels and the hover layer are HTML so they never distort. %>
-    <div class="<%= card_class %> mb-4 p-5" role="img" aria-label="<%= chart_column.label %>">
-      <p class="mb-4 text-sm font-medium text-ink-2"><%= chart_column.label %></p>
-      <div class="flex gap-3">
-        <div class="flex h-56 flex-col justify-between text-right text-xs tabular-nums text-ink-2">
-          <% y_ticks.each do |tick| %><span><%= chart_value(tick) %></span><% end %>
+      <% if bars.any? %>
+        <div class="grid grid-cols-[minmax(4rem,max-content)_1fr_max-content] items-center gap-x-3 gap-y-1 text-sm">
+          <% bars.each_with_index do |(label, marks), row| %>
+            <% gap = row.zero? ? nil : "mt-2" %>
+            <span class="<%= class_names('max-w-48 self-start truncate text-ink-2', gap) %>" style="grid-row: span <%= marks.size %>"><%= label %></span>
+            <% marks.each_with_index do |(one, raw, percent), index| %>
+              <span class="<%= class_names('h-2.5', gap => index.zero?) %>" title="<%= label %>, <%= one.label %>: <%= chart_text(raw, one) %>">
+                <span class="block h-full min-w-px rounded-r" style="width: <%= percent %>%; background: <%= one.color %>"></span>
+              </span>
+              <span class="<%= class_names('text-right tabular-nums text-ink', gap => index.zero?) %>"><%= chart_value(raw, one) %></span>
+            <% end %>
+          <% end %>
         </div>
-        <div class="min-w-0 flex-1">
-          <div class="relative h-56">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="absolute inset-0 size-full overflow-visible" aria-hidden="true">
-              <% [0, 50, 100].each do |y| %>
-                <line x1="0" x2="100" y1="<%= y %>" y2="<%= y %>" class="stroke-line" stroke-width="1" vector-effect="non-scaling-stroke" />
-              <% end %>
-              <polyline points="<%= polyline %>" class="fill-none stroke-primary" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
-            </svg>
-            <div class="absolute inset-0 flex">
-              <% line_points.each_with_index do |point, index| %>
-                <div class="group/point relative flex-1">
-                  <span class="absolute inset-y-0 left-1/2 hidden w-px bg-ink-3 group-hover/point:block"></span>
-                  <span class="absolute left-1/2 hidden size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary ring-2 ring-surface group-hover/point:block" style="bottom: <%= point.y %>%"></span>
-                  <span class="<%= class_names('pointer-events-none absolute -top-2 z-10 hidden -translate-y-full whitespace-nowrap rounded-control bg-ink px-2 py-1 text-xs text-surface group-hover/point:block',
-                                               index < line_points.size / 2 ? 'left-1/2' : 'right-1/2') %>"><%= point.label %>: <span class="tabular-nums"><%= helpers.strip_tags(chart_value(point.raw).to_s) %></span></span>
-                </div>
-              <% end %>
+      <% else %>
+        <%# The SVG stretches with the card; labels and the hover layer are HTML so they never distort. %>
+        <div class="flex gap-3">
+          <div class="flex h-56 flex-col justify-between text-right text-xs tabular-nums text-ink-2">
+            <% y_ticks.each do |tick| %><span><%= chart_value(tick) %></span><% end %>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="relative h-56">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="absolute inset-0 size-full overflow-visible" aria-hidden="true">
+                <% [0, 50, 100].each do |y| %>
+                  <line x1="0" x2="100" y1="<%= y %>" y2="<%= y %>" class="stroke-line" stroke-width="1" vector-effect="non-scaling-stroke" />
+                <% end %>
+                <% series.each_with_index do |one, index| %>
+                  <polyline points="<%= polyline(index) %>" class="fill-none" style="stroke: <%= one.color %>" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+                <% end %>
+              </svg>
+              <div class="absolute inset-0 flex">
+                <% line_points.each_with_index do |point, index| %>
+                  <div class="group/point relative flex-1">
+                    <span class="absolute inset-y-0 left-1/2 hidden w-px bg-ink-3 group-hover/point:block"></span>
+                    <% point.marks.each do |one, _raw, y| %>
+                      <span class="absolute left-1/2 hidden size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full ring-2 ring-surface group-hover/point:block" style="bottom: <%= y %>%; background: <%= one.color %>"></span>
+                    <% end %>
+                    <div class="<%= class_names('pointer-events-none absolute -top-2 z-10 hidden -translate-y-full whitespace-nowrap rounded-control bg-ink px-2 py-1 text-xs text-surface group-hover/point:block',
+                                                index < line_points.size / 2 ? 'left-1/2' : 'right-1/2') %>">
+                      <% if series.one? %>
+                        <%= point.label %>: <span class="tabular-nums"><%= chart_text(point.marks[0][1]) %></span>
+                      <% else %>
+                        <p class="font-medium"><%= point.label %></p>
+                        <% point.marks.each do |one, raw, _y| %>
+                          <p class="flex items-center gap-1.5"><span class="size-2 rounded-sm" style="background: <%= one.color %>"></span><%= one.label %><span class="ml-auto pl-3 tabular-nums"><%= chart_text(raw, one) %></span></p>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="mt-2 flex justify-between text-xs text-ink-2">
+              <% x_labels.each do |label| %><span><%= label %></span><% end %>
             </div>
           </div>
-          <div class="mt-2 flex justify-between text-xs text-ink-2">
-            <% x_labels.each do |label| %><span><%= label %></span><% end %>
-          </div>
         </div>
-      </div>
+      <% end %>
     </div>
   <% end %>
 

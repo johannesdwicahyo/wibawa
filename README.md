@@ -299,7 +299,7 @@ end
 - **Params** (`:string`, `:date`, `:number`, `:select`) become a form above the report. Their values are bound to the `:named` placeholders, never interpolated into the SQL.
 - **Another database.** `sql "...", on: WarehouseRecord` runs the query on that class's connection, so a data warehouse is just another entry in `database.yml` (any database with an ActiveRecord adapter).
 - **No SQL.** Give a block instead: `query { |params| Order.where(created_at: params[:from]..).group(:status).count }`. It may return a relation, a grouped hash or an array of hashes.
-- **Charts.** `chart x:, y:` draws bars, for comparing categories. `chart :line, x: :month, y: :revenue` draws a line, for change over time; give it rows in time order. Hover a point for its value.
+- **Charts.** `chart x:, y:` draws bars, for comparing categories. `chart :line, x: :month, y: :revenue` draws a line, for change over time; give it rows in time order. Hover a point for its value. Either kind takes up to six series, `y: %i[revenue refunds]`, drawn on one shared axis with a legend, so give it columns in the same unit.
 - **Columns** take the same `as:` formats as index columns. Leave them out to show every column the query returns.
 - **Authorization.** Reports are checked as `:show` on the `Wibawa::Report` object: `config.authorize_with { |user, action, subject| ... }` receives it as `subject`, and Pundit looks for `Wibawa::ReportPolicy#show?`.
 

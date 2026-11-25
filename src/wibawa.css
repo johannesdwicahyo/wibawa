@@ -50,6 +50,13 @@
   --wb-ink-2: oklch(47% 0.015 265);    /* labels and meta, 4.5:1 or better */
   --wb-ink-3: oklch(62% 0.01 265);     /* icons, placeholders, disabled: never body text */
   --wb-rail: oklch(27% 0.09 266);
+  /* Chart series, in this fixed order. Checked for colour-blind separation between neighbours; re-check before changing one. */
+  --wb-series-1: #2a78d6;
+  --wb-series-2: #eb6834;
+  --wb-series-3: #1baf7a;
+  --wb-series-4: #eda100;
+  --wb-series-5: #e87ba4;
+  --wb-series-6: #008300;
 }
 
 .dark {
@@ -63,7 +70,13 @@
   --wb-ink: oklch(95% 0.005 265);
   --wb-ink-2: oklch(72% 0.01 265);
   --wb-ink-3: oklch(55% 0.01 265);
-  --wb-rail: oklch(19% 0.05 266);
+--wb-rail: oklch(19% 0.05 266);
+--wb-series-1: #3987e5;
+--wb-series-2: #d95926;
+--wb-series-3: #199e70;
+--wb-series-4: #c98500;
+--wb-series-5: #d55181;
+--wb-series-6: #0ca30c;
   color-scheme: dark;
 }
 
