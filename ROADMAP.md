@@ -44,7 +44,8 @@ The things the first users will ask for in week one.
 - [x] Reports: `Wibawa.report` takes a relation or SQL and gives a table, a bar chart and CSV. Reads from any database Rails is connected to, so a warehouse needs no special code
 - [x] Reports: line charts for time series
 - [x] Reports as MCP tools (`list_reports`, `run_report`)
-- [ ] Reports: several series on one chart, paging for large results
+- [x] Reports: several series on one chart
+- [ ] Reports: paging for large results
 - [x] Command palette (Cmd+K): pages, new-record shortcuts and record search across resources
 - [x] Searchable select for large `belongs_to` collections, in forms and filters
 - [x] Searchable multi-select for `has_many` fields

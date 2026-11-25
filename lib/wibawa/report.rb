@@ -25,6 +25,7 @@ module Wibawa
   # resource instead.
   class Report
     MAX_ROWS = 1000
+    MAX_SERIES = 6 # the validated colours in wibawa.css (--wb-series-1..6)
 
     Param = Struct.new(:name, :options) do
       def as = (options[:as] || :string).to_sym
@@ -103,10 +104,14 @@ module Wibawa
 
     #   chart x: :status, y: :revenue          # bars: compare categories
     #   chart :line, x: :month, y: :revenue    # a line: change over time, rows in time order
+    #   chart :line, x: :month, y: %i[revenue refunds]   # several series on one axis, so one unit
     def chart(type = :bar, x:, y:)
       raise Error, "Unknown chart type #{type.inspect} (use :bar or :line)" unless %i[bar line].include?(type.to_sym)
 
-      @chart_options = { type: type.to_sym, x: x.to_s, y: y.to_s }
+      series = Array(y).map(&:to_s)
+      raise Error, "A chart takes 1 to #{MAX_SERIES} series, got #{series.size}" unless (1..MAX_SERIES).cover?(series.size)
+
+      @chart_options = { type: type.to_sym, x: x.to_s, y: series }
     end
 
     # ---- Reading and running -----------------------------------------------
@@ -152,7 +157,7 @@ module Wibawa
     def hash_rows(hash)
       names = @table.columns.map { |column| column.name.to_s }
       x = names[0] || @chart_options&.fetch(:x) || "name"
-      y = names[1] || @chart_options&.fetch(:y) || "value"
+      y = names[1] || @chart_options&.fetch(:y)&.first || "value"
       hash.map { |group, value| { x => Array(group).join(" / "), y => value } }
     end
   end

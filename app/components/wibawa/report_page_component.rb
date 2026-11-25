@@ -4,7 +4,13 @@ module Wibawa
     CHART_POINTS = 366
     X_LABELS = 6
 
-    Point = Struct.new(:label, :raw, :x, :y)
+    Series = Struct.new(:column, :color) do
+      def name = column.name.to_s
+      def label = column.label
+    end
+    # One x position of the line chart: its label, how far from the left (%),
+    # and per series [series, raw value, height from the bottom (%)].
+    Point = Struct.new(:label, :x, :marks)
 
     def initialize(report:, values:, rows:)
       @report = report
@@ -32,42 +38,63 @@ module Wibawa
       %i[money number percentage].include?(column.as&.to_sym) || (column.as.nil? && rows.first&.fetch(column.name.to_s, nil).is_a?(Numeric))
     end
 
-    # [[label, value, percent of the largest], ...] for the bar chart.
-    # ponytail: bars start at zero, so negative values draw as empty bars.
-    def bars
-      return [] unless (chart = report.chart_options) && chart[:type] == :bar
-
-      points = rows.first(CHART_BARS).map { |row| [row[chart[:x]].to_s, row[chart[:y]].to_f, row[chart[:y]]] }
-      max = points.map { |_, number, _| number }.max.to_f
-      points.map { |label, number, raw| [label, raw, max.positive? ? (number.clamp(0, max) / max * 100).round(2) : 0] }
-    end
-
-    # Points of the line chart, each with its place in the plot as percentages:
-    # x from the left, y from the bottom. Every point sits in the middle of its
-    # own equal-width column, which is also its hover target.
-    def line_points
-      @line_points ||= begin
-        chart = report.chart_options
-        rows = chart && chart[:type] == :line ? self.rows.first(CHART_POINTS) : []
-        low, high = y_range(rows.map { |row| row[chart[:y]].to_f }) if rows.any?
-        rows.each_with_index.map do |row, index|
-          value = row[chart[:y]].to_f
-          Point.new(row[chart[:x]].to_s, row[chart[:y]], ((index + 0.5) / rows.size * 100).round(2),
-                    high == low ? 50.0 : ((value - low) / (high - low) * 100).round(2))
+    # The charted columns. One series wears the brand colour; several take the
+    # fixed colour order, so a series keeps its colour whatever the data.
+    def series
+      @series ||= begin
+        names = Array(report.chart_options&.fetch(:y))
+        names.each_with_index.map do |name, index|
+          Series.new(columns.find { |column| column.name.to_s == name } || Column.new(name.to_sym, {}, nil),
+                     names.one? ? "var(--wb-primary-effective)" : "var(--wb-series-#{index + 1})")
         end
       end
     end
 
-    # The value axis always includes zero, so the height of the line means something.
-    def y_range(values) = [[values.min, 0].min, [values.max, 0].max]
+    def chart_type = report.chart_options&.fetch(:type)
+    def chart_label = series.map(&:label).to_sentence
+
+    # [[label, [[series, raw value, percent of the largest], ...]], ...] for the
+    # bar chart. Every series shares one scale.
+    # ponytail: bars start at zero, so negative values draw as empty bars.
+    def bars
+      return [] unless chart_type == :bar
+
+      shown = rows.first(CHART_BARS)
+      max = shown.flat_map { |row| series.map { |one| row[one.name].to_f } }.max.to_f
+      shown.map do |row|
+        [row[report.chart_options[:x]].to_s.presence || "—",
+         series.map { |one| [one, row[one.name], max.positive? ? (row[one.name].to_f.clamp(0, max) / max * 100).round(2) : 0] }]
+      end
+    end
+
+    # Every point sits in the middle of its own equal-width column, which is
+    # also its hover target.
+    # ponytail: a missing value draws as zero; break the line there if reports with gaps turn up.
+    def line_points
+      @line_points ||= begin
+        low, high = y_range
+        line_rows.each_with_index.map do |row, index|
+          Point.new(row[report.chart_options[:x]].to_s, ((index + 0.5) / line_rows.size * 100).round(2),
+                    series.map { |one| [one, row[one.name], high == low ? 50.0 : ((row[one.name].to_f - low) / (high - low) * 100).round(2)] })
+        end
+      end
+    end
+
+    def line_rows = chart_type == :line ? rows.first(CHART_POINTS) : []
+
+    # One value axis for every series. It always includes zero, so the height of a line means something.
+    def y_range
+      values = line_rows.flat_map { |row| series.map { |one| row[one.name].to_f } }
+      [[*values, 0].min, [*values, 0].max]
+    end
 
     # Top, middle and bottom of the value axis.
     def y_ticks
-      low, high = y_range(line_points.map { |point| point.raw.to_f })
+      low, high = y_range
       [high, (high + low) / 2.0, low]
     end
 
-    def polyline = line_points.map { |point| "#{point.x},#{(100 - point.y).round(2)}" }.join(" ")
+    def polyline(index) = line_points.map { |point| "#{point.x},#{(100 - point.marks[index][2]).round(2)}" }.join(" ")
 
     # A handful of evenly spaced labels for the time axis.
     def x_labels
@@ -75,8 +102,9 @@ module Wibawa
       Array.new(count) { |i| line_points[count == 1 ? 0 : (i * (line_points.size - 1) / (count - 1.0)).round].label }
     end
 
-    def chart_column = columns.find { |column| column.name.to_s == report.chart_options[:y] } || Column.new(report.chart_options[:y].to_sym, {}, nil)
-    def chart_value(raw) = presenter.format(raw, chart_column.as, column: chart_column)
+    # Values on the shared axis are written the way the first series is.
+    def chart_value(raw, one = series.first) = presenter.format(raw, one.column.as, column: one.column)
+    def chart_text(raw, one = series.first) = helpers.strip_tags(chart_value(raw, one).to_s)
 
     def param_name(param) = "p[#{param.name}]"
     def param_id(param) = "wb-report-#{param.name}"

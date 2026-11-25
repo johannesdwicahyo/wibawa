@@ -65,3 +65,16 @@ Wibawa.report :total_by_number do
   column :total, as: :money
   chart :line, x: :number, y: :total
 end
+
+Wibawa.report :total_and_double do
+  sql "SELECT number, total, total * 2 AS doubled, status FROM orders ORDER BY number"
+  column :number
+  column :total, as: :money
+  column :doubled, as: :money
+  chart :line, x: :number, y: %i[total doubled]
+end
+
+Wibawa.report :status_compare do
+  sql "SELECT status, COUNT(*) AS orders, SUM(total) AS revenue FROM orders GROUP BY status ORDER BY status"
+  chart x: :status, y: %i[orders revenue]
+end
