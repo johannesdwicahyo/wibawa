@@ -138,7 +138,7 @@ A filter on an associated column never duplicates rows: an order with three matc
 | `scope name, lambda = nil, default:, label:, count:` | Tabs above the table. Without a lambda, calls the model scope of that name. |
 | `search *fields` | The search box. Dotted names (`"customer.name"`) search through an association. |
 | `filter name, as:, collection:, on:, apply:` | `:string`, `:select`, `:boolean`, `:date_range`, `:number_range`, `:search` (with `on:`). Inferred when omitted. |
-| `index per_page:, sort:, count:` | `count: false` skips `COUNT(*)` on huge tables. |
+| `index per_page:, sort:, count:, density:` | `count: false` skips `COUNT(*)` on huge tables. `density: :compact` gives 32 px rows. |
 | `column name, as:, label:, sortable:, link:, &block` | Formats: `:money`, `:badge`, `:boolean`, `:date`, `:datetime`, `:time_ago`, `:number`, `:percentage`, `:email`, `:url`, `:image`, `:text`, `:json`, `:tags`. |
 | `actions only:, &block` | Row buttons. The block adds your own links. |
 | `show { row / attributes / panel / table_for }` | Show page layout. |

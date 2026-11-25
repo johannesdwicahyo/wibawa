@@ -13,7 +13,7 @@
           <li class="flex items-center gap-1 rounded-control hover:bg-surface-2">
             <%= link_to view.name, url_for_view(view), "aria-current": (view == current ? "true" : nil),
                   class: class_names("min-w-0 flex-1 truncate px-2 py-2 text-sm text-ink", "font-semibold" => view == current) %>
-            <%= button_to destroy_url(view), method: :delete, class: wibawa_button_class(:ghost, "p-1.5 hover:!text-rose-600"),
+            <%= button_to destroy_url(view), method: :delete, class: wibawa_button_class(:ghost, "p-1.5 hover:!text-danger"),
                   "aria-label": t("wibawa.delete_view", name: view.name),
                   form: { class: "contents", data: { turbo_confirm: t("wibawa.confirm_delete", name: view.name) } } do %>
               <%= icon("x", size: "size-4") %>

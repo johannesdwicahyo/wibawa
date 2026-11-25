@@ -6,14 +6,14 @@ module Wibawa
     BUTTON_STYLES = {
       primary: "bg-primary text-on-primary hover:bg-primary/90",
       secondary: "bg-surface text-ink ring-1 ring-inset ring-line hover:bg-surface-2",
-      danger: "bg-surface text-rose-700 ring-1 ring-inset ring-rose-300 hover:bg-rose-50 " \
-              "dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30 dark:hover:bg-rose-500/20",
+      danger: "bg-surface text-danger ring-1 ring-inset ring-danger/30 hover:bg-danger/10 " \
+              "dark:bg-danger/100/10",
       ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink"
     }.freeze
 
     INPUT_CLASS = "block w-full rounded-control border-0 bg-surface px-3 py-2 text-sm text-ink ring-1 ring-inset " \
-                  "ring-line placeholder:text-ink-3 focus:ring-2 focus:ring-inset focus:ring-primary dark:[color-scheme:dark]".freeze
-    INPUT_ERROR_CLASS = "ring-rose-400 focus:ring-rose-500 dark:ring-rose-500/60".freeze
+                  "ring-line placeholder:text-ink-3 focus:ring-2 focus:ring-inset focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 dark:[color-scheme:dark]".freeze
+    INPUT_ERROR_CLASS = "ring-danger/60 focus:ring-danger".freeze
 
     MARK_PATH = "M12,12 H38 A74,74 0 0 1 112,86 V112 H86 A74,74 0 0 1 12,38 Z M244,12 V38 A74,74 0 0 1 170,112 H144 V86 A74,74 0 0 1 218,12 Z M112,144 V170 A74,74 0 0 1 38,244 H12 V218 A74,74 0 0 1 86,144 Z M144,144 H170 A74,74 0 0 1 244,218 V244 H218 A74,74 0 0 1 144,170 Z M128,104 L152,128 L128,152 L104,128 Z".freeze
     FONT_LATIN_RANGE = "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD".freeze
@@ -52,12 +52,14 @@ module Wibawa
       "grip" => "M7.5 5h.01M12.5 5h.01M7.5 10h.01M12.5 10h.01M7.5 15h.01M12.5 15h.01",
       "eye" => "M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10zM10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
       "bolt" => "M11 2 4 11h5.5l-1 7 7-9.5H10z",
+      "sidebar" => "M3 4.5h14v11H3zM7.5 4.5v11",
+      "more" => "M4.5 10h.01M10 10h.01M15.5 10h.01",
       "inbox" => "M3 11.5 5 4h10l2 7.5V16H3zM3 11.5h4.5l1 2h3l1-2H17"
     }.freeze
 
     def wibawa_icon(name, size: "size-5", class: nil)
       path = ICONS.fetch(name.to_s) { ICONS["table"] }
-      stroke = name.to_s == "grip" ? "2.5" : "1.5"
+      stroke = %w[grip more].include?(name.to_s) ? "2.5" : "1.5"
       tag.svg(tag.path(d: path), viewBox: "0 0 20 20", fill: "none", stroke: "currentColor",
                                  "stroke-width": stroke, "stroke-linecap": "round", "stroke-linejoin": "round",
                                  "aria-hidden": "true", class: [size, "shrink-0", binding.local_variable_get(:class)].compact.join(" "))

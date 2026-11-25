@@ -78,8 +78,11 @@ module Wibawa
       @allowed_actions = list - excluded
     end
 
-    def index(per_page: nil, sort: nil, count: true, &block)
-      @index = IndexBuilder.new(per_page: per_page, sort: sort, count: count)
+    #   index density: :compact   # 32 px rows instead of 40
+    def index(per_page: nil, sort: nil, count: true, density: nil, &block)
+      raise Error, "Unknown density #{density.inspect} (use :compact)" unless [nil, :compact, "compact"].include?(density)
+
+      @index = IndexBuilder.new(per_page: per_page, sort: sort, count: count, density: density)
       @index.instance_eval(&block) if block
     end
 
@@ -182,7 +185,7 @@ module Wibawa
     end
 
     def index_options
-      { per_page: nil, sort: nil, count: true }.merge(@index&.options || {})
+      { per_page: nil, sort: nil, count: true, density: nil }.merge(@index&.options || {})
     end
 
     def index_columns

@@ -12,6 +12,8 @@ First release.
 - Secure by default: outside development and test, every request is refused until `config.authenticate_with` is set
 - ViewComponent UI with prebuilt Tailwind CSS, dark mode, English and Indonesian locales
 - Design system in `DESIGN.md`: every color is a CSS variable, Plus Jakarta Sans ships in the gem (no third-party requests), statuses show as a dot plus the word
+- Sticky table header, `index density: :compact`, a sidebar that collapses to icons, and on phones an overflow menu for page actions with the first column pinned
+- State colors (success, warning, danger, info) are CSS variables too
 - Search and filters share one toolbar: a Filters popover, with active filters as removable chips
 - Page changes cross-fade; the button that saved a form shows a spinner
 - Searchable select: `belongs_to` fields and filters, and `has_many` fields, turn into a search box once the table passes 100 records

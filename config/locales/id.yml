@@ -81,6 +81,8 @@ id:
     time_ago: "%{time} yang lalu"
     to: "Sampai"
     toggle_theme: "Ganti mode gelap"
+    toggle_sidebar: "Ciutkan atau lebarkan bilah sisi"
+    more_actions: "Tindakan lainnya"
     view: "Lihat"
     view_all: "Lihat semua"
     "yes": "Ya"

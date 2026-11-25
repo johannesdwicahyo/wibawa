@@ -80,7 +80,7 @@ module Wibawa
 
     def remove_button
       content_tag(:button, type: "button", data: { wb_nested_remove: true },
-                           class: "mt-6 rounded p-1 text-ink-3 hover:text-rose-600",
+                           class: "mt-6 rounded p-1 text-ink-3 hover:text-danger",
                            "aria-label": t("wibawa.form.remove")) do
         icon("x", size: "size-4")
       end
