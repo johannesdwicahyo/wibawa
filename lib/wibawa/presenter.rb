@@ -77,6 +77,7 @@ module Wibawa
       value = raw(record, column)
       case value
       when nil then ""
+      when rich_text_class then value.to_plain_text # before ActiveRecord::Base: a rich text is a record too
       when ActiveRecord::Base then display_name(value)
       when ActiveSupport::SafeBuffer then view.strip_tags(value).squish
       when Time then value.strftime("%Y-%m-%d %H:%M:%S")
@@ -84,9 +85,7 @@ module Wibawa
       when Array then value.map { |v| v.is_a?(ActiveRecord::Base) ? display_name(v) : v.to_s }.join(", ")
       when Hash then value.to_json
       else
-        if defined?(ActionText::RichText) && value.is_a?(ActionText::RichText)
-          value.to_plain_text
-        elsif value.respond_to?(:attached?)
+        if value.respond_to?(:attached?)
           value.attached? ? attachment_names(value) : ""
         else
           value.to_s
@@ -150,6 +149,7 @@ module Wibawa
     def auto(value, record:, name:)
       case value
       when true, false then boolean(value)
+      when rich_text_class then view.truncate(value.to_plain_text, length: 80)
       when ActiveRecord::Base then link_to_record(value)
       when ActiveRecord::Relation then collection(value.limit(4).to_a, more: value.size > 3)
       when Array then value.first.is_a?(ActiveRecord::Base) ? collection(value.first(4), more: value.size > 3) : value.join(", ")
@@ -161,8 +161,6 @@ module Wibawa
       else
         if enum?(record, name) || STATUS_NAMES.include?(name.to_s)
           status(value)
-        elsif defined?(ActionText::RichText) && value.is_a?(ActionText::RichText)
-          view.truncate(value.to_plain_text, length: 80)
         elsif value.respond_to?(:attached?)
           attachment(value)
         else
@@ -213,7 +211,7 @@ module Wibawa
     end
 
     def image(value)
-      src = value.respond_to?(:attached?) ? (value.attached? ? view.url_for(value) : nil) : value.to_s
+      src = value.respond_to?(:attached?) ? (value.attached? ? file_path(value) : nil) : value.to_s
       return empty if src.blank?
 
       view.image_tag(src, class: "h-10 w-10 rounded-md object-cover ring-1 ring-line", loading: "lazy", alt: "")
@@ -222,18 +220,27 @@ module Wibawa
     def attachment(value)
       return empty unless value.attached?
 
-      if value.respond_to?(:attachments)
+      if many_attached?(value)
         view.t("wibawa.files", count: value.attachments.size, default: "%{count} files")
       elsif value.image?
         image(value)
       else
-        view.link_to(value.filename.to_s, view.url_for(value), class: link_class, target: "_blank", rel: "noopener")
+        view.link_to(value.filename.to_s, file_path(value), class: link_class, target: "_blank", rel: "noopener")
       end
     end
 
     def attachment_names(value)
-      value.respond_to?(:attachments) ? value.attachments.map { |a| a.filename.to_s }.join(", ") : value.filename.to_s
+      many_attached?(value) ? value.attachments.map { |a| a.filename.to_s }.join(", ") : value.filename.to_s
     end
+
+    # Active Storage's routes belong to the host app; from inside the engine they are reached through main_app.
+    def file_path(value) = view.main_app.rails_blob_path(value, only_path: true)
+
+    # A single attachment also answers `attachments` (it passes the call on), so ask for the class.
+    def many_attached?(value) = defined?(ActiveStorage::Attached::Many) && value.is_a?(ActiveStorage::Attached::Many)
+
+    # A class that matches nothing when Action Text is not loaded.
+    def rich_text_class = defined?(ActionText::RichText) ? ActionText::RichText : NilClass
 
     def json(value)
       view.tag.pre(JSON.pretty_generate(value.as_json), class: "max-h-64 overflow-auto rounded-md bg-surface-2 p-3 text-xs")

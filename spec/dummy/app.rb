@@ -7,6 +7,9 @@ require "rails"
 require "active_record/railtie"
 require "action_controller/railtie"
 require "action_view/railtie"
+require "active_storage/engine"
+require "action_text/engine"
+require "rails-i18n"
 require "propshaft" # serves the gem's CSS and JavaScript to the system specs
 require "wibawa"
 
@@ -20,6 +23,10 @@ module Dummy
     config.logger = Logger.new(nil)
     config.action_dispatch.show_exceptions = :none
     config.action_controller.allow_forgery_protection = false # as in a generated test.rb
+    # Active Storage and Action Text extend models while the app boots, so this one loads then.
+    initializer("dummy.product") { require_relative "product" }
+    config.active_storage.service = :test
+    config.active_storage.service_configurations = { test: { service: "Disk", root: File.join(__dir__, "tmp/storage") } }
   end
 end
 
@@ -77,6 +84,34 @@ ActiveRecord::Schema.define do
     t.json :data
     t.datetime :created_at, null: false
   end
+  create_table(:products) { |t| t.string :name }
+  # Active Storage and Action Text tables, as their install generators create them.
+  create_table :active_storage_blobs do |t|
+    t.string :key, null: false
+    t.string :filename, null: false
+    t.string :content_type
+    t.text :metadata
+    t.string :service_name, null: false
+    t.bigint :byte_size, null: false
+    t.string :checksum
+    t.datetime :created_at, null: false
+  end
+  create_table :active_storage_attachments do |t|
+    t.string :name, null: false
+    t.references :record, null: false, polymorphic: true, index: false
+    t.references :blob, null: false
+    t.datetime :created_at, null: false
+  end
+  create_table :active_storage_variant_records do |t|
+    t.belongs_to :blob, null: false, index: false
+    t.string :variation_digest, null: false
+  end
+  create_table :action_text_rich_texts do |t|
+    t.string :name, null: false
+    t.text :body
+    t.references :record, null: false, polymorphic: true, index: false
+    t.timestamps
+  end
   create_table :line_items do |t|
     t.references :order
     t.string :product
@@ -84,7 +119,3 @@ ActiveRecord::Schema.define do
   end
 end
 
-Dummy::Application.routes.draw do
-  mount Wibawa::Engine, at: "/admin"
-  get "/favicon.ico", to: ->(_env) { [204, {}, []] } # browsers ask for one
-end

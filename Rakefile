@@ -10,7 +10,12 @@ end
 # Request specs against the one-file Rails app in spec/dummy.
 RSpec::Core::RakeTask.new(:spec)
 
-task default: %i[test spec demo:check]
+desc "Boot the admin on Sprockets and fetch its assets (the spec app uses Propshaft)"
+task :sprockets do
+  ruby "spec/sprockets_check.rb"
+end
+
+task default: %i[test spec sprockets demo:check]
 
 desc "Run the demo shop admin at http://localhost:3000/admin (PORT=4000 to change)"
 task :demo do

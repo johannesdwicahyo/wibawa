@@ -155,11 +155,23 @@ module Wibawa
     end
 
     def rich_text_html
-      if form.respond_to?(:rich_text_area)
-        form.rich_text_area(attribute, class: "wb-trix")
+      # Through the view, not the form builder: the builder would look for Action Text's tag helper on this component.
+      if helpers.respond_to?(:rich_text_area)
+        load_editor
+        helpers.rich_text_area(form.object_name, attribute, object: record, id: form.field_id(attribute), class: "wb-trix")
       else
         form.text_area(attribute, html_options(rows: 6))
       end
+    end
+
+    # Action Text ships the editor (Trix) as assets; the admin layout does not
+    # know about them, so the first rich text field on a page adds them to <head>.
+    def load_editor
+      return if helpers.content_for?(:wibawa_editor)
+
+      helpers.content_for(:wibawa_editor, "loaded")
+      helpers.content_for(:head, safe_join([helpers.stylesheet_link_tag("trix", "data-turbo-track": "reload"),
+                                            helpers.javascript_include_tag("trix", "actiontext", defer: true, "data-turbo-track": "reload")]))
     end
 
     def attachment_html

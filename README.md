@@ -64,7 +64,7 @@ end
 
 **Secure by default.** In development and test the admin is open, so `/admin` works right after the install. Everywhere else, Wibawa answers every request with 403 until `authenticate_with` is set, so a forgotten initializer cannot publish your data. If something else already guards the admin, say so instead of giving a block: `config.authenticate_with :parent_controller` (a `before_action` in your parent controller) or `config.authenticate_with :none` (a VPN, or basic auth in the proxy).
 
-Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets.
+Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets. For Indonesian (`config.i18n.default_locale = :id`), add the `rails-i18n` gem as well: Wibawa translates its own interface, and Rails' own strings (date formats, validation messages) come from that gem.
 
 ## A resource
 
@@ -138,7 +138,7 @@ Wibawa.resource Order do
 end
 ```
 
-Leave any block out and Wibawa infers it from the model: index columns, show rows, form fields (with the right input for enums, associations, dates, booleans, Active Storage and Action Text) and strong params.
+Leave any block out and Wibawa infers it from the model: index columns, show rows, form fields (with the right input for enums, associations, dates, booleans, Active Storage attachments and Action Text) and strong params. A rich text field loads Action Text's editor by itself.
 
 ### Filtering on associations
 
@@ -403,7 +403,7 @@ The index table is one component that loops rows and formats cells with plain me
 
 ```sh
 bundle install
-bundle exec rake             # DSL unit tests, request and system specs against spec/dummy, then a boot check of the demo
+bundle exec rake             # DSL unit tests, request and system specs against spec/dummy, a Sprockets boot check, then the demo
 bundle exec rspec spec/requests   # skip the browser
 npm install
 npm run build:css            # rebuild app/assets/builds/wibawa.css after changing classes
