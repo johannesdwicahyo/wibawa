@@ -70,7 +70,7 @@ RSpec.describe "Wibawa reports", type: :request do
       get "/admin/reports/order_list.csv"
       expect(response.body).to eq("﻿Number,Total\n'=B-1,5\nA-1,10\nA-2,15\n")
     end
-    expect(queries).to eq(["LIMIT 2 OFFSET 0", "LIMIT 2 OFFSET 2"])
+    expect(queries).to eq([ "LIMIT 2 OFFSET 0", "LIMIT 2 OFFSET 2" ])
     expect(response.headers["Content-Disposition"]).to include("attachment", "order_list-")
 
     # Paged in memory (own LIMIT), and an empty result: still a header row.

@@ -26,7 +26,7 @@ module Wibawa
     end
 
     def per_page_options
-      (Wibawa.config.per_page_options | [page.per_page]).sort
+      (Wibawa.config.per_page_options | [ page.per_page ]).sort
     end
 
     def nav_class(enabled)

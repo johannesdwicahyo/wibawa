@@ -17,11 +17,11 @@ module Wibawa
 
     # On phones, two or more secondary actions fold into a menu next to the primary one.
     def primary = @primary ||= actions.find { |action| action[:style].to_s == "primary" }
-    def overflow = @overflow ||= (actions - [primary]).then { |rest| rest.size >= 2 ? rest : [] }
+    def overflow = @overflow ||= (actions - [ primary ]).then { |rest| rest.size >= 2 ? rest : [] }
 
     def action_button(action, menu: false)
       style = action[:style] || :secondary
-      content = helpers.safe_join([action[:icon] && icon(action[:icon], size: "size-4"), action[:label]].compact)
+      content = helpers.safe_join([ action[:icon] && icon(action[:icon], size: "size-4"), action[:label] ].compact)
       method = (action[:method] || :get).to_sym
       css = menu ? class_names(MENU_ITEM, style.to_s == "danger" ? "text-danger" : "text-ink") : wibawa_button_class(style)
 

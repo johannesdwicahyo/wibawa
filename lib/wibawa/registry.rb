@@ -50,10 +50,10 @@ module Wibawa
 
     # [[group_name_or_nil, [resources...]], ...] sorted for the sidebar.
     def menu
-      visible = select(&:menu?).sort_by { |r| [r.menu_priority, r.label.to_s] }
+      visible = select(&:menu?).sort_by { |r| [ r.menu_priority, r.label.to_s ] }
       groups = visible.group_by(&:menu_group)
       ungrouped = groups.delete(nil) || []
-      [[nil, ungrouped]] + groups.sort_by { |name, items| [items.map(&:menu_priority).min, name.to_s] }
+      [ [ nil, ungrouped ] ] + groups.sort_by { |name, items| [ items.map(&:menu_priority).min, name.to_s ] }
     end
   end
 end

@@ -40,7 +40,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     "custom page" => "/admin/pages/maintenance"
   }.freeze
 
-  { "desktop" => [1280, 900], "phone" => [390, 800] }.each do |size, (width, height)|
+  { "desktop" => [ 1280, 900 ], "phone" => [ 390, 800 ] }.each do |size, (width, height)|
     %w[light dark].each do |theme|
       it "has no axe violations on any page (#{size}, #{theme})" do
         page.current_window.resize_to(width, height)
@@ -71,7 +71,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     found += violations.map { |violation| "filters and batch bar: #{violation}" }
 
     find("body").send_keys(:escape)
-    find("body").send_keys([:control, "k"])
+    find("body").send_keys([ :control, "k" ])
     expect(page).to have_css("dialog[data-wb-palette][open]")
     sleep 0.3 # let the dialog finish fading in, or contrast is measured mid-fade
     found += violations.map { |violation| "palette: #{violation}" }
@@ -128,7 +128,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
 
     it "names the active palette option for screen readers and keeps links out of the tab order" do
       visit "/admin"
-      find("body").send_keys([:control, "k"])
+      find("body").send_keys([ :control, "k" ])
       input = find("[data-wb-palette-input]")
       first_id = input["aria-activedescendant"]
       expect(page).to have_css("##{first_id}[role=option][aria-selected=true]")

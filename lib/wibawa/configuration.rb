@@ -71,7 +71,7 @@ module Wibawa
       @authenticate = nil
       @load_paths = []
       @per_page = 50
-      @per_page_options = [25, 50, 100, 250, 500]
+      @per_page_options = [ 25, 50, 100, 250, 500 ]
       @max_per_page = 500
       @scope_counts = true
       @currency = "USD"
@@ -123,7 +123,7 @@ module Wibawa
     def mcp_authenticate_with(&block)
       @mcp_authenticate = block
     end
-    
+
     def mcp_authenticate
       @mcp_authenticate
     end

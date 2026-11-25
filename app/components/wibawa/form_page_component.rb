@@ -14,11 +14,11 @@ module Wibawa
     end
 
     def breadcrumbs
-      crumbs = [[resource.label, resource.action?(:index) ? resources_path(resource: resource.key) : nil]]
+      crumbs = [ [ resource.label, resource.action?(:index) ? resources_path(resource: resource.key) : nil ] ]
       unless new_record?
-        crumbs << [presenter.display_name(record), resource.action?(:show) ? resource_path(resource: resource.key, id: record) : nil]
+        crumbs << [ presenter.display_name(record), resource.action?(:show) ? resource_path(resource: resource.key, id: record) : nil ]
       end
-      crumbs << [new_record? ? t("wibawa.new") : t("wibawa.edit"), nil]
+      crumbs << [ new_record? ? t("wibawa.new") : t("wibawa.edit"), nil ]
     end
 
     def form_url

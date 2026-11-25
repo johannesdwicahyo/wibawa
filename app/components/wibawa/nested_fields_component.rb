@@ -37,7 +37,7 @@ module Wibawa
       list = form.object.public_send(field.name).to_a
       return list unless sortable
 
-      list.sort_by { |c| [c.public_send(sortable) || Float::INFINITY, c.id || Float::INFINITY] }
+      list.sort_by { |c| [ c.public_send(sortable) || Float::INFINITY, c.id || Float::INFINITY ] }
     end
 
     # The builder's template must be the view context, not this component:
@@ -73,7 +73,7 @@ module Wibawa
     # Dragging is one way to reorder; the arrows (and the arrow keys on the
     # handle) are the way that needs no drag.
     def reorder_controls
-      content_tag(:div, safe_join([handle, move_button("up"), move_button("down")]), class: "mt-6 flex items-center")
+      content_tag(:div, safe_join([ handle, move_button("up"), move_button("down") ]), class: "mt-6 flex items-center")
     end
 
     def move_button(direction)

@@ -56,7 +56,7 @@ RSpec.describe "Wibawa searchable select", type: :request do
       get "/admin/customers/options/Order", params: { q: "B-2" }
       expect(response.body).to include(%(data-value="#{other.id}"))
 
-      patch "/admin/customers/#{sari.id}", params: { record: { order_ids: ["", order.id, other.id] } }
+      patch "/admin/customers/#{sari.id}", params: { record: { order_ids: [ "", order.id, other.id ] } }
       expect(sari.reload.orders).to contain_exactly(order, other)
     end
   end

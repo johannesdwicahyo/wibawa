@@ -122,7 +122,7 @@ module Wibawa
     def values(raw)
       raw = raw.to_unsafe_h if raw.respond_to?(:to_unsafe_h)
       raw = (raw || {}).to_h.transform_keys(&:to_s)
-      params.to_h { |param| [param.name, param.cast(raw[param.name.to_s])] }
+      params.to_h { |param| [ param.name, param.cast(raw[param.name.to_s]) ] }
     end
 
     # One run of the report: `rows(limit:, offset:)` for a page, `total`, `all`.
@@ -143,10 +143,10 @@ module Wibawa
     # `query` block returned something that is not a relation.
     def source(values)
       # Without params there is nothing to bind, and binding would read a bare % (LIKE, strftime) as a format.
-      return [params.empty? ? @sql : ActiveRecord::Base.sanitize_sql_array([@sql, values]), @on || ActiveRecord::Base] if @sql
+      return [ params.empty? ? @sql : ActiveRecord::Base.sanitize_sql_array([ @sql, values ]), @on || ActiveRecord::Base ] if @sql
 
       result = @query.call(values)
-      result.is_a?(ActiveRecord::Relation) ? [result.to_sql, result.klass] : [nil, nil, rows_from(result)]
+      result.is_a?(ActiveRecord::Relation) ? [ result.to_sql, result.klass ] : [ nil, nil, rows_from(result) ]
     end
 
     def rows_from(result)

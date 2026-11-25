@@ -72,7 +72,7 @@ Wibawa.page :stock_check do
       tag.p("Every active product has ten or more in stock.", class: "text-sm text-ink-2")
     else
       tag.ul(class: "divide-y divide-line rounded-card bg-surface text-sm ring-1 ring-line") do
-        safe_join(low.map { |product| tag.li(safe_join([tag.span(product.name), tag.span(product.stock, class: "tabular-nums text-ink-2")]), class: "flex justify-between px-4 py-2.5") })
+        safe_join(low.map { |product| tag.li(safe_join([ tag.span(product.name), tag.span(product.stock, class: "tabular-nums text-ink-2") ]), class: "flex justify-between px-4 py-2.5") })
       end
     end
   end

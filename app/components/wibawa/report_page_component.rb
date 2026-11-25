@@ -29,8 +29,8 @@ module Wibawa
     def empty? = rows.empty? && !page.prev?
 
     def header_actions
-      [{ label: t("wibawa.export_csv"), icon: "download", style: :secondary, data: { turbo: false },
-         url: helpers.report_path(report: report.key, format: :csv, p: request.query_parameters["p"]) }]
+      [ { label: t("wibawa.export_csv"), icon: "download", style: :secondary, data: { turbo: false },
+         url: helpers.report_path(report: report.key, format: :csv, p: request.query_parameters["p"]) } ]
     end
 
     def cell(row, column)
@@ -66,8 +66,8 @@ module Wibawa
       shown = chart_rows.first(CHART_BARS)
       max = shown.flat_map { |row| series.map { |one| row[one.name].to_f } }.max.to_f
       shown.map do |row|
-        [row[report.chart_options[:x]].to_s.presence || "—",
-         series.map { |one| [one, row[one.name], max.positive? ? (row[one.name].to_f.clamp(0, max) / max * 100).round(2) : 0] }]
+        [ row[report.chart_options[:x]].to_s.presence || "—",
+         series.map { |one| [ one, row[one.name], max.positive? ? (row[one.name].to_f.clamp(0, max) / max * 100).round(2) : 0 ] } ]
       end
     end
 
@@ -79,7 +79,7 @@ module Wibawa
         low, high = y_range
         line_rows.each_with_index.map do |row, index|
           Point.new(row[report.chart_options[:x]].to_s, ((index + 0.5) / line_rows.size * 100).round(2),
-                    series.map { |one| [one, row[one.name], high == low ? 50.0 : ((row[one.name].to_f - low) / (high - low) * 100).round(2)] })
+                    series.map { |one| [ one, row[one.name], high == low ? 50.0 : ((row[one.name].to_f - low) / (high - low) * 100).round(2) ] })
         end
       end
     end
@@ -89,20 +89,20 @@ module Wibawa
     # One value axis for every series. It always includes zero, so the height of a line means something.
     def y_range
       values = line_rows.flat_map { |row| series.map { |one| row[one.name].to_f } }
-      [[*values, 0].min, [*values, 0].max]
+      [ [ *values, 0 ].min, [ *values, 0 ].max ]
     end
 
     # Top, middle and bottom of the value axis.
     def y_ticks
       low, high = y_range
-      [high, (high + low) / 2.0, low]
+      [ high, (high + low) / 2.0, low ]
     end
 
     def polyline(index) = line_points.map { |point| "#{point.x},#{(100 - point.marks[index][2]).round(2)}" }.join(" ")
 
     # A handful of evenly spaced labels for the time axis.
     def x_labels
-      count = [line_points.size, X_LABELS].min
+      count = [ line_points.size, X_LABELS ].min
       Array.new(count) { |i| line_points[count == 1 ? 0 : (i * (line_points.size - 1) / (count - 1.0)).round].label }
     end
 
@@ -114,7 +114,7 @@ module Wibawa
     def param_id(param) = "wb-report-#{param.name}"
 
     def options_for(param)
-      Array(param.collection).map { |item| item.is_a?(Array) ? item : [Util.humanize(item.to_s), item] }
+      Array(param.collection).map { |item| item.is_a?(Array) ? item : [ Util.humanize(item.to_s), item ] }
     end
   end
 end

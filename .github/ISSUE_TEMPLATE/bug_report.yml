@@ -1,0 +1,35 @@
+name: Bug report
+description: Something in Wibawa does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: For a security problem, do not open an issue. See SECURITY.md.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you got. Include the error and the first lines of its backtrace if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps or code to reproduce
+      description: The resource file (app/wibawa/...) and the model, cut down to what is needed.
+      render: ruby
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Wibawa, Rails and Ruby
+      placeholder: Wibawa 0.1.0, Rails 8.1.4, Ruby 3.4.3
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Setup
+      description: Asset pipeline (Propshaft or Sprockets), authorization (Pundit, ActionPolicy, a proc, none) and database

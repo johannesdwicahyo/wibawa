@@ -6,7 +6,7 @@ require "capybara/cuprite"
 # System specs drive headless Chrome over CDP. The server runs in this
 # process, so it shares the in-memory database and the test transaction.
 Capybara.register_driver(:wibawa_chrome) do |app|
-  Capybara::Cuprite::Driver.new(app, window_size: [1280, 900], process_timeout: 30,
+  Capybara::Cuprite::Driver.new(app, window_size: [ 1280, 900 ], process_timeout: 30,
                                      browser_options: ENV["CI"] ? { "no-sandbox" => nil } : {})
 end
 Capybara.server = :puma, { Silent: true }

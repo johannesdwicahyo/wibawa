@@ -403,13 +403,13 @@ The index table is one component that loops rows and formats cells with plain me
 
 ```sh
 bundle install
-bundle exec rake             # DSL unit tests, request and system specs against spec/dummy, a Sprockets boot check, then the demo
+bundle exec rake             # style check, then unit, request and browser specs, a Sprockets boot check and the demo check
 bundle exec rspec spec/requests   # skip the browser
 npm install
 npm run build:css            # rebuild app/assets/builds/wibawa.css after changing classes
 ```
 
-The system specs (`spec/system`) drive headless Chrome, so Chrome or Chromium must be installed. The accessibility specs need `npm install` for axe-core and are skipped without it. Commit the rebuilt CSS; CI fails if it's out of date.
+The system specs (`spec/system`) drive headless Chrome, so Chrome or Chromium must be installed. The accessibility specs need `npm install` for axe-core and are skipped without it. Commit the rebuilt CSS; CI fails if it's out of date. `CONTRIBUTING.md` has the rest.
 
 ## License
 

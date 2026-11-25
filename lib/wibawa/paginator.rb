@@ -6,7 +6,7 @@ module Wibawa
 
     def initialize(relation, page:, per_page:, count: true)
       @relation = relation
-      @page = [page.to_i, 1].max
+      @page = [ page.to_i, 1 ].max
       @per_page = per_page
       @count = count
     end
@@ -36,7 +36,7 @@ module Wibawa
     def total_pages
       return nil unless @count
 
-      [(total_count.to_f / per_page).ceil, 1].max
+      [ (total_count.to_f / per_page).ceil, 1 ].max
     end
 
     def next?
@@ -55,7 +55,7 @@ module Wibawa
       return [] unless @count
 
       last = total_pages
-      pages = ([1, last] + ((page - radius)..(page + radius)).to_a).select { |p| p.between?(1, last) }.uniq.sort
+      pages = ([ 1, last ] + ((page - radius)..(page + radius)).to_a).select { |p| p.between?(1, last) }.uniq.sort
       pages.each_with_object([]) do |p, out|
         out << :gap if out.any? && out.last != :gap && p - out.last > 1
         out << p

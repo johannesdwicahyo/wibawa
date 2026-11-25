@@ -58,10 +58,10 @@ RSpec.describe "Wibawa MCP server", type: :request do
     expect(call("list_resources").map { |r| r["resource"] }).to include("orders", "customers")
 
     found = call("list_records", resource: "orders", search: "Sari", filters: { status: "paid" })
-    expect(found["records"].map { |r| r["number"] }).to eq(["B-2"])
+    expect(found["records"].map { |r| r["number"] }).to eq([ "B-2" ])
     expect(found["total"]).to eq(1)
 
-    expect(call("list_records", resource: "orders", scope: "pending")["records"].map { |r| r["number"] }).to eq(["A-1"])
+    expect(call("list_records", resource: "orders", scope: "pending")["records"].map { |r| r["number"] }).to eq([ "A-1" ])
     expect(call("get_record", resource: "orders", id: order.id)).to include("number" => "A-1", "customer" => { "id" => customer.id, "name" => "Sari" })
     expect(call("get_record", resource: "orders", id: 0)).to eq("error" => "Not found.")
   end
@@ -71,7 +71,7 @@ RSpec.describe "Wibawa MCP server", type: :request do
     order.update!(total: 10)
 
     listed = call("list_reports").find { |r| r["report"] == "orders_by_status" }
-    expect(listed).to include("title" => "Orders by status", "params" => [{ "name" => "number", "type" => "string", "default" => "%" }])
+    expect(listed).to include("title" => "Orders by status", "params" => [ { "name" => "number", "type" => "string", "default" => "%" } ])
 
     all = call("run_report", report: "orders_by_status")
     expect(all).to include("total" => 1, "page" => 1, "has_next" => false, "params" => { "number" => "%" })
@@ -99,7 +99,7 @@ RSpec.describe "Wibawa MCP server", type: :request do
     resource = Wibawa.registry["orders"]
     resource.controller { def scoped_collection = super.where(number: "B-2") }
 
-    expect(call("list_records", resource: "orders")["records"].map { |r| r["number"] }).to eq(["B-2"])
+    expect(call("list_records", resource: "orders")["records"].map { |r| r["number"] }).to eq([ "B-2" ])
     expect(call("get_record", resource: "orders", id: order.id)).to eq("error" => "Not found.")
   ensure
     resource.controller_blocks.pop

@@ -30,7 +30,7 @@ module Dummy
   end
 end
 
-Wibawa.config.load_paths = [File.join(__dir__, "wibawa")]
+Wibawa.config.load_paths = [ File.join(__dir__, "wibawa") ]
 
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
@@ -118,4 +118,3 @@ ActiveRecord::Schema.define do
     t.integer :position
   end
 end
-

@@ -48,6 +48,6 @@ RSpec.describe "Wibawa saved views", type: :request do
     delete "/admin/orders/views/#{theirs.id}"
     expect(response).to have_http_status(:not_found)
     delete "/admin/orders/views/#{mine.id}"
-    expect(Wibawa::SavedView.pluck(:name)).to eq(["Theirs"])
+    expect(Wibawa::SavedView.pluck(:name)).to eq([ "Theirs" ])
   end
 end

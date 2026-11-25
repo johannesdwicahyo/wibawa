@@ -16,7 +16,7 @@ module Wibawa
     def groups
       Wibawa.registry.menu.filter_map do |name, resources|
         visible = resources.select { |r| visible?(r) }
-        [name, visible] if visible.any?
+        [ name, visible ] if visible.any?
       end
     end
 

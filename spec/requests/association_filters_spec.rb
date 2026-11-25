@@ -3,8 +3,8 @@ require "spec_helper"
 RSpec.describe "Wibawa filters on associations", type: :request do
   let!(:sari) { Customer.create!(name: "Sari") }
   let!(:budi) { Customer.create!(name: "Budi") }
-  let!(:batik) { Order.create!(number: "A-1", customer: sari, line_items: [LineItem.new(product: "Batik", position: 1), LineItem.new(product: "Batik tulis", position: 2)]) }
-  let!(:kain) { Order.create!(number: "B-2", customer: budi, line_items: [LineItem.new(product: "Kain", position: 5)]) }
+  let!(:batik) { Order.create!(number: "A-1", customer: sari, line_items: [ LineItem.new(product: "Batik", position: 1), LineItem.new(product: "Batik tulis", position: 2) ]) }
+  let!(:kain) { Order.create!(number: "B-2", customer: budi, line_items: [ LineItem.new(product: "Kain", position: 5) ]) }
   let!(:empty) { Order.create!(number: "C-3", customer: budi) }
 
   def numbers(query)
@@ -13,12 +13,12 @@ RSpec.describe "Wibawa filters on associations", type: :request do
   end
 
   it "filters by a chosen has_many record" do
-    expect(numbers(line_items: kain.line_items.first.id)).to eq(["B-2"])
+    expect(numbers(line_items: kain.line_items.first.id)).to eq([ "B-2" ])
     expect(numbers(line_items: "")).to eq(%w[A-1 B-2 C-3])
   end
 
   it "filters by a column of an associated table, without duplicating rows" do
-    expect(numbers("line_items.product" => "batik")).to eq(["A-1"]) # two matching items, one row
+    expect(numbers("line_items.product" => "batik")).to eq([ "A-1" ]) # two matching items, one row
     expect(numbers("line_items.position_from" => 2, "line_items.position_to" => 9)).to eq(%w[A-1 B-2])
     expect(numbers("customer.name" => "bud")).to eq(%w[B-2 C-3])
     expect(numbers("line_items.product" => "x' OR '1'='1")).to eq([])

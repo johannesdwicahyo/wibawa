@@ -1,0 +1,12 @@
+# Rails' own house style, nothing added.
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 3.2
+  Exclude:
+    - "node_modules/**/*"
+    - "vendor/**/*"
+    - "spec/dummy/tmp/**/*"
+    - "demo/tmp/**/*"
+    - "pkg/**/*"

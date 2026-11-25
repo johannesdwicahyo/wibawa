@@ -59,7 +59,7 @@ module Wibawa
     end
 
     def row(name, as: nil, label: nil, **options, &block)
-      @items << [:row, Column.new(name.to_sym, { as: as, label: label }.merge(options).compact, block)]
+      @items << [ :row, Column.new(name.to_sym, { as: as, label: label }.merge(options).compact, block) ]
     end
 
     # Rows that hold several attributes at once:
@@ -71,7 +71,7 @@ module Wibawa
     # A titled box whose content comes from the block (run in the view, gets the record).
     #   panel("Notes") { |order| simple_format(order.notes) }
     def panel(title, &block)
-      @items << [:panel, title, block]
+      @items << [ :panel, title, block ]
     end
 
     # A table of associated records:
@@ -82,7 +82,7 @@ module Wibawa
     def table_for(association, title: nil, limit: 25, &block)
       table = TableBuilder.new
       table.instance_eval(&block) if block
-      @items << [:table, association.to_sym, { title: title, limit: limit }, table]
+      @items << [ :table, association.to_sym, { title: title, limit: limit }, table ]
     end
   end
 

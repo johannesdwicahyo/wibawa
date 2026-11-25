@@ -4,7 +4,7 @@ require "spec_helper"
 RSpec.describe "Wibawa in the browser", type: :system do
   let!(:customer) { Customer.create!(name: "Sari") }
   let!(:orders) do
-    [["A-1", :pending], ["A-2", :paid], ["A-3", :pending]].map do |number, status|
+    [ [ "A-1", :pending ], [ "A-2", :paid ], [ "A-3", :pending ] ].map do |number, status|
       Order.create!(number: number, customer: customer, total: 10, status: status)
     end
   end
@@ -45,12 +45,12 @@ RSpec.describe "Wibawa in the browser", type: :system do
 
       find("[data-wb-form] [type=submit]", match: :first).click
       expect(page).to have_no_css("[data-wb-form]")
-      expect(Order.find_by!(number: "N-1").line_items.order(:position).pluck(:product, :position)).to eq([["Rice", 1], ["Tea", 2]])
+      expect(Order.find_by!(number: "N-1").line_items.order(:position).pluck(:product, :position)).to eq([ [ "Rice", 1 ], [ "Tea", 2 ] ])
     end
 
     it "deletes a saved row only when the form is saved" do
       order = orders.first
-      order.line_items.create!([{ product: "Tea", position: 1 }, { product: "Rice", position: 2 }])
+      order.line_items.create!([ { product: "Tea", position: 1 }, { product: "Rice", position: 2 } ])
       visit "/admin/orders/#{order.id}/edit"
 
       all("[data-wb-nested-remove]").first.click
@@ -59,7 +59,7 @@ RSpec.describe "Wibawa in the browser", type: :system do
 
       find("[data-wb-form] [type=submit]", match: :first).click
       expect(page).to have_no_css("[data-wb-form]")
-      expect(order.line_items.reload.pluck(:product, :position)).to eq([["Rice", 1]])
+      expect(order.line_items.reload.pluck(:product, :position)).to eq([ [ "Rice", 1 ] ])
     end
   end
 
@@ -184,7 +184,7 @@ RSpec.describe "Wibawa in the browser", type: :system do
                   Math.round(box.querySelector("tbody tr").getBoundingClientRect().height)]
         })()
       JS
-      expect(top).to eq([800, 0, 40])
+      expect(top).to eq([ 800, 0, 40 ])
 
       orders.first.line_items.create!(product: "Tea", position: 1)
       visit "/admin/line_items"
@@ -211,7 +211,7 @@ RSpec.describe "Wibawa in the browser", type: :system do
           return [box.scrollLeft > 0, Math.round(box.querySelector("tbody td:nth-child(2)").getBoundingClientRect().left - box.getBoundingClientRect().left)]
         })()
       JS
-      expect(left).to eq([true, 0])
+      expect(left).to eq([ true, 0 ])
       expect(js("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
     end
   end
@@ -238,7 +238,7 @@ RSpec.describe "Wibawa in the browser", type: :system do
   describe "command palette" do
     it "opens on Ctrl+K, filters pages, finds records and follows Enter" do
       visit "/admin"
-      find("body").send_keys([:control, "k"])
+      find("body").send_keys([ :control, "k" ])
       expect(page).to have_css("dialog[data-wb-palette][open]")
 
       input = find("[data-wb-palette-input]")

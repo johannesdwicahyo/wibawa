@@ -12,7 +12,7 @@ RSpec.describe "Wibawa without authentication configured", type: :request do
 
   it "refuses every request anywhere else" do
     in_production
-    ["/admin", "/admin/orders", "/admin/orders.csv", "/admin/reports/orders_by_status", "/admin/-/search?q=a"].each do |path|
+    [ "/admin", "/admin/orders", "/admin/orders.csv", "/admin/reports/orders_by_status", "/admin/-/search?q=a" ].each do |path|
       get path
       expect(response).to have_http_status(:forbidden), path
       expect(response.body).to include("config.authenticate_with")

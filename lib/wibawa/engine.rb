@@ -4,7 +4,7 @@ module Wibawa
 
     initializer "wibawa.load_paths", before: :set_autoload_paths do |app|
       default = app.root.join("app", "wibawa")
-      Wibawa.config.load_paths = [default] if Wibawa.config.load_paths.empty?
+      Wibawa.config.load_paths = [ default ] if Wibawa.config.load_paths.empty?
 
       # Resource files call Wibawa.resource; they don't define constants,
       # so Zeitwerk must not try to autoload them.
@@ -16,7 +16,7 @@ module Wibawa
     initializer "wibawa.reloading" do |app|
       # Editing a resource file triggers a reload in development.
       Wibawa.config.load_paths.each do |path|
-        app.config.watchable_dirs[path.to_s] = ["rb"]
+        app.config.watchable_dirs[path.to_s] = [ "rb" ]
       end
     end
 

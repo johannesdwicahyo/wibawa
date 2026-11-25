@@ -23,7 +23,7 @@ module Wibawa
       query = Wibawa::Query.new(resource, collection_for(resource), { search: term })
       query.relation.limit(PER_RESOURCE).filter_map do |record|
         path = path_for(resource, record)
-        [resource, record, path] if path
+        [ resource, record, path ] if path
       end
     end
 

@@ -22,7 +22,7 @@ module Wibawa
 
     def per_page
       requested = params[:per_page].to_i
-      requested.positive? ? [requested, Wibawa.config.max_per_page].min : Wibawa.config.per_page
+      requested.positive? ? [ requested, Wibawa.config.max_per_page ].min : Wibawa.config.per_page
     end
 
     # CSV lines, fetched one batch at a time so a large export is never held in

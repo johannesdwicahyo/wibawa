@@ -21,9 +21,9 @@ module Wibawa
       def columns
         return [] unless model.respond_to?(:columns)
 
-        belongs_to = model.reflect_on_all_associations(:belongs_to).to_h { |r| [r.foreign_key.to_s, r.name.to_s] }
+        belongs_to = model.reflect_on_all_associations(:belongs_to).to_h { |r| [ r.foreign_key.to_s, r.name.to_s ] }
         model.columns.reject { |c| c.name.match?(SKIP) || (c.name.end_with?("_type") && belongs_to.key?(c.name.sub(/_type\z/, "_id"))) }
-                     .map { |c| [belongs_to.fetch(c.name, c.name), c.type] }
+                     .map { |c| [ belongs_to.fetch(c.name, c.name), c.type ] }
       rescue StandardError
         []
       end
@@ -38,9 +38,9 @@ module Wibawa
 
       def filters
         columns.filter_map do |name, type|
-          if model.reflect_on_association(name.to_sym) || model.defined_enums.key?(name) then [name, nil]
-          elsif %i[date datetime].include?(type) then [name, "date_range"]
-          elsif type == :boolean then [name, nil]
+          if model.reflect_on_association(name.to_sym) || model.defined_enums.key?(name) then [ name, nil ]
+          elsif %i[date datetime].include?(type) then [ name, "date_range" ]
+          elsif type == :boolean then [ name, nil ]
           end
         end.first(4)
       rescue StandardError

@@ -44,7 +44,7 @@ module Wibawa
     def self.filter(data)
       return nil if data.blank?
 
-      patterns = Rails.application.config.filter_parameters + [Wibawa::Resource::HIDDEN_ATTRIBUTES]
+      patterns = Rails.application.config.filter_parameters + [ Wibawa::Resource::HIDDEN_ATTRIBUTES ]
       ActiveSupport::ParameterFilter.new(patterns).filter(data.to_h.except(*IGNORED)).presence
     end
 
