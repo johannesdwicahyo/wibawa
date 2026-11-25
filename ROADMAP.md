@@ -25,7 +25,7 @@ Something a team can put in front of real staff.
 - [x] UI redesign to `DESIGN.md`: color tokens, bundled font, 13 px floor, status as dot plus word, sized form fields
 - [x] Motion (page cross-fade, save spinner) and a single filter toolbar with chips
 - [ ] Rest of `DESIGN.md` (see its "Not built yet" list): sticky header, compact density, collapsible sidebar, phone overflow menu
-- [ ] Secure by default: refuse to serve in production until `authenticate_with` is configured (opt out explicitly)
+- [x] Secure by default: refuse to serve outside development and test until `authenticate_with` is configured (opt out explicitly)
 - [ ] System specs for the JavaScript: nested rows (add, remove, reorder), batch selection, filters panel, theme toggle, mobile sidebar
 - [ ] Verify what the README promises but nobody has run: Pundit and ActionPolicy adapters, Active Storage attachments, Action Text, Sprockets, the `id` locale, `wibawa:component`
 - [ ] Accessibility pass to WCAG 2.2 AA (keyboard, focus order, contrast in both themes)

@@ -40,6 +40,8 @@ Wibawa.configure do |config|
 end
 ```
 
+**Secure by default.** In development and test the admin is open, so `/admin` works right after the install. Everywhere else, Wibawa answers every request with 403 until `authenticate_with` is set, so a forgotten initializer cannot publish your data. If something else already guards the admin, say so instead of giving a block: `config.authenticate_with :parent_controller` (a `before_action` in your parent controller) or `config.authenticate_with :none` (a VPN, or basic auth in the proxy).
+
 Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets.
 
 ## A resource

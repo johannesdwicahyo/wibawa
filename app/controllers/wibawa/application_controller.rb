@@ -26,8 +26,13 @@ module Wibawa
     private
 
     def wibawa_authenticate!
-      block = Wibawa.config.authenticate
-      instance_exec(&block) if block
+      gate = Wibawa.config.authenticate
+      return instance_exec(&gate) if gate.is_a?(Proc)
+      return if gate || Rails.env.local? # guarded elsewhere, or development and test
+
+      logger&.error("Wibawa refused a request: config.authenticate_with is not set (config/initializers/wibawa.rb).")
+      render plain: "This admin is not set up yet: config.authenticate_with is missing. " \
+                    "See config/initializers/wibawa.rb.", status: :forbidden
     end
 
     def wibawa_current_user

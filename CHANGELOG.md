@@ -9,6 +9,7 @@ First release.
 - Nested `has_many` forms with add, remove and drag-to-reorder
 - Streaming CSV export with formula-injection protection
 - Authorization adapters: Pundit, ActionPolicy, or a proc
+- Secure by default: outside development and test, every request is refused until `config.authenticate_with` is set
 - ViewComponent UI with prebuilt Tailwind CSS, dark mode, English and Indonesian locales
 - Design system in `DESIGN.md`: every color is a CSS variable, Plus Jakarta Sans ships in the gem (no third-party requests), statuses show as a dot plus the word
 - Search and filters share one toolbar: a Filters popover, with active filters as removable chips
@@ -21,6 +22,6 @@ First release.
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)
 - Custom pages: `Wibawa.page` gives a template or block its own menu entry, with action buttons
-- Reports: `Wibawa.report` turns SQL or a query block into a table, a paged table, a bar or line chart (up to six series) and a streamed CSV, on any connected database
+- Reports: `Wibawa.report` turns SQL or a query block into a paged table, a bar or line chart (up to six series) and a streamed CSV, on any connected database
 - MCP server for AI agents (`config.mcp_authenticate_with`): read-only by default, same authorization as the UI, reports included
 - Generators: `wibawa:install`, `wibawa:resource`, `wibawa:component`, `wibawa:saved_views`, `wibawa:audit_log`
