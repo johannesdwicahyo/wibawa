@@ -78,6 +78,24 @@ it "shows active filters as chips that remove one filter and keep the rest" do
     Wibawa.config.font = :bundled
   end
 
+  it "gives the browser tab an icon, which the app can replace or remove" do
+    get "/admin"
+    icon = response.body[/<link rel="icon"[^>]*>/]
+    expect(icon).to include('type="image/svg+xml"', "/assets/wibawa/favicon-")
+    get icon[/href="([^"]+)"/, 1]
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("<svg")
+
+    Wibawa.config.favicon = "https://example.com/own.png"
+    get "/admin"
+    expect(response.body).to include('href="https://example.com/own.png"')
+    Wibawa.config.favicon = false
+    get "/admin"
+    expect(response.body).not_to include('rel="icon"')
+  ensure
+    Wibawa.config.favicon = nil
+  end
+
   it "exports CSV" do
     get "/admin/orders.csv"
     expect(response.media_type).to eq("text/csv")

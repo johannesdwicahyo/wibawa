@@ -26,7 +26,7 @@ module Wibawa
           path = root.join("app", "assets", dir).to_s
           app.config.assets.paths << path unless app.config.assets.paths.include?(path)
         end
-        app.config.assets.precompile += %w[wibawa.css wibawa.js wibawa/plus-jakarta-sans-latin.woff2 wibawa/plus-jakarta-sans-latin-ext.woff2] if app.config.assets.respond_to?(:precompile)
+        app.config.assets.precompile += %w[wibawa.css wibawa.js wibawa/favicon.svg wibawa/plus-jakarta-sans-latin.woff2 wibawa/plus-jakarta-sans-latin-ext.woff2] if app.config.assets.respond_to?(:precompile)
       end
     end
 

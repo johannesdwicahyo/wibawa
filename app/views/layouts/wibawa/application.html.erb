@@ -7,6 +7,9 @@
     <meta name="turbo-refresh-scroll" content="preserve">
     <meta name="view-transition" content="same-origin">
     <title><%= [content_for(:title), Wibawa.config.site_title].compact_blank.join(" – ") %></title>
+    <% unless Wibawa.config.favicon == false %>
+      <%= favicon_link_tag Wibawa.config.favicon || "wibawa/favicon.svg", type: (Wibawa.config.favicon ? nil : "image/svg+xml") %>
+    <% end %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -38,7 +41,7 @@
         <button type="button" data-wb-sidebar-open class="<%= wibawa_button_class(:ghost, '-ml-2 px-2') %>" aria-label="<%= t('wibawa.open_menu') %>">
           <%= wibawa_icon("menu") %>
         </button>
-        <%= link_to Wibawa.config.site_title, root_path, class: "truncate text-[15px] font-semibold" %>
+        <%= link_to Wibawa.config.site_title, root_path, class: "truncate text-[0.9375rem] font-semibold" %>
         <button type="button" data-wb-palette-open class="<%= wibawa_button_class(:ghost, '-mr-2 ml-auto px-2') %>" aria-label="<%= t('wibawa.palette.label') %>">
           <%= wibawa_icon("search") %>
         </button>

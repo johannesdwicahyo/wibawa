@@ -367,6 +367,7 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
 ## Customizing the UI
 
 - **Colors:** `config.brand_color = "#0f766e"` sets the action color (the dark-mode shade is derived from it). Every color is a CSS variable you can override: `--wb-canvas`, `--wb-surface`, `--wb-line`, `--wb-ink`, `--wb-rail` and so on; see `DESIGN.md`.
+- **Tab icon:** the Wibawa mark by default. `config.favicon = "admin-icon.png"` uses your own asset or URL; `config.favicon = false` adds none.
 - **Fonts:** Plus Jakarta Sans ships inside the gem, so the admin makes no third-party request. `config.font = :system` uses the system UI font.
 - **Markup:** copy any component into your app and point Wibawa at it:
 
