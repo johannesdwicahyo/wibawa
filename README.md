@@ -10,12 +10,34 @@
 A modern admin framework for Rails. One small Ruby file per model gives you scopes, filters, search, sortable tables, batch and member actions, nested forms, CSV export and authorization, in the spirit of ActiveAdmin but built on today's Rails:
 
 - **ViewComponent** instead of Arbre. Every page is a component you can subclass and restyle.
-- **Turbo**, plus under 200 lines of plain JavaScript. No Stimulus, no jQuery, no build step.
+- **Turbo**, plus one file of plain JavaScript (under 500 lines). No Stimulus, no jQuery, no build step.
 - **Prebuilt Tailwind CSS** ships inside the gem. No Node, no Sass, no asset config in your app.
 - **No Formtastic, no Ransack.** Filters and sort columns are an allowlist you declare, so nothing else is queryable.
 - Dark mode, mobile layout, English and Indonesian translations.
 
 *Wibawa* (wee-BAH-wah) is Indonesian/Javanese for authority and dignity. The mark is *kawung*, a batik motif once reserved for the Javanese courts.
+
+![The orders index: scopes with counts, search, filters, saved views and a table with status dots](docs/screenshots/orders.png)
+
+| Dashboard | Report |
+| --- | --- |
+| ![Dashboard with four figures and the latest orders](docs/screenshots/dashboard.png) | ![A report with a two-series line chart above its table](docs/screenshots/report.png) |
+
+| Form with nested rows, dark theme | Phone |
+| --- | --- |
+| ![An order form in the dark theme, with line items that can be reordered](docs/screenshots/form-dark.png) | <img src="docs/screenshots/phone.png" width="260" alt="The orders index on a phone, first column pinned"> |
+
+## Try the demo
+
+The screenshots come from the demo in [`demo/`](demo): a small batik shop with seeded customers, products and orders. It is one Rails app in one file and needs nothing but the gems in this repository.
+
+```sh
+git clone https://github.com/johannesdwicahyo/wibawa && cd wibawa
+bundle install
+bundle exec rake demo        # then open http://localhost:3000/admin
+```
+
+The data lives in `demo/tmp` (SQLite) and is seeded on first run; `bundle exec rake demo:reset` starts over. The demo runs in development with no sign-in, so do not put it on a public server. Its resource files in [`demo/wibawa/`](demo/wibawa) are a working example of everything below: scopes, filters, nested forms, batch and member actions, CSV import, reports, a custom page, saved views, the audit log and the MCP server (token `demo-token`).
 
 ## Install
 
@@ -381,7 +403,7 @@ The index table is one component that loops rows and formats cells with plain me
 
 ```sh
 bundle install
-bundle exec rake             # DSL unit tests, then request and system specs against the Rails app in spec/dummy
+bundle exec rake             # DSL unit tests, request and system specs against spec/dummy, then a boot check of the demo
 bundle exec rspec spec/requests   # skip the browser
 npm install
 npm run build:css            # rebuild app/assets/builds/wibawa.css after changing classes
