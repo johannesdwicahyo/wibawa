@@ -21,7 +21,10 @@ module Wibawa
     # Normalizes a query string or params hash to the allowed keys, in a stable order.
     def self.normalize(query)
       params = query.is_a?(String) ? Rack::Utils.parse_nested_query(query) : query.to_h
-      params.slice(*KEYS).compact_blank.to_query
+      params = params.slice(*KEYS)
+      # The filter form sends every filter, the empty ones too; a view keeps only the ones in use.
+      params["q"] = params["q"].compact_blank if params["q"].respond_to?(:compact_blank)
+      params.compact_blank.to_query
     end
 
     def query=(value)
