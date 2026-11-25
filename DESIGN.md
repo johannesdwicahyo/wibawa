@@ -1,6 +1,6 @@
 # Wibawa design spec
 
-**Status: built.** Logo: kawung. Status style: dot plus word. Font: bundled.
+**Status: built.** Logo: kawung with the word in Plus Jakarta Sans Bold (files and usage in `design/logo/`). Status style: dot plus word. Font: bundled.
 
 Sources: [Impeccable](https://impeccable.style) ("Operate" mode, for product UI), [Taste Skill](https://www.tasteskill.dev) (system and motion rules), and the DESIGN.md format from [xiaopu-ai/web-design](https://github.com/xiaopu-ai/web-design). That last skill is written for landing pages; its scroll effects, WebGL and "three wow moments" rules are deliberately not applied to an admin panel. They will apply to the docs site (roadmap M3).
 

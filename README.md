@@ -1,11 +1,9 @@
-<p align="center">
+<h1 align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="design/logo/wibawa-symbol-white.svg">
-    <img src="design/logo/wibawa-symbol.svg" width="72" height="72" alt="Wibawa logo: the kawung batik motif drawn as four table cells">
+    <source media="(prefers-color-scheme: dark)" srcset="design/logo/wibawa-logo-white.svg">
+    <img src="design/logo/wibawa-logo.svg" width="300" alt="Wibawa">
   </picture>
-</p>
-
-# Wibawa
+</h1>
 
 A modern admin framework for Rails. One small Ruby file per model gives you scopes, filters, search, sortable tables, batch and member actions, nested forms, CSV export and authorization, in the spirit of ActiveAdmin but built on today's Rails:
 
@@ -15,7 +13,7 @@ A modern admin framework for Rails. One small Ruby file per model gives you scop
 - **No Formtastic, no Ransack.** Filters and sort columns are an allowlist you declare, so nothing else is queryable.
 - Dark mode, mobile layout, English and Indonesian translations.
 
-*Wibawa* (wee-BAH-wah) is Indonesian/Javanese for authority and dignity. The mark is *kawung*, a batik motif once reserved for the Javanese courts.
+*Wibawa* (wee-BAH-wah) is Indonesian/Javanese for authority and dignity. The mark is *kawung*, a batik motif once reserved for the Javanese courts, drawn as four table cells. Logo files and usage are in [`design/logo`](design/logo).
 
 ![The orders index: scopes with counts, search, filters, saved views and a table with status dots](docs/screenshots/orders.png)
 

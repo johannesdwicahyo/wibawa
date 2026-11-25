@@ -23,8 +23,9 @@ Make the repository safe to open to contributors.
 
 Something a team can put in front of real staff.
 
-- [x] Brand: kawung mark chosen and in the README; a favicon ships in the gem; wordmark, colour and favicon drafts in `design/brand/`
-- [ ] Brand: choose the wordmark, colour and favicon from the drafts, then finish the usage guide and export the files
+- [x] Brand: kawung mark chosen and in the README; a favicon ships in the gem; wordmark, colour and favicon drafted
+- [x] Brand: wordmark, colour and favicon chosen; logo files, PNG exports and usage guide in `design/logo/`
+- [ ] Brand: a trademark search on the name and the mark
 - [x] UI redesign to `DESIGN.md`: color tokens, bundled font, 13 px floor, status as dot plus word, sized form fields
 - [x] Motion (page cross-fade, save spinner) and a single filter toolbar with chips
 - [x] Rest of `DESIGN.md`: sticky header, compact density, collapsible sidebar, phone overflow menu and pinned first column, state color tokens
