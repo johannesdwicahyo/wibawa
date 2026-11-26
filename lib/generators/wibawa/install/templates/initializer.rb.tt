@@ -2,6 +2,10 @@ Wibawa.configure do |config|
   config.site_title = "<%= Rails.application.class.module_parent_name.titleize %> Admin"
 
   # Wibawa's controllers inherit from this, so your authentication applies.
+  # If ApplicationController serves a different audience (it signs in
+  # customers, and the admin is for staff), do not inherit from it: its
+  # session, callbacks and policies would come along. Point this at a
+  # controller made for the admin, or at "ActionController::Base".
   config.parent_controller = "ApplicationController"
 
   # Who may enter the admin at all. Runs as a before_action.
@@ -29,7 +33,8 @@ Wibawa.configure do |config|
   # config.logout_path = -> { main_app.session_path }
   # config.logout_method = :delete
 
-  # Money columns (as: :money). IDR formats as "Rp 1.250.000".
+  # Money columns (as: :money, and as: :cents for integers of hundredths): an ISO code.
+  # Change this to your own; IDR formats as "Rp 1.250.000".
   config.currency = "USD"
 
   # Any CSS color for buttons, links and focus rings.

@@ -60,6 +60,8 @@ Wibawa.configure do |config|
 end
 ```
 
+The installer puts the mount line last in `config/routes.rb`. Keep it below any route of your own under the same path (a sign-in page at `/admin/login`, say): under its path the engine answers every URL.
+
 **Secure by default.** In development and test the admin is open, so `/admin` works right after the install. Everywhere else, Wibawa answers every request with 403 until `authenticate_with` is set, so a forgotten initializer cannot publish your data. If something else already guards the admin, say so instead of giving a block: `config.authenticate_with :parent_controller` (a `before_action` in your parent controller) or `config.authenticate_with :none` (a VPN, or basic auth in the proxy).
 
 Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets. For Indonesian (`config.i18n.default_locale = :id`), add the `rails-i18n` gem as well: Wibawa translates its own interface, and Rails' own strings (date formats, validation messages) come from that gem.

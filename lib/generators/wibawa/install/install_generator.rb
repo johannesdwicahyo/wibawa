@@ -17,8 +17,17 @@ module Wibawa
         template "dashboard.rb.tt", "app/wibawa/dashboard.rb"
       end
 
+      # The mount goes last in the routes file. Under its path the engine answers
+      # every URL (/ops/anything is "the resource called anything"), so a route
+      # of the app's own under the same path only works if it comes first.
       def mount_engine
-        route %(mount Wibawa::Engine, at: "#{options[:path]}")
+        line = %(  mount Wibawa::Engine, at: "#{options[:path]}"\n)
+        routes = File.join(destination_root, "config/routes.rb")
+        if File.exist?(routes) && File.read(routes).match?(/^end\s*\z/)
+          inject_into_file "config/routes.rb", line, before: /^end\s*\z/
+        else
+          route line.strip
+        end
       end
 
       def create_resources
@@ -35,6 +44,8 @@ module Wibawa
         say "  1. Set up authentication in config/initializers/wibawa.rb"
         say "  2. Start the server and open #{options[:path]}"
         say "  3. Edit the files in app/wibawa/ to shape each page"
+        say ""
+        say "Routes of your own under #{options[:path]} (a sign-in page, say) must stay above the mount line in config/routes.rb."
       end
 
       private

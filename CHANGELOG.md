@@ -50,6 +50,7 @@ First release.
 - Fixed on PostgreSQL: searching a UUID or integer column with a term it cannot hold raised an error
 - Fixed: Wibawa's own tables got integer keys in an app whose `ApplicationRecord` assigns UUIDs, so their records collided; the generators now follow the app's key type
 - `rake postgres` runs the admin on PostgreSQL with UUID keys, and CI runs it
+- The installer puts the mount line last in the routes file, so an app's own routes under the same path keep working, and its initializer says when not to inherit from `ApplicationController`
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)
