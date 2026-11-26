@@ -68,6 +68,8 @@ Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets. Fo
 
 Each file in `app/wibawa/` registers one resource. Edits reload without a server restart.
 
+The generators leave out columns that look secret (`digest`, `*_digest`, `*_token`, `*_secret`, `api_key`, `encrypted_*` and the like), and so do the default index, show page and form. To show one anyway, name it yourself: `column :token`.
+
 ```ruby
 # app/wibawa/orders.rb
 Wibawa.resource Order do
@@ -231,7 +233,7 @@ What it does not cover:
 - Reads. Agent calls that only read are not logged.
 - Changes to nested `has_many` rows are saved but only the parent's own attributes are listed.
 
-Values of attributes matching your app's `filter_parameters`, or that Wibawa already hides from forms (`*_digest`, `*_token`, `encrypted_*`), are stored as `[FILTERED]`. The entry is written right after the change, not in the same transaction.
+Values of attributes matching your app's `filter_parameters`, or that Wibawa already hides from forms (`digest`, `*_digest`, `*_token`, `*_secret`, `encrypted_*` and the like), are stored as `[FILTERED]`. The entry is written right after the change, not in the same transaction.
 
 ## Saved views
 
@@ -387,6 +389,15 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
 ## Performance
 
 The index table is one component that loops rows and formats cells with plain methods, so a 500-row page doesn't create thousands of component objects. Associations shown in columns are eager-loaded. Turn off scope counts (`config.scope_counts = false`) and row counts (`index count: false`) on very large tables. CSV export streams in batches of 1,000 instead of loading everything into memory.
+
+## Testing your admin
+
+Forms post under the key `record`, whatever the model, so a request spec reads:
+
+```ruby
+post "/admin/products", params: { record: { name: "Teh", price: 12_000 } }
+patch "/admin/products/#{product.id}", params: { record: { price: 15_000 } }
+```
 
 ## Coming from ActiveAdmin
 

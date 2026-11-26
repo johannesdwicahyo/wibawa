@@ -2,7 +2,10 @@ module Wibawa
   # One admin resource, built from the DSL in app/wibawa/*.rb.
   class Resource
     CRUD_ACTIONS = %i[index show new create edit update destroy].freeze
-    HIDDEN_ATTRIBUTES = /\A(id|created_at|updated_at|encrypted_.*|.*_digest|.*_token|.*_ciphertext|lock_version)\z/
+    # Columns that hold a secret, whole name or last word: `digest`, `password_digest`,
+    # `api_key`, `otp_secret`. Never offered by default; the audit log masks them.
+    SECRET_ATTRIBUTES = /\A(encrypted_.*|.*_ciphertext|(.*_)?(digest|token|secret|salt|password|password_hash|api_key))\z/
+    HIDDEN_ATTRIBUTES = Regexp.union(/\A(id|created_at|updated_at|lock_version)\z/, SECRET_ATTRIBUTES)
 
     attr_reader :model_name, :options, :scopes, :filters, :search_fields, :member_actions,
                 :controller_blocks, :menu_options, :include_associations

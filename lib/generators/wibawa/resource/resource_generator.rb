@@ -10,9 +10,19 @@ module Wibawa
         template "resource.rb.tt", File.join("app/wibawa", "#{file_path.tr('/', '_').pluralize}.rb")
       end
 
+      def report_secret_columns
+        return unless model.respond_to?(:column_names)
+
+        left_out = model.column_names.grep(Wibawa::Resource::SECRET_ATTRIBUTES)
+        say "  left out of #{class_name}, as they look secret: #{left_out.join(', ')}", :yellow if left_out.any?
+      rescue StandardError
+        nil
+      end
+
       private
 
-      SKIP = /\A(id|created_at|updated_at|encrypted_.*|.*_digest|.*_token|.*_ciphertext|lock_version)\z/
+      # A decimal column with one of these words in its name is shown as money.
+      MONEY = /(\A|_)(total|subtotal|price|amount|cost|fee|balance|revenue)(\z|_)/
 
       def model
         @model ||= class_name.safe_constantize
@@ -22,18 +32,20 @@ module Wibawa
         return [] unless model.respond_to?(:columns)
 
         belongs_to = model.reflect_on_all_associations(:belongs_to).to_h { |r| [ r.foreign_key.to_s, r.name.to_s ] }
-        model.columns.reject { |c| c.name.match?(SKIP) || (c.name.end_with?("_type") && belongs_to.key?(c.name.sub(/_type\z/, "_id"))) }
+        model.columns.reject { |c| c.name.match?(Wibawa::Resource::HIDDEN_ATTRIBUTES) || (c.name.end_with?("_type") && belongs_to.key?(c.name.sub(/_type\z/, "_id"))) }
                      .map { |c| [ belongs_to.fetch(c.name, c.name), c.type ] }
       rescue StandardError
         []
       end
 
       def index_columns
-        columns.reject { |_, type| %i[text json jsonb binary].include?(type) }.first(6).map(&:first)
+        columns.reject { |_, type| %i[text json jsonb binary].include?(type) }.first(6).map do |name, type|
+          type == :decimal && name.match?(MONEY) ? "#{name}, as: :money" : name
+        end
       end
 
       def searchable
-        columns.select { |name, type| %i[string citext].include?(type) && !name.match?(/password/) }.first(3).map(&:first)
+        columns.select { |name, type| %i[string citext].include?(type) }.first(3).map(&:first)
       end
 
       def filters
