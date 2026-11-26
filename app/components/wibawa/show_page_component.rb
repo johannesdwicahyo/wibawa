@@ -48,6 +48,26 @@ module Wibawa
       list
     end
 
+    # The record's PaperTrail or Audited history, if its model keeps one.
+    # Only changes to attributes this page shows are listed.
+    def history
+      return @history if defined?(@history)
+
+      names = resource.show_items.filter_map { |kind, column| column.name.to_s if kind == :row }
+      keys = names.filter_map { |name| record.class.reflect_on_association(name)&.then { |ref| ref.foreign_key.to_s if ref.belongs_to? } }
+      @history = Wibawa::ModelHistory.for(record, only: names + keys)
+    end
+
+    def history_event(entry) = t("wibawa.history.events.#{entry.event}", default: entry.event.to_s.humanize)
+
+    # A change is [old, new]; a masked secret is a plain string.
+    def history_change(change)
+      return change.to_s unless change.is_a?(Array)
+
+      old, new = change.map { |value| value.nil? || value == "" ? presenter.empty : helpers.truncate(value.to_s, length: 80) }
+      safe_join([ old, content_tag(:span, "→", class: "px-1 text-ink-2", "aria-label": t("wibawa.history.became")), new ])
+    end
+
     # Groups consecutive :row items into one attributes card.
     def sections
       resource.show_items.slice_when { |a, b| a.first != :row || b.first != :row }.to_a

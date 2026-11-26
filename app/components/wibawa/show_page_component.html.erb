@@ -55,4 +55,40 @@
       <% end %>
     <% end %>
   <% end %>
+
+  <% if history %>
+    <section class="<%= card_class %>" data-wb-history>
+      <h2 class="flex items-center gap-2 border-b border-line px-5 py-3 text-sm font-semibold">
+        <%= t("wibawa.history.title") %>
+        <span class="text-xs font-normal tabular-nums text-ink-2"><%= history.size %><%= "+" if history.size >= Wibawa::ModelHistory::LIMIT %></span>
+      </h2>
+      <% if history.empty? %>
+        <p class="px-5 py-6 text-sm text-ink-2"><%= t("wibawa.none") %></p>
+      <% else %>
+        <ol class="divide-y divide-line">
+          <% history.each do |entry| %>
+            <li class="grid gap-1 px-5 py-3 text-sm sm:grid-cols-[13rem_1fr] sm:gap-6">
+              <div class="text-ink-2">
+                <%= presenter.format(entry.at, :datetime) %>
+                <% if entry.who %><span class="block truncate"><%= entry.who %></span><% end %>
+              </div>
+              <div class="min-w-0 text-ink">
+                <p class="font-medium"><%= history_event(entry) %></p>
+                <% if entry.changes.any? %>
+                  <dl class="mt-1 space-y-0.5">
+                    <% entry.changes.each do |name, change| %>
+                      <div class="break-words">
+                        <dt class="inline text-ink-2"><%= record.class.human_attribute_name(name) %>:</dt>
+                        <dd class="inline"><%= history_change(change) %></dd>
+                      </div>
+                    <% end %>
+                  </dl>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ol>
+      <% end %>
+    </section>
+  <% end %>
 </div>
