@@ -18,6 +18,12 @@ task :demo do
   sh "bundle exec rackup demo/config.ru -p #{ENV.fetch('PORT', 3000)}"
 end
 
+desc "Time the index page against ActiveAdmin and Administrate (needs: BUNDLE_GEMFILE=benchmark/Gemfile bundle install)"
+task :benchmark do
+  # Its own bundle and its own process: the other admins are not in Wibawa's Gemfile.
+  Bundler.with_unbundled_env { sh({ "BUNDLE_GEMFILE" => "benchmark/Gemfile" }, "bundle exec ruby benchmark/run.rb") }
+end
+
 namespace :demo do
   desc "Delete the demo's data; the next `rake demo` seeds it again"
   task :reset do
