@@ -186,16 +186,29 @@ RSpec.describe "Wibawa in the browser, continued", type: :system do
       expect(page).to have_css("form#wb-row-form", count: 1, visible: :all)
       expect(page).to have_css("tbody form", count: 0, visible: :all) # a row holds a button, not a form of its own
       row = find("tbody tr", text: "A-2")
-      row.hover
-      dismiss_confirm { row.find("button[title=Delete]").click }
+      delete = -> { row.find("button[title=Delete]", visible: :all).click } # there whether or not this browser can hover to reveal it
+      dismiss_confirm { delete.call }
       expect(Order.count).to eq(3) # said no
 
-      row.hover
-      message = accept_confirm { row.find("button[title=Delete]").click }
+      message = accept_confirm { delete.call }
       expect(message).to include("A-2")
       expect(page).to have_css("[data-wb-flash]")
       expect(page).to have_no_css("tbody tr", text: "A-2")
       expect(Order.pluck(:number)).to contain_exactly("A-1", "A-3")
+    end
+
+    it "tucks the actions away only where the row can be hovered, and shows them on focus" do
+      visit "/admin/orders"
+      # Read once it has settled: the change is a 150 ms fade.
+      opacity = -> { sleep(0.3) && js("getComputedStyle(document.querySelector('tbody tr:last-child .wb-row-actions')).opacity") }
+
+      # A desktop browser with a mouse can hover. The browser on a CI machine, like a kiosk or
+      # some tablets, cannot, and there the actions must always show or nothing would reveal them.
+      if js("matchMedia('(hover: hover) and (pointer: fine)').matches")
+        expect(opacity.call).to eq("0")
+        page.execute_script("document.querySelector('tbody tr:last-child a[title=View]').focus()")
+      end
+      expect(opacity.call).to eq("1")
     end
 
     it "draws each row icon once on the page and points at it from the rows" do

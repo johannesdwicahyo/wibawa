@@ -130,8 +130,12 @@
   /* On phones the first column stays in view while the others scroll sideways.
      Its width there is marked important: the cell also has a max-w-xs utility, which would otherwise win. */
   .wb-pin { @apply max-sm:sticky max-sm:left-0 max-sm:max-w-40! max-sm:overflow-hidden max-sm:text-ellipsis max-sm:whitespace-nowrap max-sm:bg-surface max-sm:shadow-[inset_-1px_0_0_var(--color-line)]; }
-  /* View, edit, delete: shown on hover or focus where there is a pointer to hover with, always on touch. */
-  .wb-row-actions { @apply inline-flex items-center gap-0.5 transition-opacity lg:opacity-0 lg:group-hover/row:opacity-100 lg:group-focus-within/row:opacity-100 pointer-coarse:opacity-100; }
+  /* View, edit, delete. On a wide screen with a mouse they are tucked away until the row is hovered or
+     holds focus. Everywhere else they always show: a device that cannot hover would never reveal them. */
+  .wb-row-actions { @apply inline-flex items-center gap-0.5 transition-opacity; }
+  @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+    .wb-row:not(:hover):not(:focus-within) .wb-row-actions { opacity: 0; }
+  }
   .wb-row-action { @apply inline-flex items-center justify-center gap-1.5 rounded-control px-3 py-2 text-sm font-semibold transition active:scale-[.985] pointer-coarse:min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer whitespace-nowrap text-ink-2 hover:bg-surface-2 hover:text-ink; }
   .wb-row-action-danger { @apply hover:text-danger; }
   /* An icon drawn once per page (wibawa_icon_sprite) and referred to from each row (wibawa_icon_use). */
