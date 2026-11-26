@@ -166,8 +166,9 @@ module Wibawa
     def tool_list_records
       ensure_action!(:index)
       wibawa_authorize!(:index, model)
-      query = Wibawa::Query.new(resource, authorized_collection, params)
+      query = Wibawa::Query.new(resource, authorized_collection, params, related: wibawa_related)
       page = Wibawa::Paginator.new(query.relation, page: params[:page], per_page: per_page, count: resource.index_options[:count])
+      wibawa_presenter.prime_related(page.records.to_a, resource.index_columns)
       records = page.records.map { |record| serialize(record, resource.index_columns) }
       log_read(:list, resource, nil, params.permit(:scope, :search, :sort, :direction, :page, q: {}).to_h.merge(returned: records.size))
       { records: records,
@@ -204,17 +205,16 @@ module Wibawa
     def tool_create_record
       ensure_action!(:create)
       record = build_record
-      record.assign_attributes(record_params)
+      rejected = wibawa_assign(record, record_params)
       wibawa_authorize!(:create, record)
-      save(record)
+      save(record, rejected)
     end
 
     def tool_update_record
       ensure_action!(:update)
       record = find_record
       wibawa_authorize!(:update, record)
-      record.assign_attributes(record_params)
-      save(record)
+      save(record, wibawa_assign(record, record_params))
     end
 
     def tool_delete_record
@@ -264,9 +264,9 @@ module Wibawa
 
     # ---- Serialization -----------------------------------------------------
 
-    def save(record)
+    def save(record, rejected)
       action = record.new_record? ? :create : :update
-      record.save || raise(ToolError, record.errors.full_messages.to_sentence)
+      wibawa_save(record, rejected) || raise(ToolError, record.errors.full_messages.to_sentence)
       wibawa_audit(action, record, record.saved_changes)
       detail(record)
     end
@@ -284,8 +284,9 @@ module Wibawa
       case value
       when ActiveSupport::SafeBuffer then helpers.strip_tags(value).squish
       when nil, true, false, Numeric, String, Hash then value
-      when ActiveRecord::Base then { id: value.id, name: wibawa_presenter.display_name(value) }
-      when Array, ActiveRecord::Relation then value.first(100).map { |item| json_value(item) }
+      when ActiveRecord::Base then { id: value.id, name: wibawa_presenter.related_name(value) }
+      when ActiveRecord::Relation then wibawa_presenter.related_records(value).first(100).map { |item| json_value(item) }
+      when Array then value.first(100).map { |item| json_value(item) }
       when Time, Date then value.iso8601
       else value.respond_to?(:to_plain_text) ? value.to_plain_text : value.to_s
       end

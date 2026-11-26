@@ -14,7 +14,7 @@ module Wibawa
       ensure_action!(:index)
       if request.format.csv?
         wibawa_authorize!(:export, model)
-        @query = Wibawa::Query.new(resource, authorized_collection, params)
+        @query = Wibawa::Query.new(resource, authorized_collection, params, related: wibawa_related)
         stream_csv(@query.relation)
       else
         wibawa_authorize!(:index, model)
@@ -22,7 +22,7 @@ module Wibawa
           flash.keep # a notice from the page that sent us here
           return redirect_to(url)
         end
-        @query = Wibawa::Query.new(resource, authorized_collection, params)
+        @query = Wibawa::Query.new(resource, authorized_collection, params, related: wibawa_related)
         options = resource.index_options
         @page = Wibawa::Paginator.new(@query.relation, page: params[:page], per_page: per_page, count: options[:count])
       end
@@ -42,10 +42,10 @@ module Wibawa
     def create
       ensure_action!(:create)
       @record = build_record
-      record.assign_attributes(record_params)
+      rejected = wibawa_assign(record, record_params)
       wibawa_authorize!(:create, record)
 
-      if record.save
+      if wibawa_save(record, rejected)
         wibawa_audit(:create, record, record.saved_changes)
         redirect_to after_save_path, notice: t("wibawa.flash.created", resource: resource.singular_label), status: :see_other
       else
@@ -61,9 +61,9 @@ module Wibawa
     def update
       ensure_action!(:update)
       wibawa_authorize!(:update, record)
-      record.assign_attributes(record_params)
+      rejected = wibawa_assign(record, record_params)
 
-      if record.save
+      if wibawa_save(record, rejected)
         wibawa_audit(:update, record, record.saved_changes)
         redirect_to after_save_path, notice: t("wibawa.flash.updated", resource: resource.singular_label), status: :see_other
       else
@@ -92,7 +92,8 @@ module Wibawa
 
       wibawa_authorize!(:import, model)
       @importer = Wibawa::CsvImporter.new(resource, find_in: authorized_collection, build: -> { build_record },
-                                                    authorize: ->(action, record) { wibawa_authorized?(action, record) })
+                                                    authorize: ->(action, record) { wibawa_authorized?(action, record) },
+                                                    related: wibawa_related)
       return send_data(CSV.generate_line(@importer.headers), filename: "#{resource.key}-template.csv", type: "text/csv; charset=utf-8") if request.format.csv?
       @recent = Wibawa::Import.visible_to(wibawa_current_user).where(resource_key: resource.key).order(id: :desc).limit(5) if Wibawa.config.background_import
       return unless request.post?

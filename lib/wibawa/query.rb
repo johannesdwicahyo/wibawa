@@ -8,10 +8,13 @@ module Wibawa
 
     attr_reader :resource, :params
 
-    def initialize(resource, relation, params)
+    # related: a Wibawa::RelatedScope. With it, a filter that reaches through
+    # an association only matches associated records the user may see.
+    def initialize(resource, relation, params, related: nil)
       @resource = resource
       @base = relation
       @params = params
+      @related = related
     end
 
     def model = resource.model
@@ -162,9 +165,12 @@ module Wibawa
 
       # "line_items.product": the condition is on the associated table. A
       # subquery keeps one row per record however many associated rows match.
-      matching = model.joins(name.split(".").first.to_sym).merge(apply_typed(klass.all, klass, column, name, type))
+      matching = model.joins(name.split(".").first.to_sym).merge(apply_typed(visible(klass), klass, column, name, type))
       rel.where(model.primary_key => matching.select(model.arel_table[model.primary_key]))
     end
+
+    # Every record of the associated model, or only those the user may see.
+    def visible(klass) = @related ? @related.scope(klass.all) : klass.all
 
     def filter_active?(key)
       [ "", "_from", "_to" ].any? { |suffix| Array(filter_value("#{key}#{suffix}")).any?(&:present?) }
@@ -198,7 +204,7 @@ module Wibawa
         rel.where(ref.foreign_key => values)
       when :has_many, :has_and_belongs_to_many
         # Records that have at least one of the chosen associated records.
-        having = klass.joins(column.to_sym).where(ref.klass.arel_table[ref.klass.primary_key].in(values))
+        having = klass.joins(column.to_sym).merge(visible(ref.klass)).where(ref.klass.arel_table[ref.klass.primary_key].in(values))
         rel.where(klass.primary_key => having.select(klass.arel_table[klass.primary_key]))
       else
         rel.where(column => values)

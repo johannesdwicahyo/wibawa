@@ -47,7 +47,8 @@ module Wibawa
       raise Wibawa::NotAuthorized, I18n.t("wibawa.flash.not_authorized") if (user_gid && user.nil?) || !authorizer.authorized?(:import, resource.model)
 
       importer = Wibawa::CsvImporter.new(resource, find_in: authorizer.scope(resource.model.all), build: -> { resource.model.new },
-                                                   authorize: ->(action, record) { authorizer.authorized?(action, record) })
+                                                   authorize: ->(action, record) { authorizer.authorized?(action, record) },
+                                                   related: Wibawa::RelatedScope.new(authorizer))
       done = importer.call(file, dry_run: dry_run, max_rows: MAX_ROWS)
       if done.ok? && !dry_run && Wibawa.config.audit_log
         Wibawa::AuditEntry.record!(user: user, action: :import, resource: resource, via: "web", data: { created: done.created, updated: done.updated })

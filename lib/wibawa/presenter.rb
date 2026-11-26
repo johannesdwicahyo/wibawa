@@ -81,11 +81,12 @@ module Wibawa
       case value
       when nil then ""
       when rich_text_class then value.to_plain_text # before ActiveRecord::Base: a rich text is a record too
-      when ActiveRecord::Base then display_name(value)
+      when ActiveRecord::Base then related_name(value)
+      when ActiveRecord::Relation then related_records(value).map { |v| display_name(v) }.join(", ")
       when ActiveSupport::SafeBuffer then view.strip_tags(value).squish
       when Time then value.strftime("%Y-%m-%d %H:%M:%S")
       when Date then value.iso8601
-      when Array then value.map { |v| v.is_a?(ActiveRecord::Base) ? display_name(v) : v.to_s }.join(", ")
+      when Array then value.map { |v| v.is_a?(ActiveRecord::Base) ? related_name(v) : v.to_s }.join(", ")
       when Hash then value.to_json
       else
         if value.respond_to?(:attached?)
@@ -106,6 +107,34 @@ module Wibawa
         return value.to_s if value.present?
       end
       record.respond_to?(:model_name) ? "#{record.model_name.human} ##{record.to_param}" : record.to_s # a user need not be a model
+    end
+
+    # What the user may see of records reached from the one being shown.
+    def related_scope
+      @related_scope ||= Wibawa::RelatedScope.new(Wibawa::Authorization.build(view.wibawa_current_user))
+    end
+
+    # A record another record points at: its name, linked if it has a page,
+    # or only "#42" when it is outside the user's scope for its model.
+    def related(record)
+      related_scope.visible?(record) ? link_to_record(record) : masked(record)
+    end
+
+    def related_name(record)
+      related_scope.visible?(record) ? display_name(record) : masked(record)
+    end
+
+    def masked(record) = "##{record.id}"
+
+    # Call before drawing a page of records, with the names of the columns
+    # shown: the scope check then costs one query per association, not per row.
+    def prime_related(records, columns)
+      related_scope.prime(records, columns.reject(&:block).map(&:name))
+    end
+
+    # The records of a has_many the user may see.
+    def related_records(value)
+      value.is_a?(ActiveRecord::Relation) ? related_scope.scope(value) : value
     end
 
     # Link to the record's admin page if it has one, otherwise plain text.
@@ -153,8 +182,8 @@ module Wibawa
       case value
       when true, false then boolean(value)
       when rich_text_class then view.truncate(value.to_plain_text, length: 80)
-      when ActiveRecord::Base then link_to_record(value)
-      when ActiveRecord::Relation then collection(value.limit(4).to_a, more: value.size > 3)
+      when ActiveRecord::Base then related(value)
+      when ActiveRecord::Relation then related_records(value).then { |visible| collection(visible.limit(4).to_a, more: visible.size > 3) }
       when Array then value.first.is_a?(ActiveRecord::Base) ? collection(value.first(4), more: value.size > 3) : value.join(", ")
       when Time then datetime(value)
       when Date then view.l(value)
@@ -177,7 +206,7 @@ module Wibawa
     end
 
     def collection(records, more:)
-      links = records.first(3).map { |r| link_to_record(r) }
+      links = records.first(3).map { |r| related(r) }
       links << view.tag.span("…", class: "text-ink-3") if more
       view.safe_join(links, ", ")
     end

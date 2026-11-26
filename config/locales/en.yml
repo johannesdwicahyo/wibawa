@@ -121,6 +121,7 @@ en:
     errors:
       not_found_title: "Page not found"
       not_found_body: "The record or page you're looking for doesn't exist, or it was deleted."
+      related: "is not one you can choose"
       forbidden_title: "You don't have access"
       forbidden_body: "Ask an administrator for permission to open this page."
     flash:
