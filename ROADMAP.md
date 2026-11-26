@@ -66,7 +66,7 @@ The things the first users will ask for in week one.
 - [x] Show PaperTrail or Audited history on the record page when the app uses one
 - [x] CSV import, all-or-nothing, with create-or-update by a key column
 - [x] CSV import: a dry-run preview
-- [ ] CSV import in a background job for large files *(candidate)*
+- [x] CSV import in a background job for large files
 
 **Exit:** a mid-sized app (20+ models) can replace ActiveAdmin without writing a custom controller.
 

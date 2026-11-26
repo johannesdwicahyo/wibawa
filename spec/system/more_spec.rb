@@ -154,6 +154,32 @@ RSpec.describe "Wibawa in the browser, continued", type: :system do
     end
   end
 
+  describe "a CSV import in the background" do
+    include ActiveJob::TestHelper
+
+    around { |example| Dir.mktmpdir { |dir| (@dir = dir) && example.run } }
+    before do
+      stub_const("Wibawa::CsvImporter::MAX_ROWS", 2)
+      Wibawa.config.background_import = true
+    end
+    after { Wibawa.config.background_import = false }
+
+    it "waits on a page that finds out by itself when the job is done" do
+      path = File.join(@dir, "orders.csv")
+      File.write(path, "number,status,customer_id\n" + (1..4).map { |n| "N-#{n},paid,#{customer.id}\n" }.join)
+      visit "/admin/orders/import"
+      attach_file "wb-import-file", path
+      click_button "Import CSV"
+      expect(page).to have_css("[data-wb-import-status=queued] [role=status]", text: "Waiting to start")
+      expect(Order.count).to eq(3)
+
+      perform_enqueued_jobs
+      using_wait_time(10) { expect(page).to have_css("[data-wb-import-status=finished] [role=status]", text: "4 created") } # no click: the page asked again
+      expect(page).to have_no_css("[data-wb-reload]")
+      expect(Order.count).to eq(7)
+    end
+  end
+
   describe "dragging a nested row" do
     it "reorders with a real mouse drag and saves the new order" do
       order = orders.first

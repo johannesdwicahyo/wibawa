@@ -65,6 +65,10 @@ module Wibawa
     # a name. Needs a table: run `bin/rails g wibawa:saved_views` first.
     attr_accessor :saved_views
 
+    # Runs CSV imports too large for a request in an Active Job. Needs a table:
+    # run `bin/rails g wibawa:background_import` first, and a job backend.
+    attr_accessor :background_import
+
     # Records every create, update, delete and action made through the admin
     # (browser and MCP). Needs a table: run `bin/rails g wibawa:audit_log` first.
     attr_accessor :audit_log
@@ -108,6 +112,7 @@ module Wibawa
       @mcp_write = false
       @saved_views = false
       @audit_log = false
+      @background_import = false
       @mcp_authenticate = nil
     end
 

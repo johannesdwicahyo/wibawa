@@ -36,6 +36,7 @@ First release.
 - Component override guide with a worked example per component (`docs/components.md`); `wibawa:component --no-template` generates a subclass that keeps Wibawa's template
 - `Wibawa.column_type` and `Wibawa.field_type` register your own `as:` formats and inputs
 - The installer writes `config.current_user = -> { Current.user }` for an app that keeps its user in `Current`, and Wibawa logs a warning when `config.current_user` names a method the controller does not have
+- CSV files with more than 5,000 rows (up to 100,000) are imported by a background job, with a page that waits for the result (`wibawa:background_import`)
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)

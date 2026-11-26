@@ -21,6 +21,7 @@ Wibawa::Engine.routes.draw do
     post   "/",                       to: "resources#create"
     get    "new",                     to: "resources#new",     as: :new_resource
     match  "import",                  to: "resources#import",  as: :import_resource, via: %i[get post]
+    get    "imports/:id",             to: "resources#import_status", as: :import_status_resource
     get    "options/:target",         to: "resources#options", as: :options_resource
     post   "views",                   to: "saved_views#create",  as: :saved_views
     patch  "views/:id",               to: "saved_views#update",  as: :saved_view

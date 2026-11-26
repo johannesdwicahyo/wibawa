@@ -1,0 +1,18 @@
+class CreateWibawaImports < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    create_table :wibawa_imports do |t|
+      t.string :resource_key, null: false
+      t.string :owner       # "User:42"; null when the admin has no signed-in user
+      t.string :user_gid    # the same user as a GlobalID, for the job to find again
+      t.string :filename
+      t.string :status, null: false, default: "queued" # queued, running, finished, failed
+      t.boolean :dry_run, null: false, default: false
+      t.binary :file, limit: 100.megabytes # the upload; cleared when the import has run
+      t.json :result        # created, updated, errors, preview
+      t.datetime :started_at
+      t.datetime :finished_at
+      t.timestamps
+    end
+    add_index :wibawa_imports, %i[resource_key owner]
+  end
+end

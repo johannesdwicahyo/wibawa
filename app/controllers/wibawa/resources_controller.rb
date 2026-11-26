@@ -94,15 +94,31 @@ module Wibawa
       @importer = Wibawa::CsvImporter.new(resource, find_in: authorized_collection, build: -> { build_record },
                                                     authorize: ->(action, record) { wibawa_authorized?(action, record) })
       return send_data(CSV.generate_line(@importer.headers), filename: "#{resource.key}-template.csv", type: "text/csv; charset=utf-8") if request.format.csv?
+      @recent = Wibawa::Import.visible_to(wibawa_current_user).where(resource_key: resource.key).order(id: :desc).limit(5) if Wibawa.config.background_import
       return unless request.post?
 
-      @result = @importer.call(params[:file].respond_to?(:read) ? params[:file].read : "", dry_run: params[:dry_run].present?)
+      text = params[:file].respond_to?(:read) ? params[:file].read : ""
+      # A rough count: a line break inside a quoted cell counts too, which only sends a file to the job sooner.
+      if text.count("\n") > Wibawa::CsvImporter::MAX_ROWS && Wibawa::Import.possible?(resource, wibawa_current_user)
+        import = Wibawa::Import.start!(resource, wibawa_current_user, text, filename: params[:file].original_filename, dry_run: params[:dry_run].present?)
+        return redirect_to(import_status_resource_path(resource: resource.key, id: import), status: :see_other)
+      end
+
+      @result = @importer.call(text, dry_run: params[:dry_run].present?)
       return render(:import, status: :unprocessable_entity) unless @result.ok?
       return render(:import) if @result.dry_run
 
       wibawa_audit(:import, nil, { created: @result.created, updated: @result.updated })
       redirect_to resources_path(resource: resource.key), status: :see_other,
                   notice: t("wibawa.flash.imported", created: @result.created, updated: @result.updated)
+    end
+
+    # Where a background import is watched: waiting, then what it did.
+    def import_status
+      raise Wibawa::ResourceNotFound unless resource.importable? && Wibawa.config.background_import
+
+      wibawa_authorize!(:import, model)
+      @import = Wibawa::Import.visible_to(wibawa_current_user).where(resource_key: resource.key).find(params[:id])
     end
 
     # Choices for a searchable select, as <li> options. `target` must be a

@@ -45,6 +45,16 @@ id:
       create: "Buat"
       update: "Perbarui"
       no_change: "Tidak berubah"
+      background_note: "Berkas dengan lebih dari %{count} baris diimpor di latar belakang: Anda boleh meninggalkan halaman ini lalu kembali lagi."
+      waiting: "Halaman ini memeriksa lagi setiap beberapa detik. Anda boleh meninggalkannya dan kembali dari halaman impor."
+      recent: "Impor latar belakang terakhir"
+      again: "Impor berkas lain"
+      check_again: "Periksa lagi"
+      status:
+        queued: "Menunggu giliran"
+        running: "Sedang dikerjakan…"
+        finished: "Selesai"
+        failed: "Terhenti"
     combobox:
       placeholder: "Ketik untuk mencari…"
       empty: "Tidak ada yang cocok."

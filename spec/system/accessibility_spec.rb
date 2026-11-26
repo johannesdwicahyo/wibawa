@@ -65,7 +65,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     expect(violations.join).to include("button-name", "color-contrast")
   end
 
-  it "has no axe violations with the filters, the batch bar, the palette, a saved view's edit panel, an import check and form errors showing" do
+  it "has no axe violations with the filters, the batch bar, the palette, a saved view's edit panel, an import check, a background import and form errors showing" do
     found = []
     visit "/admin/orders"
     all("[data-wb-select]").first.click
@@ -103,6 +103,14 @@ RSpec.describe "Wibawa accessibility", type: :system do
       found += violations.map { |violation| "import check: #{violation}" }
     end
 
+    Wibawa.config.background_import = true
+    waiting = Wibawa::Import.create!(resource_key: "orders", filename: "orders.csv", file: "x")
+    done = Wibawa::Import.create!(resource_key: "orders", filename: "done.csv", status: "finished", result: { created: 0, updated: 0, errors: [ [ 3, "Number can't be blank" ] ] })
+    [ waiting, done ].each do |import|
+      visit "/admin/orders/imports/#{import.id}"
+      found += violations.map { |violation| "import #{import.status}: #{violation}" }
+    end
+
     visit "/admin/orders/new"
     page.execute_script("document.querySelectorAll('form').forEach((form) => { form.noValidate = true })")
     find("[data-wb-form] [type=submit]", match: :first).click
@@ -112,6 +120,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     expect(found.join("\n")).to eq("")
   ensure
     Wibawa.config.saved_views = false
+    Wibawa.config.background_import = false
   end
 
   describe "keyboard" do

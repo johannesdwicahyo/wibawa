@@ -1,7 +1,7 @@
 module Wibawa
   class BaseComponent < ViewComponent::Base
     delegate :resources_path, :resource_path, :new_resource_path, :edit_resource_path,
-             :batch_resources_path, :options_resource_path, :import_resource_path, :member_action_resource_path, :root_path,
+             :batch_resources_path, :options_resource_path, :import_resource_path, :import_status_resource_path, :member_action_resource_path, :root_path,
              :wibawa_authorized?, :wibawa_presenter, :wibawa_icon, :wibawa_button_class,
              :wibawa_input_class, :wibawa_component, :class_names, :request, to: :helpers
 
