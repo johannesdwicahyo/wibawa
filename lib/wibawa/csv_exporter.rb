@@ -8,6 +8,8 @@ module Wibawa
     BATCH_SIZE = 1000
     FORMULA_PREFIX = /\A[=+\-@\t\r]/
 
+    # ponytail: a related record's visibility is looked up once per distinct record, not per batch.
+    # Free when its model's scope hides nothing; prime per batch if a restricted export of many customers is slow.
     def initialize(resource, relation, presenter)
       @resource = resource
       @relation = relation

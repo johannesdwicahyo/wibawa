@@ -25,8 +25,10 @@ module Wibawa
     end
 
     # find_in: relation to look existing records up in; build: -> { new record };
-    # authorize: ->(action, record) { true or false }
-    def initialize(resource, find_in:, build:, authorize:)
+    # authorize: ->(action, record) { true or false }; related: a Wibawa::RelatedScope, to hold a row
+    # back from pointing at records the user may not see
+    def initialize(resource, find_in:, build:, authorize:, related: nil)
+      @related = related
       @resource = resource
       @find_in = find_in
       @build = build
@@ -84,6 +86,9 @@ module Wibawa
       # before the row's values touch it, so a row cannot rewrite the very
       # attribute a policy decides on. A create is judged with its values set.
       allowed = @authorize.call(action, record) if action == :update
+      rejected = @related ? @related.outside(record, values) : {}
+      return result.errors << [ line, rejected.values.map { |name| "#{model.human_attribute_name(name)} #{I18n.t('wibawa.errors.related')}" }.to_sentence ] if rejected.any?
+
       record.assign_attributes(values)
       allowed = @authorize.call(action, record) if action == :create
 

@@ -202,6 +202,22 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
 
+### Records reached from other records
+
+Being allowed to see an order does not make its customer visible. Where one record points at another, Wibawa asks the policy scope of the other model too:
+
+- **Showing.** A related record outside the user's scope is shown as `#42`, not by name: in table cells, on the record's page, in CSV export and to agents over MCP. A `has_many` shown in a cell or as a table on the record's page lists only the records in scope.
+- **Saving.** A form, a CSV import or an agent cannot point a record at a related record outside the user's scope: the save fails with "is not one you can choose" on that field. Only a change is judged, so a record that already points outside the user's scope can still be edited.
+- **Filtering.** A filter that reaches through an association (`filter :tags`, `filter "line_items.product"`) only matches associated records in scope.
+
+This costs one extra query per association column on a page, and nothing when a model's scope hides nothing, which is always so without `config.authorization` or with a plain `authorize_with` block (a block has no scope).
+
+What it does not cover:
+
+- **`scoped_collection` in a `controller do` block.** That narrows one resource's own pages. It is not consulted for records reached from another resource, so tenancy done only there is not enforced here. Put the rule in the policy scope.
+- Polymorphic and `through` associations, and anything your own column blocks, panels, dashboard tables or reports load.
+- A model with no policy at all is treated as having nothing to hide.
+
 ## Large associations
 
 A `belongs_to` field or filter is a plain `<select>` while its table has up to 100 records. Above that it becomes a search box: type to find a record, pick it with the mouse or the arrow keys. A `has_many` field works the same way: a multi-select list up to 100 records, then a search box where each chosen record is a chip you can remove. Nothing to configure, and no record is out of reach because it was not among the first few hundred.

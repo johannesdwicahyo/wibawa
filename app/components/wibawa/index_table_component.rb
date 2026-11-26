@@ -17,6 +17,9 @@ module Wibawa
     attr_reader :resource, :records, :query
 
     def columns = @columns ||= resource.index_columns
+
+    # One scope query per association column for the whole page, before any cell is drawn.
+    def before_render = presenter.prime_related(records.to_a, columns)
     def model = resource.model
     def batch_form_id = BATCH_FORM_ID
 

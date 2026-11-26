@@ -69,6 +69,7 @@ module Wibawa
 
     def association_records(name, limit)
       value = record.public_send(name)
+      value = presenter.related_records(value) # only the ones this user may see
       value.respond_to?(:limit) ? value.limit(limit).to_a : Array(value).first(limit)
     end
 

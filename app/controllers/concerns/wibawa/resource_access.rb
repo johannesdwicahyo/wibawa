@@ -8,6 +8,30 @@ module Wibawa
       @wibawa_authorizer ||= Wibawa::Authorization.build(wibawa_current_user)
     end
 
+    # The user's view of records reached from other records (see Wibawa::RelatedScope).
+    def wibawa_related
+      @wibawa_related ||= Wibawa::RelatedScope.new(wibawa_authorizer)
+    end
+
+    # Assigns attributes from a form or an agent, except those that would point
+    # the record at a related record outside the user's scope. Returns the
+    # names of the associations that were held back, for wibawa_save.
+    def wibawa_assign(record, attributes)
+      rejected = wibawa_related.outside(record, attributes)
+      record.assign_attributes(attributes.except(*rejected.keys))
+      rejected.values
+    end
+
+    # Saves, unless wibawa_assign held something back: then nothing is saved and
+    # the record carries an error on each such association, beside its own.
+    def wibawa_save(record, rejected)
+      return record.save if rejected.empty?
+
+      record.valid?
+      rejected.each { |name| record.errors.add(name, I18n.t("wibawa.errors.related")) }
+      false
+    end
+
     def wibawa_authorized?(action, subject)
       wibawa_authorizer.authorized?(action, subject)
     end

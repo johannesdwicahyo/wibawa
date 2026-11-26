@@ -121,6 +121,7 @@ id:
     errors:
       not_found_title: "Halaman tidak ditemukan"
       not_found_body: "Data atau halaman yang Anda cari tidak ada, atau sudah dihapus."
+      related: "bukan pilihan yang tersedia untuk Anda"
       forbidden_title: "Anda tidak punya akses"
       forbidden_body: "Minta izin ke administrator untuk membuka halaman ini."
     flash:

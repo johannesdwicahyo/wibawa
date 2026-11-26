@@ -42,6 +42,7 @@ First release.
 - The phone top bar is a `topbar` component; the layout file is now only the page shell, and the guide says how to replace it
 - A benchmark of the index page against ActiveAdmin and Administrate (`rake benchmark`, results in `docs/benchmark.md`)
 - An index row is about 42% less HTML: one short class for what each row repeats, row icons drawn once per page, and one shared form for the row delete buttons
+- Authorization now reaches related records: one outside the user's policy scope is shown as `#id`, cannot be newly chosen in a form, import or MCP call, and is not matched by a filter that goes through an association
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)
