@@ -153,7 +153,8 @@ RSpec.describe "Wibawa accessibility", type: :system do
     it "returns focus to the Filters button when Escape closes the popover" do
       visit "/admin/orders"
       find("[data-wb-filters] summary").click
-      find("#wb-filter-status").click
+      # Focused, not clicked: a click opens the select's own list on Linux and Windows, and that list takes the first Escape.
+      page.execute_script("document.getElementById('wb-filter-status').focus()")
       find("#wb-filter-status").send_keys(:escape)
       expect(page).to have_css("[data-wb-filters]:not([open])")
       expect(focused).to start_with("<summary")
