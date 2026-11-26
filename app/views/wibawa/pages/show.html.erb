@@ -1,12 +1,9 @@
 <% content_for :title, page.title %>
-<% actions = page.actions.select { |action| wibawa_authorized?(action.name, page) }.map do |action|
-     { label: action.label, icon: "bolt", method: :post, confirm: action.confirm, style: action.destructive? ? :danger : :secondary,
-       url: page_action_path(page: page.key, page_action: action.name) }
-   end %>
-<%= render wibawa_component(:page_header, Wibawa::PageHeaderComponent).new(title: page.title, subtitle: page.description, actions: actions) %>
-
-<% if page.view %>
-  <%= render template: page.view %>
-<% elsif page.content_block %>
-  <%= instance_exec(&page.content_block) %>
+<%# The app's content is rendered here, in the view, so its template or block sees what it always did. %>
+<%= render wibawa_component(:custom_page, Wibawa::CustomPageComponent).new(page: page) do %>
+  <% if page.view %>
+    <%= render template: page.view %>
+  <% elsif page.content_block %>
+    <%= instance_exec(&page.content_block) %>
+  <% end %>
 <% end %>

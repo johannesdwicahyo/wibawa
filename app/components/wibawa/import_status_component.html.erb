@@ -1,0 +1,24 @@
+<%= render wibawa_component(:page_header, Wibawa::PageHeaderComponent).new(title: title, subtitle: import.filename, breadcrumbs: breadcrumbs) %>
+
+<div class="max-w-3xl space-y-6" data-wb-import-status="<%= import.status %>">
+  <% if waiting? %>
+    <%# wibawa.js loads this page again every few seconds while data-wb-reload is on it; the link does the same by hand. %>
+    <div role="status" data-wb-reload class="rounded-card bg-surface px-5 py-4 text-sm ring-1 ring-line">
+      <p class="font-medium text-ink"><%= status_text %></p>
+      <p class="mt-1 text-ink-2"><%= t("wibawa.import.waiting") %></p>
+      <p class="mt-3"><%= link_to t("wibawa.import.check_again"), status_url, class: wibawa_button_class(:secondary) %></p>
+    </div>
+  <% else %>
+    <% if imported? %>
+      <div role="status" class="rounded-control bg-success/10 px-4 py-3 text-sm text-success ring-1 ring-inset ring-success/30">
+        <%= t("wibawa.flash.imported", created: outcome.created, updated: outcome.updated) %>
+      </div>
+    <% else %>
+      <%= render wibawa_component(:import_result, Wibawa::ImportResultComponent).new(resource: resource, result: outcome) %>
+    <% end %>
+    <div class="flex flex-wrap items-center gap-3">
+      <%= link_to t("wibawa.import.again"), import_url, class: wibawa_button_class(:secondary) %>
+      <%= link_to resource.label, index_url, class: wibawa_button_class(:ghost) %>
+    </div>
+  <% end %>
+</div>

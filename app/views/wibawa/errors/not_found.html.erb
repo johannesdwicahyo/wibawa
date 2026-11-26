@@ -1,7 +1,2 @@
 <% content_for :title, t("wibawa.errors.not_found_title") %>
-<div class="mx-auto max-w-md py-24 text-center">
-  <p class="text-sm font-semibold text-primary">404</p>
-  <h1 class="mt-2 text-2xl font-semibold tracking-tight"><%= t("wibawa.errors.not_found_title") %></h1>
-  <p class="mt-3 text-sm text-ink-2"><%= t("wibawa.errors.not_found_body") %></p>
-  <%= link_to t("wibawa.back_to_dashboard"), root_path, class: wibawa_button_class(:secondary, "mt-6") %>
-</div>
+<%= render wibawa_component(:error_page, Wibawa::ErrorPageComponent).new(status: :not_found) %>
