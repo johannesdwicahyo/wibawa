@@ -60,7 +60,7 @@ The things the first users will ask for in week one.
 - [x] Custom pages: `Wibawa.page :name do … end` with their own menu entry and action buttons
 - [x] Filters on `has_many` and through associations, and on columns of associated tables
 - [x] Saved views: a named set of filters, scope and sort, per user
-- [ ] Saved views: share a view with the team, set a default view, rename *(candidate)*
+- [x] Saved views: share a view with the team, set a default view, rename
 - [x] Audit log of changes made through the admin and MCP, with per-record history
 - [ ] Show PaperTrail or Audited history on the record page when the app uses one *(candidate)*
 - [x] CSV import, all-or-nothing, with create-or-update by a key column

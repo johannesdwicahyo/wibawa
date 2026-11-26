@@ -64,33 +64,53 @@ RSpec.describe "Wibawa in the browser, continued", type: :system do
       click_button "Apply"
       expect(page).to have_css("tbody tr", count: 1)
 
-      find("[data-wb-saved-views] summary").click
+      find("[data-wb-saved-views] > summary").click
       within("[data-wb-saved-views]") do
         expect(page).to have_text("No saved views")
         find("input[name=name]").set("Paid only")
         click_button "Save"
       end
-      expect(page).to have_css("[data-wb-saved-views] summary", text: "Paid only") # the button names the view in use
+      expect(page).to have_css("[data-wb-saved-views] > summary", text: "Paid only") # the button names the view in use
       expect(Wibawa::SavedView.pluck(:name, :query)).to eq([ [ "Paid only", "q%5Bstatus%5D=paid" ] ]) # no empty filters, no default page size
 
       visit "/admin/orders"
       expect(page).to have_css("tbody tr", count: 3)
-      expect(page).to have_css("[data-wb-saved-views] summary", text: "Views")
-      find("[data-wb-saved-views] summary").click
+      expect(page).to have_css("[data-wb-saved-views] > summary", text: "Views")
+      find("[data-wb-saved-views] > summary").click
       click_link "Paid only"
       expect(page).to have_css("tbody tr", count: 1)
       expect(page).to have_css("ul[aria-label='Active filters'] a", text: "Paid")
 
-      find("[data-wb-saved-views] summary").click
-      accept_confirm { find("[data-wb-saved-views] button[aria-label='Delete view Paid only']").click }
-      expect(page).to have_css("[data-wb-saved-views] summary", text: "Views")
+      find("[data-wb-saved-views] > summary").click
+      find("summary[aria-label='Edit view Paid only']").click
+      accept_confirm { click_button "Delete view Paid only" }
+      expect(page).to have_css("[data-wb-saved-views] > summary", text: "Views")
       expect(Wibawa::SavedView.count).to eq(0)
+    end
+
+    it "renames a view and makes it the default from its edit panel" do
+      view = Wibawa::SavedView.create!(resource_key: "orders", name: "Paid", query: "q%5Bstatus%5D=paid")
+      visit "/admin/orders"
+      find("[data-wb-saved-views] > summary").click
+      find("summary[aria-label='Edit view Paid']").click
+      fill_in "wb-view-name-#{view.id}", with: "Paid orders"
+      check "Open by default"
+      expect(page).to have_no_field("Share with everyone") # nobody is signed in: every view is everyone's already
+      within("[data-wb-view-edit]") { click_button "Save" }
+      expect(page).to have_css("[data-wb-flash]", text: "Paid orders")
+      expect(view.reload).to have_attributes(name: "Paid orders", default_view: true)
+
+      visit "/admin/orders" # opens on the default view
+      expect(page).to have_css("tbody tr", count: 1)
+      expect(page).to have_css("[data-wb-saved-views] > summary", text: "Paid orders")
+      find("ul[aria-label='Active filters'] a", text: "Paid").click # and the whole list is still one click away
+      expect(page).to have_css("tbody tr", count: 3)
     end
 
     it "opens one popover at a time" do
       visit "/admin/orders"
       find("[data-wb-filters] summary").click
-      find("[data-wb-saved-views] summary").click
+      find("[data-wb-saved-views] > summary").click
       expect(page).to have_css("[data-wb-saved-views][open]")
       expect(page).to have_css("[data-wb-filters]:not([open])")
     end

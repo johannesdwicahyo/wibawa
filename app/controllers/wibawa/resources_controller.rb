@@ -18,6 +18,10 @@ module Wibawa
         stream_csv(@query.relation)
       else
         wibawa_authorize!(:index, model)
+        if (url = default_view_url)
+          flash.keep # a notice from the page that sent us here
+          return redirect_to(url)
+        end
         @query = Wibawa::Query.new(resource, authorized_collection, params)
         options = resource.index_options
         @page = Wibawa::Paginator.new(@query.relation, page: params[:page], per_page: per_page, count: options[:count])
@@ -139,6 +143,20 @@ module Wibawa
     end
 
     private
+
+    # A bare index URL opens on the user's default saved view.
+    # ponytail: "bare" must still be reachable, so a link from the index page
+    # itself (clear filters, the All scope) is left alone; that is read from the
+    # Referer header. Without the header the default opens again, which is safe.
+    def default_view_url
+      return unless Wibawa.config.saved_views && request.format.html? && request.query_parameters.empty?
+      return if request.referer && URI(request.referer).path == request.path
+
+      view = Wibawa::SavedView.default_for(resource.key, wibawa_current_user)
+      "#{request.path}?#{view.query}" if view&.query.present?
+    rescue URI::InvalidURIError
+      nil
+    end
 
     def load_resource
       use_resource(params[:resource])

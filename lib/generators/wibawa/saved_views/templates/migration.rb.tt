@@ -5,6 +5,8 @@ class CreateWibawaSavedViews < ActiveRecord::Migration[<%= ActiveRecord::Migrati
       t.string :name, null: false
       t.text :query, null: false, default: ""
       t.string :owner # "User:42"; null when the admin has no signed-in user
+      t.boolean :shared, null: false, default: false # everyone sees it; only the owner changes it
+      t.boolean :default_view, null: false, default: false # the owner's index page opens on it
       t.timestamps
     end
     add_index :wibawa_saved_views, %i[resource_key owner]
