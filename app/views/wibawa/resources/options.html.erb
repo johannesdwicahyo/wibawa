@@ -1,7 +1,1 @@
-<% if @options.empty? %>
-  <li class="px-3 py-2 text-sm text-ink-2"><%= t("wibawa.combobox.empty") %></li>
-<% end %>
-<% @options.each do |record| %>
-  <li role="option" aria-selected="false" data-value="<%= record.id %>"
-      class="cursor-pointer truncate rounded-control px-3 py-2 text-sm text-ink aria-selected:bg-surface-2"><%= wibawa_presenter.display_name(record) %></li>
-<% end %>
+<%= render wibawa_component(:combobox_options, Wibawa::ComboboxOptionsComponent).new(options: @options) %>

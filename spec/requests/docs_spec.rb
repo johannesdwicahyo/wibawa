@@ -47,7 +47,7 @@ RSpec.describe "Wibawa docs", type: :request do
 
   describe "docs/components.md" do
     let(:doc) { File.read("docs/components.md") }
-    let(:keys) { Dir["app/components/wibawa/*_component.rb"].map { |file| File.basename(file, "_component.rb") } - %w[base combobox] }
+    let(:keys) { Dir["app/components/wibawa/*_component.rb"].map { |file| File.basename(file, "_component.rb") } - %w[base] }
     # Each example is a complete file that starts with its path.
     let(:examples) { doc.scan(/```ruby\n# app\/components\/admin\/(\w+)_component\.rb\n(.*?)```/m).to_h }
 
@@ -57,6 +57,7 @@ RSpec.describe "Wibawa docs", type: :request do
     after do
       Wibawa.config.components.clear
       Wibawa.config.saved_views = false
+      Wibawa.config.background_import = false
       Object.send(:remove_const, :Admin) if defined?(Admin)
     end
 
@@ -115,6 +116,38 @@ RSpec.describe "Wibawa docs", type: :request do
 
       get "/admin/reports/orders_by_status"
       expect(response.body).to include("All orders")                                                       # report_page
+
+      post "/admin/orders/batch", params: { batch_action: "destroy" }
+      follow_redirect! # to the index,
+      follow_redirect! # which opens on the default saved view made above
+      expect(response.body).to include("Not done: ")                                                       # flash
+
+      stub_const("Wibawa::ComboboxComponent::THRESHOLD", 0)
+      get "/admin/orders/#{order.id}/edit"
+      expect(response.body).to include('placeholder="Type a name or an id…"')                              # combobox
+      get "/admin/orders/options/Customer", params: { q: "Sari" }
+      expect(response.body).to include("Sari (##{customer.id})")                                            # combobox_options
+      get "/admin/-/search", params: { q: "A-1" }
+      expect(response.body).to include(">Orders</span>")                                                   # search_results
+
+      get "/admin/orders/import"
+      expect(response.body).to include(">Customer</li>")                                                   # import_page
+      expect(response.body).not_to include(">customer_id</li>")
+      Dir.mktmpdir do |dir|
+        File.write(File.join(dir, "o.csv"), "number,customer_id\n" + (1..6).map { |n| "N-#{n},#{customer.id}\n" }.join)
+        post "/admin/orders/import", params: { file: Rack::Test::UploadedFile.new(File.join(dir, "o.csv"), "text/csv"), dry_run: "1" }
+      end
+      expect(response.body).to include("would create 6", "The first 5 rows")                               # import_result
+
+      Wibawa.config.background_import = true
+      import = Wibawa::Import.create!(resource_key: "orders", filename: "secret-name.csv", status: "finished", result: { created: 1, updated: 0 })
+      get "/admin/orders/imports/#{import.id}"
+      expect(response.body).to include(">Import ##{import.id}<")                                            # import_status
+
+      get "/admin/pages/maintenance"
+      expect(response.body).to include("Housekeeping. Staff only.")                                        # custom_page
+      get "/admin/nope"
+      expect(response.body).to include("It may have been deleted.")                                        # error_page
     ensure
       I18n.backend.reload!
     end

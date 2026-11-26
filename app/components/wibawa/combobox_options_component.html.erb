@@ -1,0 +1,7 @@
+<% if options.empty? %>
+  <li class="px-3 py-2 text-sm text-ink-2"><%= empty_text %></li>
+<% end %>
+<% options.each do |record| %>
+  <li role="option" aria-selected="false" data-value="<%= record.id %>"
+      class="cursor-pointer truncate rounded-control px-3 py-2 text-sm text-ink aria-selected:bg-surface-2"><%= label(record) %></li>
+<% end %>

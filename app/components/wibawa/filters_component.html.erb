@@ -27,7 +27,7 @@
             </div>
           <% elsif type == :select && (target = combobox_class(filter)) %>
             <label for="<%= field_id(filter) %>" class="mb-1.5 block text-sm font-medium text-ink"><%= filter.label %></label>
-            <%= render Wibawa::ComboboxComponent.new(name: field_name(filter), klass: target, value: value(filter), resource_key: resource.key,
+            <%= render wibawa_component(:combobox, Wibawa::ComboboxComponent).new(name: field_name(filter), klass: target, value: value(filter), resource_key: resource.key,
                                                      id: field_id(filter), form: form_id) %>
           <% elsif type == :select %>
             <label for="<%= field_id(filter) %>" class="mb-1.5 block text-sm font-medium text-ink"><%= filter.label %></label>

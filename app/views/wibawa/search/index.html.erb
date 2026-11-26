@@ -1,9 +1,1 @@
-<% @hits.each do |resource, record, path| %>
-  <li role="presentation">
-    <%= link_to path, role: "option", "aria-selected": "false", tabindex: -1, class: "flex items-center gap-3 rounded-control px-3 py-2 text-sm text-ink aria-selected:bg-surface-2" do %>
-      <%= wibawa_icon(resource.menu_icon, size: "size-4", class: "shrink-0 text-ink-3") %>
-      <span class="min-w-0 flex-1 truncate"><%= wibawa_presenter.display_name(record) %></span>
-      <span class="shrink-0 text-xs text-ink-2"><%= resource.singular_label %></span>
-    <% end %>
-  </li>
-<% end %>
+<%= render wibawa_component(:search_results, Wibawa::SearchResultsComponent).new(hits: @hits) %>

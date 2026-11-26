@@ -221,7 +221,7 @@ module Wibawa
     end
 
     def combobox_html(multiple: false)
-      render Wibawa::ComboboxComponent.new(
+      render wibawa_component(:combobox, Wibawa::ComboboxComponent).new(
         name: form.field_name(attribute, multiple: multiple), klass: reflection.klass, value: record.public_send(attribute),
         resource_key: helpers.params[:resource], id: form.field_id(attribute), multiple: multiple,
         input_html: html_options.except(*(multiple ? [ :required ] : []))

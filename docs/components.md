@@ -1,6 +1,6 @@
 # Overriding components
 
-Every part of an admin page is a [ViewComponent](https://viewcomponent.org): a Ruby class and, for most, an ERB template. You can replace any of them with a subclass of your own. This page shows how, and gives one small, working override for each component.
+Every page of the admin, and every part of a page, is a [ViewComponent](https://viewcomponent.org): a Ruby class and, for most, an ERB template. The files in `app/views/wibawa` only set the page title and render one component each; the layout is the page shell around them. You can replace any of them with a subclass of your own. This page shows how, and gives one small, working override for each component.
 
 ## How an override works
 
@@ -35,7 +35,7 @@ bin/rails g wibawa:component index_table
 # app/components/admin/index_table_component.html.erb   <- yours now
 ```
 
-The copy is yours from that moment: later changes to Wibawa's template do not reach it. After an upgrade, compare your copy with the new original (`bundle info wibawa --path` prints where the gem is; the templates are in `app/components/wibawa`). `field` has no template; it builds its HTML in Ruby.
+The copy is yours from that moment: later changes to Wibawa's template do not reach it. After an upgrade, compare your copy with the new original (`bundle info wibawa --path` prints where the gem is; the templates are in `app/components/wibawa`). `field` and `combobox` have no template; they build their HTML in Ruby.
 
 ### Three things to know
 
@@ -56,12 +56,16 @@ Which component draws what:
 
 | Page | Components |
 | --- | --- |
-| Every page | `sidebar`, `command_palette`, `page_header` |
+| Every page | `sidebar`, `command_palette` (its record hits are `search_results`), `page_header`, `flash` |
 | Index | `index_page`, which renders `scopes`, `filters`, `saved_views`, `index_table`, `pagination` |
 | Record | `show_page` |
 | New and edit | `form_page`, which renders a `field` per field and `nested_fields` per `has_many` block |
+| A long association, in a form or a filter | `combobox`, whose matches are `combobox_options` |
+| CSV import | `import_page` and, for a background import, `import_status`; both render `import_result` |
 | Dashboard | `dashboard` |
 | Report | `report_page`, which renders `pagination` |
+| Custom page (`Wibawa.page`) | `custom_page` |
+| Not found, not allowed | `error_page` |
 
 Each example is a complete file. Generate the class with `--no-template`, paste the method in, and add the `config.components` line the generator prints.
 
@@ -370,6 +374,169 @@ end
 ```
 
 Overriding `sharing?` to return false only hides the checkbox; it does not stop a view from being shared.
+
+### flash
+
+The messages at the top of a page after an action ("Order created.").
+
+Receives: `flash:`. Worth overriding: `messages` (pairs of type and text), `alert?(type)`, `tone_class(type)`.
+
+Example: make a failure unmistakable.
+
+```ruby
+# app/components/admin/flash_component.rb
+module Admin
+  class FlashComponent < Wibawa::FlashComponent
+    def messages
+      super.map { |type, text| [ type, alert?(type) ? "Not done: #{text}" : text ] }
+    end
+  end
+end
+```
+
+### combobox
+
+The search box that replaces a `<select>` when an association has more than 100 records, in forms and in filters. It has no template.
+
+Receives: `name:`, `klass:`, `value:`, `resource_key:`, `id:`, and optionally `form:`, `input_html:`, `multiple:`. Worth overriding: `placeholder`, `call` (all of its HTML).
+
+Example: say what can be typed.
+
+```ruby
+# app/components/admin/combobox_component.rb
+module Admin
+  class ComboboxComponent < Wibawa::ComboboxComponent
+    def placeholder = "Type a name or an id…"
+  end
+end
+```
+
+When a list is long enough to need the box, and how it is searched, are not part of the override: `searchable: true` or `false` on a field decides the first, and the target resource's `search` the second. The script that drives the box reads its `data-wb-combobox` attribute and its roles, so keep them if you rewrite `call`.
+
+### combobox_options
+
+The matches listed under a combobox, fetched as you type.
+
+Receives: `options:` (records). Worth overriding: `label(record)`, `empty_text`.
+
+Example: show the id beside the name, for records with the same name.
+
+```ruby
+# app/components/admin/combobox_options_component.rb
+module Admin
+  class ComboboxOptionsComponent < Wibawa::ComboboxOptionsComponent
+    def label(record) = "#{super} (##{record.id})"
+  end
+end
+```
+
+The text of the chosen option becomes the text in the box.
+
+### search_results
+
+The record hits in the command palette, fetched as you type.
+
+Receives: `hits:` (each a resource, a record and the path to open). Worth overriding: `label(record)`, `hint(resource)`.
+
+Example: name the list a hit comes from ("Orders") instead of its kind ("Order").
+
+```ruby
+# app/components/admin/search_results_component.rb
+module Admin
+  class SearchResultsComponent < Wibawa::SearchResultsComponent
+    def hint(resource) = resource.label
+  end
+end
+```
+
+### import_page
+
+The CSV import page: the upload form, the columns a file may use, and the user's recent background imports.
+
+Receives: `resource:`, `importer:`, `result:` (after an upload), `recent:`. Worth overriding: `title`, `breadcrumbs`, `columns`, `row_limit`, `recent`, `cancel_url`.
+
+Example: list the columns by their labels. A file may use either the attribute name or the label as a heading.
+
+```ruby
+# app/components/admin/import_page_component.rb
+module Admin
+  class ImportPageComponent < Wibawa::ImportPageComponent
+    def columns = super.map { |attribute| resource.model.human_attribute_name(attribute) }
+  end
+end
+```
+
+This changes what the page lists, not what an import accepts: that is `import only: [...]` on the resource. The template to download still uses attribute names.
+
+### import_result
+
+What an import did or would do: the errors by line, or after **Check file** the counts and the first rows.
+
+Receives: `resource:`, `result:`. Worth overriding: `errors`, `preview`, `attribute_label(name)`, `change(value)`.
+
+Example: a shorter preview.
+
+```ruby
+# app/components/admin/import_result_component.rb
+module Admin
+  class ImportResultComponent < Wibawa::ImportResultComponent
+    def preview = super.first(5)
+  end
+end
+```
+
+### import_status
+
+The page a background import is watched on: waiting, then the result.
+
+Receives: `resource:`, `import:` (a `Wibawa::Import`). Worth overriding: `title`, `label`, `breadcrumbs`, `status_text`.
+
+Example: name an import by its number, not by the uploaded file's name.
+
+```ruby
+# app/components/admin/import_status_component.rb
+module Admin
+  class ImportStatusComponent < Wibawa::ImportStatusComponent
+    def label = "Import ##{import.id}"
+  end
+end
+```
+
+While the import waits, the page reloads itself as long as an element with `data-wb-reload` is on it. Keep that attribute if you copy the template. The header's second line still shows the file name; override `title` or the template to change that too.
+
+### custom_page
+
+A `Wibawa.page`: the header with the page's actions, around the content you wrote.
+
+Receives: `page:`, and the page's content as its block. Worth overriding: `title`, `subtitle`, `actions`.
+
+Example: one more line under the title of every custom page.
+
+```ruby
+# app/components/admin/custom_page_component.rb
+module Admin
+  class CustomPageComponent < Wibawa::CustomPageComponent
+    def subtitle = [ super, "Staff only." ].compact.join(" ")
+  end
+end
+```
+
+### error_page
+
+What is shown for a page that does not exist (`:not_found`) or that the user may not open (`:forbidden`).
+
+Receives: `status:`. Worth overriding: `code`, `title`, `body`, `back_label`, `back_url`.
+
+Example: one more sentence on the not-found page.
+
+```ruby
+# app/components/admin/error_page_component.rb
+module Admin
+  class ErrorPageComponent < Wibawa::ErrorPageComponent
+    def body = status == :not_found ? "#{super} It may have been deleted." : super
+  end
+end
+```
 
 ## Icons
 

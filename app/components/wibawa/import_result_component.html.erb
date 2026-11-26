@@ -1,25 +1,24 @@
-<%# What an import did or would do: its errors, or on a dry run the counts and the first rows. %>
-<% if result && !result.ok? %>
+<% if failed? %>
   <div role="alert" class="rounded-control bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-inset ring-danger/30">
     <p class="font-medium"><%= t("wibawa.import.failed") %></p>
     <ul class="mt-2 space-y-1">
-      <% result.errors.each do |line, message| %>
+      <% errors.each do |line, message| %>
         <li><% if line %><span class="font-medium tabular-nums"><%= t("wibawa.import.line", line: line) %></span> <% end %><%= message %></li>
       <% end %>
     </ul>
   </div>
 <% end %>
 
-<% if result&.ok? && result.dry_run %>
+<% if checked? %>
   <section class="rounded-card bg-surface ring-1 ring-line" data-wb-import-preview>
     <div role="status" class="px-5 py-4 text-sm">
       <p class="font-medium text-ink"><%= t("wibawa.import.checked", created: result.created, updated: result.updated) %></p>
       <p class="mt-1 text-ink-2"><%= t("wibawa.import.not_yet") %></p>
     </div>
-    <% if result.preview.any? %>
+    <% if preview.any? %>
       <div class="overflow-x-auto border-t border-line">
         <table class="min-w-full text-sm">
-          <caption class="px-5 py-2 text-left text-ink-2"><%= t("wibawa.import.preview", count: result.preview.size) %></caption>
+          <caption class="px-5 py-2 text-left text-ink-2"><%= t("wibawa.import.preview", count: preview.size) %></caption>
           <thead>
             <tr class="border-y border-line text-left">
               <% [ t("wibawa.import.row"), t("wibawa.import.action"), t("wibawa.audit.record"), t("wibawa.audit.changes") ].each do |heading| %>
@@ -28,7 +27,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
-            <% result.preview.each do |line, action, label, changes| %>
+            <% preview.each do |line, action, label, changes| %>
               <tr class="align-top">
                 <td class="px-5 py-2.5 tabular-nums text-ink-2"><%= line %></td>
                 <td class="whitespace-nowrap px-5 py-2.5 text-ink"><%= t("wibawa.import.#{action}") %></td>
@@ -37,8 +36,8 @@
                   <% if changes.empty? %>
                     <span class="text-ink-2"><%= t("wibawa.import.no_change") %></span>
                   <% else %>
-                    <% changes.each do |name, change| %>
-                      <div class="break-words"><span class="text-ink-2"><%= resource.model.human_attribute_name(name) %>:</span> <%= wibawa_change(change) %></div>
+                    <% changes.each do |name, value| %>
+                      <div class="break-words"><span class="text-ink-2"><%= attribute_label(name) %>:</span> <%= change(value) %></div>
                     <% end %>
                   <% end %>
                 </td>
