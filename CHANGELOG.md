@@ -31,6 +31,9 @@ First release.
 - MCP: `run_batch_action` runs a resource's batch actions on up to 1,000 records; with the audit log on, an agent's reads (`list_records`, `get_record`, `run_report`) are recorded
 - A record page lists the model's PaperTrail versions or Audited audits in a Change history card, when the model uses one
 - CSV import has a Check file button: a dry run that lists the errors, or what the file would create and change, and keeps nothing
+- `config.stylesheets` loads your own stylesheets after Wibawa's on every admin page
+- Design tokens are documented with a stability promise (`docs/tokens.md`). New: `--wb-on-rail`, `--wb-scrim`, `--wb-radius-control`, `--wb-radius-card`, `--wb-spacing`, `--wb-font`; no template names a color outside the tokens any more
+- Component override guide with a worked example per component (`docs/components.md`); `wibawa:component --no-template` generates a subclass that keeps Wibawa's template
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)

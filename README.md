@@ -378,10 +378,11 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
 
 ## Customizing the UI
 
-- **Colors:** `config.brand_color = "#0f766e"` sets the action color (the dark-mode shade is derived from it). Every color is a CSS variable you can override: `--wb-canvas`, `--wb-surface`, `--wb-line`, `--wb-ink`, `--wb-rail` and so on; see `DESIGN.md`.
+- **Colors:** `config.brand_color = "#0f766e"` sets the action color (the dark-mode shade is derived from it).
+- **Design tokens:** every color, both corner radii, the spacing unit and the font are CSS variables (`--wb-surface`, `--wb-rail`, `--wb-radius-card`, `--wb-spacing`, ...). Override them in a stylesheet of your own, loaded after Wibawa's: `config.stylesheets = %w[admin]`. [docs/tokens.md](docs/tokens.md) lists them all and says what is promised about them.
 - **Tab icon:** the Wibawa mark by default. `config.favicon = "admin-icon.png"` uses your own asset or URL; `config.favicon = false` adds none.
 - **Fonts:** Plus Jakarta Sans ships inside the gem, so the admin makes no third-party request. `config.font = :system` uses the system UI font.
-- **Markup:** copy any component into your app and point Wibawa at it:
+- **Markup and behaviour:** subclass any component and point Wibawa at it. `--no-template` gives a class that keeps Wibawa's template, for changing methods only; without it you also get a copy of the template to edit:
 
   ```sh
   bin/rails g wibawa:component index_table
@@ -391,7 +392,7 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
   config.components[:index_table] = "Admin::IndexTableComponent"
   ```
 
-  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`, `report_page`, `command_palette`, `saved_views`.
+  Components: `sidebar`, `page_header`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `show_page`, `form_page`, `field`, `nested_fields`, `dashboard`, `report_page`, `command_palette`, `saved_views`. [docs/components.md](docs/components.md) has a worked example for each.
 
 ## Performance
 
