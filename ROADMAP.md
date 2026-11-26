@@ -77,7 +77,8 @@ Let people change Wibawa without forking it.
 - [x] Documented design tokens: every color, radius and space is a CSS variable with a stability promise
 - [ ] Field and column type registry (`Wibawa.field_type :color_swatch, …`)
 - [x] Component override guide with a worked example per component
-- [ ] More locales, with a translation completeness check in CI
+- [x] A translation completeness check in CI
+- [ ] More locales
 - [ ] Docs site
 
 **Exit:** two third-party extensions exist that needed no monkey patches.

@@ -35,7 +35,7 @@ To run the suite against another Rails version: `RAILS_VERSION=7.2 bundle update
 
 - **Design:** `DESIGN.md` is the specification for anything visual: colors come from tokens, nothing under 13 px, one primary button per page. New screens are checked at 390 px and 1440 px in both themes.
 - **Accessibility:** new pages belong in `spec/system/accessibility_spec.rb`, and everything a pointer can do must work from the keyboard.
-- **Translations:** every string goes in `config/locales/en.yml` and `id.yml`. A spec fails if the two files do not have the same keys.
+- **Translations:** every string goes in `config/locales/en.yml` and in every other file there. `spec/unit/locales_spec.rb` fails if a locale is missing a key, has one English lacks, leaves a text empty or uses different `%{variables}`, and if the code asks for a key English does not define or English keeps one the code never uses. To add a language, copy `en.yml` to `<code>.yml`, change the top key, and translate; the spec picks the file up by itself.
 - **Dependencies:** Wibawa has no JavaScript dependencies and few Ruby ones. A new runtime dependency needs a strong reason; say what it is in the pull request.
 - **Scope:** one change per pull request. A refactor and a feature are two pull requests.
 

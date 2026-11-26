@@ -8,7 +8,6 @@ id:
     cancel: "Batal"
     clear: "Hapus"
     clear_filters: "Hapus filter"
-    close: "Tutup"
     close_menu: "Tutup menu"
     confirm_batch: "Jalankan “%{action}” untuk data yang dipilih?"
     confirm_delete: "Hapus %{name}? Tindakan ini tidak bisa dibatalkan."

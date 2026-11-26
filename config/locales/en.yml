@@ -8,7 +8,6 @@ en:
     cancel: "Cancel"
     clear: "Clear"
     clear_filters: "Clear filters"
-    close: "Close"
     close_menu: "Close menu"
     confirm_batch: "Run “%{action}” on the selected records?"
     confirm_delete: "Delete %{name}? This can't be undone."
