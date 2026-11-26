@@ -10,13 +10,40 @@
     <% else %>
       <ul>
         <% views.each do |view| %>
-          <li class="flex items-center gap-1 rounded-control hover:bg-surface-2">
-            <%= link_to view.name, url_for_view(view), "aria-current": (view == current ? "true" : nil),
-                  class: class_names("min-w-0 flex-1 truncate px-2 py-2 text-sm text-ink", "font-semibold" => view == current) %>
-            <%= button_to destroy_url(view), method: :delete, class: wibawa_button_class(:ghost, "p-1.5 hover:!text-danger"),
-                  "aria-label": t("wibawa.delete_view", name: view.name),
-                  form: { class: "contents", data: { turbo_confirm: t("wibawa.confirm_delete", name: view.name) } } do %>
-              <%= icon("x", size: "size-4") %>
+          <li class="relative">
+            <%= link_to url_for_view(view), "aria-current": (view == current ? "true" : nil),
+                  class: class_names("flex min-w-0 items-center gap-2 rounded-control px-2 py-2 text-sm text-ink hover:bg-surface-2", "font-semibold" => view == current, "pr-10" => own?(view)) do %>
+              <span class="truncate"><%= view.name %></span>
+              <% if view.default_view && own?(view) %><span class="<%= badge_class %>"><%= t("wibawa.default_view") %></span><% end %>
+              <% if view.shared %><span class="<%= badge_class %>"><%= t("wibawa.shared_view") %></span><% end %>
+            <% end %>
+            <% if own?(view) %>
+              <details data-wb-view-edit>
+                <summary class="<%= wibawa_button_class(:ghost, "absolute right-1 top-1 cursor-pointer list-none p-1.5 [&::-webkit-details-marker]:hidden") %>" aria-label="<%= t("wibawa.edit_view", name: view.name) %>">
+                  <%= icon("pencil", size: "size-4") %>
+                </summary>
+                <div class="mb-2 space-y-3 rounded-control bg-surface-2 p-3">
+                  <%= helpers.form_with url: update_url(view), method: :patch, class: "space-y-3" do |f| %>
+                    <label class="block">
+                      <span class="mb-1.5 block text-sm font-medium text-ink"><%= t("wibawa.view_name") %></span>
+                      <%= f.text_field :name, value: view.name, required: true, maxlength: 60, autocomplete: "off", id: "wb-view-name-#{view.id}", class: wibawa_input_class %>
+                    </label>
+                    <% if sharing? %>
+                      <label class="flex items-center gap-2 text-sm text-ink">
+                        <%= f.check_box :shared, { checked: view.shared, id: "wb-view-shared-#{view.id}", class: check_class }, "1", "0" %><%= t("wibawa.share_view") %>
+                      </label>
+                    <% end %>
+                    <label class="flex items-center gap-2 text-sm text-ink">
+                      <%= f.check_box :default_view, { checked: view.default_view, id: "wb-view-default-#{view.id}", class: check_class }, "1", "0" %><%= t("wibawa.open_by_default") %>
+                    </label>
+                    <%= f.button t("wibawa.save"), type: "submit", class: wibawa_button_class(:primary), data: { turbo_submits_with: t("wibawa.form.saving") } %>
+                  <% end %>
+                  <%= button_to destroy_url(view), method: :delete, class: wibawa_button_class(:ghost, "hover:!text-danger"),
+                        form: { data: { turbo_confirm: t("wibawa.confirm_delete", name: view.name) } } do %>
+                    <%= icon("trash", size: "size-4") %><%= t("wibawa.delete_view", name: view.name) %>
+                  <% end %>
+                </div>
+              </details>
             <% end %>
           </li>
         <% end %>

@@ -10,9 +10,22 @@ module Wibawa
     validates :resource_key, :name, presence: true
     validates :name, length: { maximum: 60 }
 
-    # Views belong to whoever saved them. Without a signed-in user (no
-    # authentication configured) they are shared by everyone.
-    scope :visible_to, ->(user) { where(owner: owner_key(user)) }
+    # Views belong to whoever saved them, who alone can rename, share or delete
+    # them. Without a signed-in user (no authentication configured) every view
+    # has no owner, so they are shared by everyone.
+    scope :owned_by, ->(user) { where(owner: owner_key(user)) }
+    scope :visible_to, ->(user) { owned_by(user).or(where(shared: true)) }
+
+    before_save :one_default_per_owner, if: :default_view?
+
+    # The view this user's index page opens on, if they chose one.
+    # ponytail: a default is the owner's own; nobody can set one for the team,
+    # or pick someone else's shared view. Add a per-user table if that is wanted.
+    def self.default_for(resource_key, user)
+      owned_by(user).find_by(resource_key: resource_key, default_view: true)
+    end
+
+    def owned_by?(user) = owner == self.class.owner_key(user)
 
     def self.owner_key(user)
       "#{user.class.name}:#{user.id}" if user.respond_to?(:id) && user.id
@@ -34,6 +47,12 @@ module Wibawa
 
     def query=(value)
       super(self.class.normalize(value.to_s))
+    end
+
+    private
+
+    def one_default_per_owner
+      self.class.where(owner: owner, resource_key: resource_key, default_view: true).where.not(id: id).update_all(default_view: false)
     end
   end
 end

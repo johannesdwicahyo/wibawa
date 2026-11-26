@@ -57,4 +57,65 @@ RSpec.describe "Wibawa saved views", type: :request do
     delete "/admin/orders/views/#{mine.id}"
     expect(Wibawa::SavedView.pluck(:name)).to eq([ "Theirs" ])
   end
+
+  context "with a signed-in user" do
+    let(:viewer) { AdminUser.new(1, "Sari") }
+    let!(:mine) { Wibawa::SavedView.create!(resource_key: "orders", name: "Mine", query: query, owner: "AdminUser:1") }
+    let!(:theirs) { Wibawa::SavedView.create!(resource_key: "orders", name: "Theirs", query: "search=Budi", owner: "AdminUser:2", shared: true) }
+
+    before do
+      stub_const("AdminUser", Struct.new(:id, :name))
+      user = viewer
+      Wibawa.config.current_user = -> { user }
+    end
+
+    it "shows a shared view to everyone, and lets only its owner change it" do
+      get "/admin/orders"
+      expect(response.body).to include(">Theirs<", ">Shared<", "Edit view Mine")
+      expect(response.body).not_to include("Edit view Theirs")
+
+      patch "/admin/orders/views/#{theirs.id}", params: { name: "Taken over" }
+      expect(response).to have_http_status(:not_found)
+      delete "/admin/orders/views/#{theirs.id}"
+      expect(response).to have_http_status(:not_found)
+      expect(theirs.reload).to have_attributes(name: "Theirs", shared: true)
+    end
+
+    it "renames, shares and unshares a view" do
+      patch "/admin/orders/views/#{mine.id}", params: { name: " Pending ", shared: "1", default_view: "0" }
+      expect(response).to have_http_status(:see_other)
+      expect(mine.reload).to have_attributes(name: "Pending", shared: true, default_view: false, query: query)
+
+      patch "/admin/orders/views/#{mine.id}", params: { name: "", shared: "1" } # a name is required
+      expect(mine.reload.name).to eq("Pending")
+
+      patch "/admin/orders/views/#{mine.id}", params: { name: "Pending", shared: "0" }
+      expect(mine.reload.shared).to be(false)
+    end
+
+    it "opens the index on the default view, one per user, and still lets them leave it" do
+      other = Wibawa::SavedView.create!(resource_key: "orders", name: "Other", query: "search=A-1", owner: "AdminUser:1", default_view: true)
+      patch "/admin/orders/views/#{mine.id}", params: { name: "Mine", default_view: "1" }
+      expect(other.reload.default_view).to be(false) # the newer choice wins
+      theirs.update!(default_view: true) # someone else's default, even shared, is not mine
+
+      get "/admin/orders"
+      expect(response).to redirect_to("/admin/orders?#{query}")
+      follow_redirect!
+      expect(response.body).to include(">Default<")
+
+      get "/admin/orders", headers: { "Referer" => "http://www.example.com/admin/orders?#{query}" } # "clear filters"
+      expect(response).to have_http_status(:ok)
+      get "/admin/orders?search=x"
+      expect(response).to have_http_status(:ok)
+      get "/admin/orders.csv"
+      expect(response).to have_http_status(:ok)
+      get "/admin/customers"
+      expect(response).to have_http_status(:ok)
+
+      Wibawa.config.saved_views = false
+      get "/admin/orders"
+      expect(response).to have_http_status(:ok)
+    end
+  end
 end

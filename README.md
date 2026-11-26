@@ -245,7 +245,12 @@ bin/rails g wibawa:saved_views && bin/rails db:migrate
 config.saved_views = true
 ```
 
-A view belongs to the user who saved it (`config.current_user`). If the admin has no signed-in user, views are shared by everyone. A saved view is only a remembered URL, so it can never show more than the index page itself would.
+A view belongs to the user who saved it (`config.current_user`). The pencil beside a view opens it for its owner to rename, delete, share or set as default:
+
+- **Share with everyone** shows the view to every user who can open that index page. Only the owner can change or delete it.
+- **Open by default** makes the index page open on that view when the user arrives from elsewhere. Clearing the filters on the page still shows the whole list. A default is personal: one per user and resource.
+
+If the admin has no signed-in user, views are shared by everyone. A saved view is only a remembered URL, so it can never show more than the index page itself would.
 
 ## Command palette
 

@@ -26,6 +26,7 @@ First release.
 - Audit log of changes made through the admin and the MCP server (`wibawa:audit_log`), with a History button on every record
 - Column and menu labels may be procs, resolved when shown
 - Saved views: each user can name and reuse an index page's scope, search, filters and sort (`wibawa:saved_views`)
+- Saved views can be renamed, shared with everyone, and set as the view an index page opens on. The `wibawa_saved_views` table gains `shared` and `default_view` columns
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)

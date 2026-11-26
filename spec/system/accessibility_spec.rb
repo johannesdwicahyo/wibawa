@@ -63,7 +63,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     expect(violations.join).to include("button-name", "color-contrast")
   end
 
-  it "has no axe violations with the filters, the batch bar, the palette and form errors showing" do
+  it "has no axe violations with the filters, the batch bar, the palette, a saved view's edit panel and form errors showing" do
     found = []
     visit "/admin/orders"
     all("[data-wb-select]").first.click
@@ -81,6 +81,17 @@ RSpec.describe "Wibawa accessibility", type: :system do
     found += violations.map { |violation| "sidebar rail: #{violation}" }
     find("[data-wb-rail-toggle]").click
 
+    Wibawa.config.saved_views = true
+    Wibawa::SavedView.create!(resource_key: "orders", name: "Paid", query: "q%5Bstatus%5D=paid", shared: true, default_view: true)
+    [ false, true ].each do |dark|
+      visit "/admin/orders?search=x"
+      dark! if dark
+      find("[data-wb-saved-views] > summary").click
+      find("[data-wb-view-edit] summary").click
+      found += violations.map { |violation| "saved view edit panel#{' (dark)' if dark}: #{violation}" }
+    end
+    page.execute_script("localStorage.clear()")
+
     visit "/admin/orders/new"
     page.execute_script("document.querySelectorAll('form').forEach((form) => { form.noValidate = true })")
     find("[data-wb-form] [type=submit]", match: :first).click
@@ -88,6 +99,8 @@ RSpec.describe "Wibawa accessibility", type: :system do
     found += violations.map { |violation| "form errors: #{violation}" }
 
     expect(found.join("\n")).to eq("")
+  ensure
+    Wibawa.config.saved_views = false
   end
 
   describe "keyboard" do
