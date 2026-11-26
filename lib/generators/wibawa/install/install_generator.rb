@@ -39,6 +39,13 @@ module Wibawa
 
       private
 
+      # The Rails 8 authentication generator keeps the user in Current, and
+      # defines no `current_user` method on controllers.
+      def current_attributes_user?
+        file = File.join(destination_root, "app/models/current.rb")
+        File.exist?(file) && File.read(file).match?(/\buser\b/)
+      end
+
       def model_names
         Dir[File.join(destination_root, "app/models/**/*.rb")].filter_map do |file|
           relative = file.delete_prefix(File.join(destination_root, "app/models/")).delete_suffix(".rb")
