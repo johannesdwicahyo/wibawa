@@ -14,8 +14,12 @@ Wibawa.configure do |config|
   #   config.authenticate_with { authenticate_user!; redirect_to main_app.root_path unless current_user.admin? }
 
   # How to find the signed-in user (method name or proc run in the controller).
+<% if current_attributes_user? -%>
+  config.current_user = -> { Current.user }
+<% else -%>
   # config.current_user = -> { Current.user }
   config.current_user = :current_user
+<% end -%>
 
   # Per-action authorization: nil (allow all), :pundit, :action_policy,
   # or a proc: ->(user, action, subject) { user.admin? || action.in?(%i[index show]) }

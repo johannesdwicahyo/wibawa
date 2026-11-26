@@ -55,7 +55,7 @@ Open `/admin`. Then set up who may enter in `config/initializers/wibawa.rb`:
 Wibawa.configure do |config|
   config.parent_controller = "ApplicationController"
   config.authenticate_with { redirect_to main_app.root_path unless Current.user&.admin? }
-  config.current_user = -> { Current.user }
+  config.current_user = -> { Current.user }   # the default is the controller method :current_user (Devise); the installer writes this line when it finds a Current model
   config.currency = "IDR"   # as: :money => "Rp 1.250.000"
 end
 ```

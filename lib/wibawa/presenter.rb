@@ -105,7 +105,7 @@ module Wibawa
         value = record.public_send(method)
         return value.to_s if value.present?
       end
-      "#{record.model_name.human} ##{record.to_param}"
+      record.respond_to?(:model_name) ? "#{record.model_name.human} ##{record.to_param}" : record.to_s # a user need not be a model
     end
 
     # Link to the record's admin page if it has one, otherwise plain text.
