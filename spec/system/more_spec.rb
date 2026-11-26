@@ -133,12 +133,19 @@ RSpec.describe "Wibawa in the browser, continued", type: :system do
       expect(page).to have_css("h1", text: "Import")
 
       attach_file "wb-import-file", csv("number,status,customer_id\nN-1,pending,#{customer.id}\n,paid,#{customer.id}\n")
-      find("form[enctype='multipart/form-data'] [type=submit]").click
+      click_button "Import CSV"
       expect(page).to have_css("[role=alert]", text: "Line 3")
       expect(Order.count).to eq(3)
 
-      attach_file "wb-import-file", csv("number,status,customer_id\nN-1,pending,#{customer.id}\nA-1,paid,\n")
-      find("form[enctype='multipart/form-data'] [type=submit]").click
+      good = csv("number,status,customer_id\nN-1,pending,#{customer.id}\nA-1,paid,\n")
+      attach_file "wb-import-file", good
+      click_button "Check file"
+      expect(page).to have_css("[data-wb-import-preview] [role=status]", text: "would create 1 and update 1")
+      expect(page).to have_css("[data-wb-import-preview] tbody tr", count: 2)
+      expect(Order.count).to eq(3) # a check keeps nothing
+
+      attach_file "wb-import-file", good
+      click_button "Import CSV"
       expect(page).to have_css("[data-wb-flash]", text: "1")
       expect(page).to have_current_path("/admin/orders")
       expect(Order.find_by(number: "N-1")).to be_pending

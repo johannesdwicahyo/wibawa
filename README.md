@@ -275,6 +275,7 @@ end
 This adds an **Import CSV** button to the index page, with an upload form and a template to download. The first row names the columns, by attribute name or label; by default they are the form's fields, so a CSV can set nothing the form cannot. For a `belongs_to`, use its id column (`customer_id`).
 
 - **All or nothing.** If any row is invalid, nothing is imported and each problem is listed with its line number.
+- **Check file** does a dry run: it reports the same errors, or how many records the file would create and update, with the first 20 rows and what would change in each. Nothing is kept. The check saves every row and rolls it all back, so model callbacks run (all but `after_commit`); the file is not stored, so it has to be chosen again to import it.
 - **Empty cells leave the value as it is**: a new record keeps its defaults and an existing one keeps its data. An import never clears a field.
 - **Authorization.** `:import` on the model (falls back to `create?`), then `create` or `update` on each row.
 - The import runs inside the request and is capped at 5,000 rows. With the audit log on, each import is one entry with its counts.

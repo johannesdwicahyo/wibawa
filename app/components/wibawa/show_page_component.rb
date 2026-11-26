@@ -60,14 +60,6 @@ module Wibawa
 
     def history_event(entry) = t("wibawa.history.events.#{entry.event}", default: entry.event.to_s.humanize)
 
-    # A change is [old, new]; a masked secret is a plain string.
-    def history_change(change)
-      return change.to_s unless change.is_a?(Array)
-
-      old, new = change.map { |value| value.nil? || value == "" ? presenter.empty : helpers.truncate(value.to_s, length: 80) }
-      safe_join([ old, content_tag(:span, "→", class: "px-1 text-ink-2", "aria-label": t("wibawa.history.became")), new ])
-    end
-
     # Groups consecutive :row items into one attributes card.
     def sections
       resource.show_items.slice_when { |a, b| a.first != :row || b.first != :row }.to_a
