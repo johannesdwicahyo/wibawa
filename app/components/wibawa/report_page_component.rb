@@ -39,7 +39,7 @@ module Wibawa
     end
 
     def numeric?(column)
-      %i[money number percentage].include?(column.as&.to_sym) || (column.as.nil? && rows.first&.fetch(column.name.to_s, nil).is_a?(Numeric))
+      %i[money cents number percentage].include?(column.as&.to_sym) || (column.as.nil? && rows.first&.fetch(column.name.to_s, nil).is_a?(Numeric))
     end
 
     # The charted columns. One series wears the brand colour; several take the

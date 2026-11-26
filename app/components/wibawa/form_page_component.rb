@@ -38,6 +38,11 @@ module Wibawa
     def base_errors = record.errors[:base]
     def errors? = record.errors.any?
 
+    # The lock_version column of a model with optimistic locking, on a record being edited.
+    def locking_column
+      model.locking_column if !new_record? && model.respond_to?(:locking_enabled?) && model.locking_enabled?
+    end
+
     def multipart?
       model.respond_to?(:attachment_reflections) && model.attachment_reflections.any?
     end

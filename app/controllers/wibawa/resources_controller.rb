@@ -63,12 +63,16 @@ module Wibawa
       wibawa_authorize!(:update, record)
       rejected = wibawa_assign(record, record_params)
 
-      if wibawa_save(record, rejected)
-        wibawa_audit(:update, record, record.saved_changes)
-        redirect_to after_save_path, notice: t("wibawa.flash.updated", resource: resource.singular_label), status: :see_other
-      else
-        render :edit, status: :unprocessable_entity
-      end
+        if wibawa_save(record, rejected)
+          wibawa_audit(:update, record, record.saved_changes)
+          redirect_to after_save_path, notice: t("wibawa.flash.updated", resource: resource.singular_label), status: :see_other
+        else
+          render :edit, status: :unprocessable_entity
+        end
+      rescue ActiveRecord::StaleObjectError
+        # Someone saved this record after the form was opened. What was typed stays in the form.
+        record.errors.add(:base, t("wibawa.flash.stale"))
+        render :edit, status: :conflict
     end
 
     def destroy
@@ -95,7 +99,7 @@ module Wibawa
                                                     authorize: ->(action, record) { wibawa_authorized?(action, record) },
                                                     related: wibawa_related)
       return send_data(CSV.generate_line(@importer.headers), filename: "#{resource.key}-template.csv", type: "text/csv; charset=utf-8") if request.format.csv?
-      @recent = Wibawa::Import.visible_to(wibawa_current_user).where(resource_key: resource.key).order(id: :desc).limit(5) if Wibawa.config.background_import
+      @recent = Wibawa::Import.visible_to(wibawa_current_user).where(resource_key: resource.key).order(created_at: :desc).limit(5) if Wibawa.config.background_import
       return unless request.post?
 
       text = params[:file].respond_to?(:read) ? params[:file].read : ""

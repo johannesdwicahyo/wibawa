@@ -43,6 +43,13 @@ First release.
 - A benchmark of the index page against ActiveAdmin and Administrate (`rake benchmark`, results in `docs/benchmark.md`)
 - An index row is about 42% less HTML: one short class for what each row repeats, row icons drawn once per page, and one shared form for the row delete buttons
 - Authorization now reaches related records: one outside the user's policy scope is shown as `#id`, cannot be newly chosen in a form, import or MCP call, and is not matched by a filter that goes through an association
+- `as: :cents` shows money stored as an integer of hundredths
+- `config.default_actions` sets which actions a resource has unless it says otherwise, for a read-only panel
+- Columns ending in `_hash` or `_key`, and columns the model declares with `encrypts`, are left out by default
+- The edit form carries `lock_version`: a save over someone else's change is refused, not silently applied
+- Fixed on PostgreSQL: searching a UUID or integer column with a term it cannot hold raised an error
+- Fixed: Wibawa's own tables got integer keys in an app whose `ApplicationRecord` assigns UUIDs, so their records collided; the generators now follow the app's key type
+- `rake postgres` runs the admin on PostgreSQL with UUID keys, and CI runs it
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)

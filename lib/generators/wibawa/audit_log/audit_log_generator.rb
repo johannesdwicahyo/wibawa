@@ -1,11 +1,13 @@
 require "rails/generators"
 require "rails/generators/active_record"
+require "generators/wibawa/key_type"
 
 module Wibawa
   module Generators
     # bin/rails g wibawa:audit_log
     class AuditLogGenerator < Rails::Generators::Base
       include ActiveRecord::Generators::Migration
+      include Wibawa::Generators::KeyType
 
       source_root File.expand_path("templates", __dir__)
 

@@ -1,6 +1,6 @@
 class CreateWibawaAuditEntries < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
   def change
-    create_table :wibawa_audit_entries do |t|
+    create_table :wibawa_audit_entries<%= key_type_option %> do |t|
       t.string :actor        # "User:42"; null when the admin has no signed-in user
       t.string :actor_label  # the user's name at the time
       t.string :action, null: false

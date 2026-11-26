@@ -129,6 +129,7 @@ en:
       view_saved: "View \"%{name}\" saved."
       view_deleted: "View \"%{name}\" deleted."
       view_updated: "View \"%{name}\" updated."
+      stale: "Someone else changed this record while you were editing it. Nothing was saved. Open it again to see their version."
       created: "%{resource} created."
       updated: "%{resource} updated."
       destroyed: "%{resource} deleted."

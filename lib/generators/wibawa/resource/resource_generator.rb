@@ -13,7 +13,7 @@ module Wibawa
       def report_secret_columns
         return unless model.respond_to?(:column_names)
 
-        left_out = model.column_names.grep(Wibawa::Resource::SECRET_ATTRIBUTES)
+        left_out = model.column_names.select { |name| Wibawa::Resource.secret?(model, name) }
         say "  left out of #{class_name}, as they look secret: #{left_out.join(', ')}", :yellow if left_out.any?
       rescue StandardError
         nil
@@ -32,7 +32,7 @@ module Wibawa
         return [] unless model.respond_to?(:columns)
 
         belongs_to = model.reflect_on_all_associations(:belongs_to).to_h { |r| [ r.foreign_key.to_s, r.name.to_s ] }
-        model.columns.reject { |c| c.name.match?(Wibawa::Resource::HIDDEN_ATTRIBUTES) || (c.name.end_with?("_type") && belongs_to.key?(c.name.sub(/_type\z/, "_id"))) }
+        model.columns.reject { |c| c.name.match?(Wibawa::Resource::HIDDEN_ATTRIBUTES) || Wibawa::Resource.secret?(model, c.name) || (c.name.end_with?("_type") && belongs_to.key?(c.name.sub(/_type\z/, "_id"))) }
                      .map { |c| [ belongs_to.fetch(c.name, c.name), c.type ] }
       rescue StandardError
         []
@@ -40,7 +40,10 @@ module Wibawa
 
       def index_columns
         columns.reject { |_, type| %i[text json jsonb binary].include?(type) }.first(6).map do |name, type|
-          type == :decimal && name.match?(MONEY) ? "#{name}, as: :money" : name
+          if type == :decimal && name.match?(MONEY) then "#{name}, as: :money"
+          elsif %i[integer bigint].include?(type) && name.end_with?("_cents") then "#{name}, as: :cents"
+          else name
+          end
         end
       end
 

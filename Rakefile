@@ -11,6 +11,12 @@ end
 
 RuboCop::RakeTask.new
 
+desc "Run the admin on PostgreSQL with UUID keys (needs a server; DATABASE_URL to point at one)"
+task :postgres do
+  ruby "spec/postgres_check.rb"
+end
+
+# `rake postgres` is not in the default: it needs a database server. CI runs it as a job of its own.
 task default: %i[rubocop spec sprockets demo:check]
 
 desc "Run the demo shop admin at http://localhost:3000/admin (PORT=4000 to change)"

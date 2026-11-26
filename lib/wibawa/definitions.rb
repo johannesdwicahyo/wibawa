@@ -7,7 +7,8 @@ module Wibawa
     # A proc label is resolved when shown, e.g. `label: -> { I18n.t("...") }`.
     def label
       value = options[:label]
-      (value.respond_to?(:call) ? value.call : value) || Util.humanize(name)
+      # `total_cents` shown as money is "Total", not "Total cents".
+      (value.respond_to?(:call) ? value.call : value) || Util.humanize(as.to_s == "cents" ? name.to_s.delete_suffix("_cents") : name)
     end
 
     # Returns the SQL to sort by, or nil when the column isn't sortable.

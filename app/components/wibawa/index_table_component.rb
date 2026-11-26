@@ -5,7 +5,7 @@ module Wibawa
   class IndexTableComponent < BaseComponent
     BATCH_FORM_ID = "wb-batch-form".freeze
     ROW_FORM_ID = "wb-row-form".freeze
-    NUMERIC_AS = %i[money number percentage].freeze
+    NUMERIC_AS = %i[money cents number percentage].freeze
     NUMERIC_TYPES = %i[integer bigint decimal float].freeze
 
     def initialize(resource:, records:, query:)

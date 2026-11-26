@@ -2,6 +2,7 @@
 
 <%= form_with model: record, scope: :record, url: form_url, method: (new_record? ? :post : :patch),
               multipart: multipart?, class: "max-w-3xl", data: { wb_form: true } do |f| %>
+  <%= f.hidden_field locking_column if locking_column %>
   <% if errors? %>
     <div role="alert" class="mb-6 rounded-control bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-inset ring-danger/30">
       <p class="font-medium"><%= t("wibawa.form.errors_heading", count: record.errors.count) %></p>

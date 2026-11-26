@@ -30,3 +30,4 @@ gem "action_policy"
 gem "paper_trail" # a record's page lists its versions
 gem "audited"     # or its audits
 gem "sprockets-rails", require: false # only spec/sprockets_check.rb loads it
+gem "pg", require: false              # only spec/postgres_check.rb loads it

@@ -68,7 +68,7 @@ Requirements: Ruby 3.2+, Rails 7.2+, turbo-rails, and Propshaft or Sprockets. Fo
 
 Each file in `app/wibawa/` registers one resource. Edits reload without a server restart.
 
-The generators leave out columns that look secret (`digest`, `*_digest`, `*_token`, `*_secret`, `api_key`, `encrypted_*` and the like), and so do the default index, show page and form. To show one anyway, name it yourself: `column :token`.
+The generators leave out columns that look secret (`digest`, `*_digest`, `*_token`, `*_secret`, `*_hash`, `*_key`, `encrypted_*` and the like) and columns the model declares with `encrypts`, and so do the default index, show page and form. This goes by name and by `encrypts` only: a secret under another name, or one key inside a JSON column, is yours to leave out. To show one anyway, name it yourself: `column :token`.
 
 ```ruby
 # app/wibawa/orders.rb
@@ -161,7 +161,7 @@ A filter on an associated column never duplicates rows: an order with three matc
 | `search *fields` | The search box. Dotted names (`"customer.name"`) search through an association. |
 | `filter name, as:, collection:, on:, apply:` | `:string`, `:select`, `:boolean`, `:date_range`, `:number_range`, `:search` (with `on:`). Inferred when omitted. |
 | `index per_page:, sort:, count:, density:` | `count: false` skips `COUNT(*)` on huge tables. `density: :compact` gives 32 px rows. |
-| `column name, as:, label:, sortable:, link:, &block` | Formats: `:money`, `:badge`, `:boolean`, `:date`, `:datetime`, `:time_ago`, `:number`, `:percentage`, `:email`, `:url`, `:image`, `:text`, `:json`, `:tags`. |
+| `column name, as:, label:, sortable:, link:, &block` | Formats: `:money`, `:cents` (money stored as an integer of hundredths: `total_cents` 1500000 shows as 15,000.00, under the label "Total"), `:badge`, `:boolean`, `:date`, `:datetime`, `:time_ago`, `:number`, `:percentage`, `:email`, `:url`, `:image`, `:text`, `:json`, `:tags`. |
 | `actions only:, &block` | Row buttons. The block adds your own links. |
 | `show { row / attributes / panel / table_for }` | Show page layout. |
 | `form { field / fields / section / has_many }` | Form layout. `field name, as:, collection:, hint:, input_html:`. |
@@ -174,6 +174,14 @@ A filter on an associated column never duplicates rows: an order with three matc
 | `controller { def ... }` | Override `scoped_collection`, `find_record`, `build_record`, `record_params`, `after_save_path`. |
 
 Column, panel and action blocks run in the view or controller, so `link_to`, `number_to_currency`, `redirect_to` and your own helpers all work.
+
+### Keys, locking and databases
+
+- **UUID keys** work throughout: links, sorting, batch selection, filters, the audit log and saved views. Searching compares a term with a key or a number column only when it could be one, so a search for "123" over a UUID column is not an error.
+- **Wibawa's own tables** (`wibawa_saved_views`, `wibawa_audit_entries`, `wibawa_imports`) take the app's key type: their generators follow `config.generators { |g| g.orm :active_record, primary_key_type: :uuid }`, or `--primary-key-type=uuid`. This matters because Wibawa's models inherit from your `ApplicationRecord`: if that assigns UUIDs itself, these tables must have UUID keys too (and no default, if your tables have none).
+- **Optimistic locking.** For a model with a `lock_version` column, the edit form carries the version it was opened with. Saving over a change someone else made meanwhile is refused with a message, and what was typed stays in the form. Changes through the MCP server do not carry a version.
+- **Soft delete.** Wibawa does nothing with `deleted_at`: it lists every row and its delete button calls `destroy`. Add `scope :active, default: true`, and leave `:destroy` out of `actions`, where that is not what you want.
+- The spec suite runs on SQLite; `bundle exec rake postgres` runs the admin on PostgreSQL with UUID keys, and CI does both.
 
 ## Dashboard
 
@@ -201,6 +209,22 @@ config.authorize_with { |user, action, subject| user.admin? || action.in?(%i[ind
 ```
 
 Actions checked: `index show new create edit update destroy export`, `batch_<name>` and each member action name. With Pundit or ActionPolicy, a missing policy method falls back sensibly (`batch_*` and member actions to `update?`, `export?` to `index?`), and the index uses your policy scope. Buttons and menu entries you can't use are hidden.
+
+### A read-only panel
+
+`actions :index, :show` makes one resource read-only: no new, edit or delete, no batch bar, and those URLs answer 404. To make that the rule and editing the exception:
+
+```ruby
+config.default_actions = %i[index show]     # every resource, unless it says otherwise
+```
+
+```ruby
+Wibawa.resource Business do
+  actions :all                              # this one may be edited
+end
+```
+
+Import, batch actions and member actions exist only where a resource declares them.
 
 ### Records reached from other records
 
