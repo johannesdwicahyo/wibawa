@@ -123,21 +123,7 @@ RSpec.describe "README promises", type: :request do
   describe "the Indonesian locale" do
     around { |example| I18n.with_locale(:id, &example) }
 
-    def keys(hash, prefix = nil) = hash.flat_map { |key, value| value.is_a?(Hash) ? keys(value, [ prefix, key ].compact.join(".")) : [ [ prefix, key ].compact.join(".") ] }
-
-    it "has every key the English one has, and the same placeholders" do
-      en, id = %w[en id].map { |locale| YAML.load_file("config/locales/#{locale}.yml").fetch(locale) }
-      plural = /\.(one|other)\z/ # Indonesian has no plural forms
-      expect(keys(en).map { |key| key.sub(plural, "") }.uniq - keys(id).map { |key| key.sub(plural, "") }.uniq).to eq([])
-      expect(keys(id).map { |key| key.sub(plural, "") }.uniq - keys(en).map { |key| key.sub(plural, "") }.uniq).to eq([])
-
-      mismatched = keys(id).reject do |key|
-        english = en.dig(*key.split(".")) || en.dig(*key.sub(plural, ".other").split("."))
-        english.to_s.scan(/%\{\w+\}/).sort == id.dig(*key.split(".")).to_s.scan(/%\{\w+\}/).sort
-      end
-      expect(mismatched).to eq([])
-    end
-
+    # That it has every English key is checked for all locales in spec/unit/locales_spec.rb.
     it "renders every kind of page without a missing translation" do
       [ "/admin", "/admin/orders", "/admin/orders/#{order.id}", "/admin/orders/#{order.id}/edit", "/admin/orders/new", "/admin/orders/import",
        "/admin/reports/orders_by_status", "/admin/pages/maintenance", "/admin/products/new" ].each do |path|
