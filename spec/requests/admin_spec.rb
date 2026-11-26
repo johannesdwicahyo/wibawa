@@ -139,4 +139,28 @@ it "shows active filters as chips that remove one filter and keep the rest" do
     get "/admin/orders"
     expect(response.body).not_to include("/admin/orders/new")
   end
+
+  describe "the row delete button" do
+    around do |example|
+      ActionController::Base.allow_forgery_protection = true
+      example.run
+    ensure
+      ActionController::Base.allow_forgery_protection = false
+    end
+
+    it "works without script, and only with the token of the form all rows share" do
+      doomed = Order.create!(number: "Z-9", customer: Customer.create!(name: "Tika"))
+      get "/admin/orders"
+      token = response.body[/<form id="wb-row-form"[^>]*><input type="hidden" name="authenticity_token" value="([^"]+)"/, 1]
+      expect(token).to be_present
+      expect(response.body).to include(%(formaction="/admin/orders/#{doomed.id}" name="_method" value="delete"))
+
+      expect { post "/admin/orders/#{doomed.id}", params: { _method: "delete" } }.to raise_error(ActionController::InvalidAuthenticityToken)
+      expect(Order.exists?(doomed.id)).to be(true)
+
+      post "/admin/orders/#{doomed.id}", params: { _method: "delete", authenticity_token: token }
+      expect(response).to have_http_status(:see_other)
+      expect(Order.exists?(doomed.id)).to be(false)
+    end
+  end
 end

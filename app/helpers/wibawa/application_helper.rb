@@ -65,6 +65,18 @@ module Wibawa
                                  "aria-hidden": "true", class: [ size, "shrink-0", binding.local_variable_get(:class) ].compact.join(" "))
     end
 
+    # For an icon repeated on every row of a table: its drawing goes on the page
+    # once (wibawa_icon_sprite) and each row only points at it (wibawa_icon_use),
+    # which is a third of the markup of wibawa_icon.
+    def wibawa_icon_sprite(*names)
+      symbols = names.map { |name| tag.symbol(tag.path(d: ICONS.fetch(name.to_s)), id: "wb-icon-#{name}", viewBox: "0 0 20 20") }
+      tag.svg(safe_join(symbols), width: 0, height: 0, class: "absolute", "aria-hidden": "true")
+    end
+
+    def wibawa_icon_use(name, size: "size-4")
+      tag.svg(tag.use(href: "#wb-icon-#{name}"), class: "wb-icon #{size} shrink-0", "aria-hidden": "true")
+    end
+
     # The Wibawa mark: kawung, four table cells around one point.
     def wibawa_mark(size: "size-5")
       tag.svg(tag.path(d: MARK_PATH), viewBox: "0 0 256 256", fill: "currentColor", "aria-hidden": "true", class: "#{size} shrink-0")

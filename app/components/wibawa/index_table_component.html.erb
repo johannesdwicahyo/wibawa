@@ -30,6 +30,12 @@
   <% else %>
     <%# The card is the scroller in both directions, capped to the window, so the header can stick. %>
     <div class="relative max-h-[calc(100dvh-8rem)] scroll-pt-12 overflow-auto">
+      <% if row_actions? %>
+        <%= helpers.wibawa_icon_sprite(*row_icons) if row_icons.any? %>
+        <% if row_delete? %>
+          <form id="<%= row_form_id %>" method="post" hidden><input type="hidden" name="authenticity_token" value="<%= helpers.form_authenticity_token %>" autocomplete="off"></form>
+        <% end %>
+      <% end %>
       <table class="min-w-full text-sm">
         <thead class="sticky top-0 z-10">
           <tr class="bg-surface-2 text-left">
@@ -57,12 +63,12 @@
         </thead>
         <tbody class="divide-y divide-line">
           <% records.each do |record| %>
-            <tr class="group/row transition-colors hover:bg-surface-2 has-[:checked]:bg-primary/[0.04] dark:has-[:checked]:bg-primary/10">
+            <tr class="group/row wb-row">
               <% if selectable? %>
                 <td class="w-10 <%= row_pad %> pl-4 pr-1">
                   <input type="checkbox" name="ids[]" value="<%= record.id %>" form="<%= batch_form_id %>" data-wb-select
                          aria-label="<%= t('wibawa.select_record', name: presenter.display_name(record)) %>"
-                         class="size-4 rounded border-line accent-[var(--color-primary)]">
+                         class="wb-check">
                 </td>
               <% end %>
               <% columns.each do |column| %>
@@ -70,24 +76,17 @@
               <% end %>
               <% if row_actions? %>
                 <td class="whitespace-nowrap px-3 py-0 text-right">
-                  <div class="inline-flex items-center gap-0.5 transition-opacity lg:opacity-0 lg:group-hover/row:opacity-100 lg:group-focus-within/row:opacity-100 pointer-coarse:opacity-100">
+                  <div class="wb-row-actions">
                     <%= custom_row_actions(record) %>
                     <% if show_row_action?(:show) && wibawa_authorized?(:show, record) %>
-                      <%= link_to resource_path(resource: resource.key, id: record), class: wibawa_button_class(:ghost, "p-1.5"), title: t("wibawa.view") do %>
-                        <%= icon("eye", size: "size-4") %><span class="sr-only"><%= t("wibawa.view") %></span>
-                      <% end %>
+                      <a class="wb-row-action" title="<%= t("wibawa.view") %>" href="<%= resource_path(resource: resource.key, id: record) %>"><%= helpers.wibawa_icon_use("eye") %><span class="sr-only"><%= t("wibawa.view") %></span></a>
                     <% end %>
                     <% if show_row_action?(:edit) && wibawa_authorized?(:edit, record) %>
-                      <%= link_to edit_resource_path(resource: resource.key, id: record), class: wibawa_button_class(:ghost, "p-1.5"), title: t("wibawa.edit") do %>
-                        <%= icon("pencil", size: "size-4") %><span class="sr-only"><%= t("wibawa.edit") %></span>
-                      <% end %>
+                      <a class="wb-row-action" title="<%= t("wibawa.edit") %>" href="<%= edit_resource_path(resource: resource.key, id: record) %>"><%= helpers.wibawa_icon_use("pencil") %><span class="sr-only"><%= t("wibawa.edit") %></span></a>
                     <% end %>
-                    <% if show_row_action?(:destroy) && wibawa_authorized?(:destroy, record) %>
-                      <%= button_to resource_path(resource: resource.key, id: record), method: :delete, title: t("wibawa.delete"),
-                            class: wibawa_button_class(:ghost, "p-1.5 hover:!text-danger"),
-                            form: { class: "contents", data: { turbo_confirm: t("wibawa.confirm_delete", name: presenter.display_name(record)) } } do %>
-                        <%= icon("trash", size: "size-4") %><span class="sr-only"><%= t("wibawa.delete") %></span>
-                      <% end %>
+                    <% if row_delete? && wibawa_authorized?(:destroy, record) %>
+                      <button type="submit" form="<%= row_form_id %>" formaction="<%= resource_path(resource: resource.key, id: record) %>" name="_method" value="delete"
+                              class="wb-row-action wb-row-action-danger" title="<%= t("wibawa.delete") %>" data-turbo-confirm="<%= t("wibawa.confirm_delete", name: presenter.display_name(record)) %>"><%= helpers.wibawa_icon_use("trash") %><span class="sr-only"><%= t("wibawa.delete") %></span></button>
                     <% end %>
                   </div>
                 </td>

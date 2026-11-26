@@ -180,6 +180,32 @@ RSpec.describe "Wibawa in the browser, continued", type: :system do
     end
   end
 
+  describe "a row's own actions" do
+    it "deletes one record from its row, after asking, through the form all rows share" do
+      visit "/admin/orders"
+      expect(page).to have_css("form#wb-row-form", count: 1, visible: :all)
+      expect(page).to have_css("tbody form", count: 0, visible: :all) # a row holds a button, not a form of its own
+      row = find("tbody tr", text: "A-2")
+      row.hover
+      dismiss_confirm { row.find("button[title=Delete]").click }
+      expect(Order.count).to eq(3) # said no
+
+      row.hover
+      message = accept_confirm { row.find("button[title=Delete]").click }
+      expect(message).to include("A-2")
+      expect(page).to have_css("[data-wb-flash]")
+      expect(page).to have_no_css("tbody tr", text: "A-2")
+      expect(Order.pluck(:number)).to contain_exactly("A-1", "A-3")
+    end
+
+    it "draws each row icon once on the page and points at it from the rows" do
+      visit "/admin/orders"
+      expect(page).to have_css("symbol#wb-icon-eye, symbol#wb-icon-pencil, symbol#wb-icon-trash", count: 3, visible: :all)
+      drawn = js("[...document.querySelectorAll('tbody tr:first-child .wb-row-action svg')].map((svg) => { const box = svg.getBBox(); return box.width > 5 && box.height > 5 && getComputedStyle(svg).stroke !== 'none' })")
+      expect(drawn).to eq([ true, true, true ]) # the reference resolves to a drawing with a stroke
+    end
+  end
+
   describe "dragging a nested row" do
     it "reorders with a real mouse drag and saves the new order" do
       order = orders.first
