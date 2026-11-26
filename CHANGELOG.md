@@ -28,6 +28,7 @@ First release.
 - Saved views: each user can name and reuse an index page's scope, search, filters and sort (`wibawa:saved_views`)
 - Saved views can be renamed, shared with everyone, and set as the view an index page opens on. The `wibawa_saved_views` table gains `shared` and `default_view` columns
 - Columns that look secret are left out by default by their whole name too (`digest`, `token`, `secret`, `salt`, `password`, `api_key`), not only as a suffix; the resource generator says which it left out, and writes `as: :money` for decimal columns named like `total` or `price`
+- MCP: `run_batch_action` runs a resource's batch actions on up to 1,000 records; with the audit log on, an agent's reads (`list_records`, `get_record`, `run_report`) are recorded
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)

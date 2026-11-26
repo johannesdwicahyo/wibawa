@@ -117,4 +117,29 @@ RSpec.describe "Wibawa MCP server", type: :request do
 
     expect(call("delete_record", resource: "orders", id: order.id)).to eq("deleted" => order.id)
   end
+
+  it "runs batch actions on the records the user may see" do
+    other = Order.create!(number: "B-2", customer: customer)
+    expect(rpc("tools/list").dig("result", "tools").map { |tool| tool["name"] }).not_to include("run_batch_action") # writing is off
+
+    Wibawa.config.mcp_write = true
+    Wibawa.registry.fetch("orders").batch_action(:mark_paid) { |orders| "#{orders.update_all(status: 1)} paid" }
+    expect(call("list_resources").find { |r| r["resource"] == "orders" }["batch_actions"]).to eq(%w[mark_paid destroy])
+
+    expect(call("run_batch_action", resource: "orders", action: "mark_paid", ids: [ order.id, other.id, 0 ])).to eq("message" => "2 paid", "matched" => 2)
+    expect([ order, other ].map { |o| o.reload.status }).to eq(%w[paid paid])
+
+    expect(call("run_batch_action", resource: "orders", action: "nope", ids: [ order.id ])).to eq("error" => "Not found.")
+    expect(call("run_batch_action", resource: "orders", action: "mark_paid", ids: (1..1001).to_a)["error"]).to include("1000")
+
+    Wibawa.config.authorization = ->(_user, action, _subject) { action != :batch_destroy }
+    expect(call("list_resources").find { |r| r["resource"] == "orders" }["batch_actions"]).to eq(%w[mark_paid])
+    expect(call("run_batch_action", resource: "orders", action: "destroy", ids: [ order.id ])).to eq("error" => "Not authorized.")
+    Wibawa.config.authorization = nil
+    expect(call("run_batch_action", resource: "orders", action: "destroy", ids: [ order.id ])).to include("matched" => 1)
+    expect(Order.pluck(:number)).to eq(%w[B-2])
+  ensure
+    Wibawa.config.authorization = nil
+    Wibawa.load! # drop the batch action added above
+  end
 end

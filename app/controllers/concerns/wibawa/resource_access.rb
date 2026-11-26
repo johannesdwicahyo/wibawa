@@ -29,6 +29,25 @@ module Wibawa
                                  via: is_a?(Wibawa::McpController) ? "mcp" : "web")
     end
 
+    # Runs a batch action on the records among `ids` this user may see, and
+    # returns [what the action's block returned, how many records that was].
+    def run_batch_action(name, ids)
+      action = resource.find_batch_action(name) || raise(Wibawa::ResourceNotFound)
+      wibawa_authorize!(:"batch_#{action.name}", model)
+
+      records = authorized_collection.where(model.primary_key => ids)
+      matched = records.count
+      result = action.block ? instance_exec(records, &action.block) : batch_destroy(records)
+      wibawa_audit(:"batch_#{action.name}", nil, { ids: ids.first(Wibawa::AuditEntry::MAX_IDS), count: ids.size })
+      [ action, result, matched ]
+    end
+
+    def batch_destroy(records)
+      destroyed = 0
+      records.find_each { |r| destroyed += 1 if r.destroy }
+      t("wibawa.flash.batch_destroyed", count: destroyed)
+    end
+
     # Selects the resource for this request and applies its `controller do ... end` overrides.
     def use_resource(key)
       @resource = Wibawa.registry.fetch(key)

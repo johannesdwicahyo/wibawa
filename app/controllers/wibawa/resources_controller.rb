@@ -120,9 +120,7 @@ module Wibawa
       ids = Array(params[:ids]).compact_blank
       return redirect_back_or_to(resources_path(resource: resource.key), alert: t("wibawa.flash.nothing_selected"), status: :see_other) if ids.empty?
 
-      records = authorized_collection.where(model.primary_key => ids)
-      result = action.block ? instance_exec(records, &action.block) : batch_destroy(records)
-      wibawa_audit(:"batch_#{action.name}", nil, { ids: ids.first(Wibawa::AuditEntry::MAX_IDS), count: ids.size })
+      action, result, = run_batch_action(action.name, ids)
       return if performed?
 
       message = result.is_a?(String) ? result : t("wibawa.flash.batch_done", action: action.label, count: ids.size)
@@ -175,12 +173,6 @@ module Wibawa
     end
 
     # ---- Helpers -----------------------------------------------------------
-
-    def batch_destroy(records)
-      destroyed = 0
-      records.find_each { |r| destroyed += 1 if r.destroy }
-      t("wibawa.flash.batch_destroyed", count: destroyed)
-    end
 
     def stream_csv(relation)
       exporter = Wibawa::CsvExporter.new(resource, relation, wibawa_presenter)
