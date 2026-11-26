@@ -26,6 +26,7 @@
     <% if Wibawa.config.brand_color.present? %>
       <%= tag.style(":root { --wb-primary: #{Wibawa.config.brand_color.to_s.gsub(/[;{}<>]/, '')}; }".html_safe, nonce: content_security_policy_nonce) %>
     <% end %>
+    <%= stylesheet_link_tag(*Wibawa.config.stylesheets, "data-turbo-track": "reload") if Wibawa.config.stylesheets.present? %>
     <%= javascript_include_tag "turbo.min", type: "module", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "wibawa", type: "module", "data-turbo-track": "reload" %>
     <%= yield :head %>

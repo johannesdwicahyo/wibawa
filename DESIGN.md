@@ -32,7 +32,7 @@ Rules:
 - The primary hue moves from 272° to 264°. The current value sits at the edge of violet, and its dark-mode mix came out lavender.
 - Accent is for the primary action, the current selection and the focus ring. Record IDs and association links become ink with an underline on hover; today each row has two columns of blue links competing with the one real action.
 - Dark mode is designed, not inverted: three explicit surface steps, no translucent white overlays.
-- Every color is a CSS variable. `config.brand_color` keeps working and now derives the dark value in OKLCH.
+- Every color is a CSS variable; [docs/tokens.md](docs/tokens.md) is the full list (with `--wb-on-rail`, `--wb-scrim`, the radii, the spacing unit and the font) and says which are public. `config.brand_color` keeps working and now derives the dark value in OKLCH.
 
 ## 3. Typography
 

@@ -47,6 +47,12 @@ module Wibawa
     # Any CSS color. Sets the --wb-primary variable used for buttons and links.
     attr_accessor :brand_color
 
+    # Your own stylesheets (asset names), loaded after Wibawa's on every admin
+    # page: where design tokens are overridden and where the classes of an
+    # overridden component live.
+    #   config.stylesheets = %w[admin]   # app/assets/stylesheets/admin.css
+    attr_accessor :stylesheets
+
     # :bundled serves Plus Jakarta Sans from the gem (no third-party request);
     # :system uses the operating system's UI font.
     attr_accessor :font
@@ -90,6 +96,7 @@ module Wibawa
       @logout_path = nil
       @logout_method = :delete
       @brand_color = nil
+      @stylesheets = []
       @font = :bundled
       @components = {}
       @mcp_write = false

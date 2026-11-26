@@ -56,15 +56,15 @@ module Wibawa
     def dashboard_active? = @current_key.empty? && helpers.controller_name == "dashboard"
 
     def group_class
-      "mb-1 mt-6 px-2.5 text-xs font-medium text-white/70 " \
-        "lg:rail:mx-2 lg:rail:my-3 lg:rail:h-px lg:rail:overflow-hidden lg:rail:bg-white/15 lg:rail:p-0 lg:rail:text-transparent"
+      "mb-1 mt-6 px-2.5 text-xs font-medium text-on-rail/70 " \
+        "lg:rail:mx-2 lg:rail:my-3 lg:rail:h-px lg:rail:overflow-hidden lg:rail:bg-on-rail/15 lg:rail:p-0 lg:rail:text-transparent"
     end
 
     def link_class(active)
       class_names(
         "group flex items-center gap-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors lg:rail:justify-center lg:rail:px-0",
-        "bg-white/12 text-white" => active,
-        "text-white/70 hover:bg-white/[0.07] hover:text-white" => !active
+        "bg-on-rail/12 text-on-rail" => active,
+        "text-on-rail/70 hover:bg-on-rail/[0.07] hover:text-on-rail" => !active
       )
     end
 
