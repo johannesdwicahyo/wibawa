@@ -69,6 +69,10 @@ module Wibawa
     # (browser and MCP). Needs a table: run `bin/rails g wibawa:audit_log` first.
     attr_accessor :audit_log
 
+    # Your own `as:` types, by name. Fill them with Wibawa.column_type and
+    # Wibawa.field_type; a name Wibawa already has is replaced.
+    attr_reader :column_types, :field_types
+
     # Swap any built-in component for your own subclass:
     #   config.components[:index_table] = "Admin::IndexTableComponent"
     attr_accessor :components
@@ -99,6 +103,8 @@ module Wibawa
       @stylesheets = []
       @font = :bundled
       @components = {}
+      @column_types = {}
+      @field_types = {}
       @mcp_write = false
       @saved_views = false
       @audit_log = false

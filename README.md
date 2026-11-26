@@ -382,6 +382,27 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
 - **Design tokens:** every color, both corner radii, the spacing unit and the font are CSS variables (`--wb-surface`, `--wb-rail`, `--wb-radius-card`, `--wb-spacing`, ...). Override them in a stylesheet of your own, loaded after Wibawa's: `config.stylesheets = %w[admin]`. [docs/tokens.md](docs/tokens.md) lists them all and says what is promised about them.
 - **Tab icon:** the Wibawa mark by default. `config.favicon = "admin-icon.png"` uses your own asset or URL; `config.favicon = false` adds none.
 - **Fonts:** Plus Jakarta Sans ships inside the gem, so the admin makes no third-party request. `config.font = :system` uses the system UI font.
+- **Your own column and field types:** give a name to a format or an input, and use it with `as:` like the built-in ones:
+
+  ```ruby
+  # app/wibawa/types.rb (any file in app/wibawa, or the initializer)
+  Wibawa.column_type :stars do |value, record, column|
+    tag.span("★" * value.to_i + "☆" * (5 - value.to_i), role: "img", "aria-label": "#{value} of 5")
+  end
+
+  Wibawa.field_type :stars do |form, attribute, html_options|
+    form.select(attribute, (1..5).map { |n| [ "★" * n, n ] }, { include_blank: true }, html_options)
+  end
+  ```
+
+  ```ruby
+  Wibawa.resource Review do
+    index { column :rating, as: :stars }
+    form  { field :rating, as: :stars }
+  end
+  ```
+
+  Both blocks run in the view, so `tag`, `link_to` and your helpers work. A column type also applies on the show page, in dashboard tables and stats, and in reports; it is not called for an empty value, and CSV export and the MCP server keep giving the plain value. A field type returns only the input: Wibawa adds the label, hint and errors, and `html_options` carries the id, the classes and the error state. Text a column block returns is escaped unless it is built with `tag` or marked `html_safe`. A name Wibawa already uses (`:money`, `:select`, ...) replaces the built-in one. An input that posts an array or a hash also needs `permit_params`.
 - **Markup and behaviour:** subclass any component and point Wibawa at it. `--no-template` gives a class that keeps Wibawa's template, for changing methods only; without it you also get a copy of the template to edit:
 
   ```sh

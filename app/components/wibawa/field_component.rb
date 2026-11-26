@@ -126,6 +126,9 @@ module Wibawa
     end
 
     def input_html(type)
+      custom = Wibawa.config.field_types[type]
+      return helpers.instance_exec(form, attribute, html_options, &custom) if custom
+
       case type
       when *TEXT_INPUTS.keys
         extra = type == :password ? { autocomplete: "new-password" } : {}

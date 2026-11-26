@@ -55,6 +55,31 @@ module Wibawa
       registry.register_page(Page.new(name, &block))
     end
 
+    # A column format of your own, for `column :rating, as: :stars` (index, show
+    # page, dashboard tables and reports). The block runs in the view, so helpers
+    # work, and gets the value, the record and the column. It is not called for nil.
+    #
+    #   Wibawa.column_type :stars do |value|
+    #     tag.span("★" * value.to_i, role: "img", "aria-label": "#{value} of 5")
+    #   end
+    def column_type(name, &block)
+      raise ArgumentError, "Wibawa.column_type :#{name} needs a block" unless block
+
+      config.column_types[name.to_sym] = block
+    end
+
+    # A form input of your own, for `field :rating, as: :stars`. The block runs
+    # in the view and returns the input; Wibawa adds the label, hint and errors.
+    #
+    #   Wibawa.field_type :stars do |form, attribute, html_options|
+    #     form.select(attribute, (1..5).map { |n| [ "★" * n, n ] }, { include_blank: true }, html_options)
+    #   end
+    def field_type(name, &block)
+      raise ArgumentError, "Wibawa.field_type :#{name} needs a block" unless block
+
+      config.field_types[name.to_sym] = block
+    end
+
     # Define the dashboard shown at the admin root.
     def dashboard(&block)
       registry.dashboard = Dashboard.new(&block)
