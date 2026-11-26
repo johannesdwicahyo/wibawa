@@ -56,6 +56,7 @@ RSpec.describe "Wibawa docs", type: :request do
 
     after do
       Wibawa.config.components.clear
+      Wibawa.config.site_title = "Admin"
       Wibawa.config.saved_views = false
       Wibawa.config.background_import = false
       Object.send(:remove_const, :Admin) if defined?(Admin)
@@ -87,6 +88,7 @@ RSpec.describe "Wibawa docs", type: :request do
       # The code comes from this repository's own docs page, nowhere else: running it is the point of the spec.
       doc.scan(/```ruby\n(# app\/components\/admin\/\w+_component\.rb\n.*?)```/m).flatten.each { |code| eval(code, TOPLEVEL_BINDING) } # rubocop:disable Security/Eval
       keys.each { |key| Wibawa.config.components[key.to_sym] = "Admin::#{key.camelize}Component" }
+      Wibawa.config.site_title = "Toko Sari Admin"
       Wibawa.config.saved_views = true
       Wibawa::SavedView.create!(resource_key: "orders", name: "Alpha", query: "search=a")
       Wibawa::SavedView.create!(resource_key: "orders", name: "Zulu", query: "search=z", default_view: true)
@@ -97,6 +99,7 @@ RSpec.describe "Wibawa docs", type: :request do
       expect(response.body.scan("https://status.example.com").size).to eq(2)
       expect(response.body.scan('href="/admin/line_items"').size).to eq(before[:dashboard_links] - 1)       # dashboard
       expect(response.body).to include("https://example.com/admin-handbook")                               # page_header
+      expect(response.body).to include(">Toko</a>", "Toko Sari Admin")                                    # topbar: short there, whole in the sidebar
 
       get "/admin/orders?search=A"
       body = response.body

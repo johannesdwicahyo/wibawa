@@ -56,7 +56,7 @@ Which component draws what:
 
 | Page | Components |
 | --- | --- |
-| Every page | `sidebar`, `command_palette` (its record hits are `search_results`), `page_header`, `flash` |
+| Every page | `sidebar`, `topbar` (phones and tablets), `command_palette` (its record hits are `search_results`), `page_header`, `flash` |
 | Index | `index_page`, which renders `scopes`, `filters`, `saved_views`, `index_table`, `pagination` |
 | Record | `show_page` |
 | New and edit | `form_page`, which renders a `field` per field and `nested_fields` per `has_many` block |
@@ -90,6 +90,25 @@ end
 ```
 
 An entry is label, URL, icon, whether it is the current page, and its group. The command palette builds its own list; see [command_palette](#command_palette) to add the link there too.
+
+### topbar
+
+The bar across the top on phones and tablets, where the sidebar is tucked away: the menu button, the admin's name and the search button.
+
+Receives: nothing. Worth overriding: `title`, `home_url`.
+
+Example: only the first word of a long name, so it fits a phone.
+
+```ruby
+# app/components/admin/topbar_component.rb
+module Admin
+  class TopbarComponent < Wibawa::TopbarComponent
+    def title = super.split.first
+  end
+end
+```
+
+Keep `data-wb-sidebar-open` and `data-wb-palette-open` on the buttons if you copy the template: the script opens the menu and the palette from them.
 
 ### page_header
 
@@ -560,6 +579,19 @@ module Admin
   end
 end
 ```
+
+## The layout
+
+One thing is not a component: the layout, `app/views/layouts/wibawa/application.html.erb`. It is the page shell: `<head>`, then the sidebar, top bar, palette and flash components around the page.
+
+Most reasons to touch it have a setting instead: `config.stylesheets` for your CSS, `config.favicon`, `config.brand_color`, `config.font`, `config.site_title`. For anything else, such as a script of your own in `<head>`, copy the file from the gem to the same path in your app. Rails then uses yours:
+
+```sh
+mkdir -p app/views/layouts/wibawa
+cp "$(bundle info wibawa --path)/app/views/layouts/wibawa/application.html.erb" app/views/layouts/wibawa/
+```
+
+Keep what is in its `<head>`: the CSRF and CSP tags, the small script that sets the theme before the page paints, Wibawa's stylesheet and scripts, and `yield :head` (the rich text editor adds its assets there). As with a copied template, the copy is yours: compare it with the original after an upgrade.
 
 ## Icons
 
