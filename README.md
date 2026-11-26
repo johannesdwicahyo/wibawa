@@ -438,6 +438,8 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
 
 The index table is one component that loops rows and formats cells with plain methods, so a 500-row page doesn't create thousands of component objects. Associations shown in columns are eager-loaded. Turn off scope counts (`config.scope_counts = false`) and row counts (`index count: false`) on very large tables. CSV export streams in batches of 1,000 instead of loading everything into memory.
 
+[docs/benchmark.md](docs/benchmark.md) compares the index page with ActiveAdmin and Administrate at 50 and 500 rows: the three take about the same time, and Wibawa's HTML is the largest of the three.
+
 ## Testing your admin
 
 Forms post under the key `record`, whatever the model, so a request spec reads:

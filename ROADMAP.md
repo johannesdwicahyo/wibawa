@@ -88,6 +88,7 @@ Let people change Wibawa without forking it.
 - [ ] Freeze the DSL and the component API; semantic versioning from here
 - [ ] Upgrade guide from 0.x, deprecation warnings for anything removed
 - [ ] Hosted demo
-- [ ] Published benchmark against ActiveAdmin and Administrate (index page at 50, 500 rows)
+- [x] Published benchmark against ActiveAdmin and Administrate (index page at 50, 500 rows)
+- [ ] Slim the index row's HTML: the benchmark found it two to three times the size of the others *(candidate)*
 
 **Exit:** two minor releases in a row with no breaking change reported.

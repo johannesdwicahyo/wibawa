@@ -40,6 +40,7 @@ First release.
 - Every page is now a component an app can override: new `import_page`, `import_result`, `import_status`, `custom_page`, `error_page`, `flash`, `combobox_options` and `search_results`, and `combobox` can be swapped too
 - One `table` component draws every plain table (associated records, dashboard tables, report rows, the import preview), where four copies of the markup did
 - The phone top bar is a `topbar` component; the layout file is now only the page shell, and the guide says how to replace it
+- A benchmark of the index page against ActiveAdmin and Administrate (`rake benchmark`, results in `docs/benchmark.md`)
 - Command palette (Cmd/Ctrl+K): jump to any page, or search records across resources
 - CSV import per resource (`import key: :sku`): all-or-nothing, with a template and line-numbered errors
 - Filters on associations: choose a `has_many` record (`filter :tags`) or match an associated column (`filter "line_items.product"`)

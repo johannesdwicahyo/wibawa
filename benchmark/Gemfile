@@ -1,0 +1,10 @@
+# The benchmark has a bundle of its own, so the other admin gems stay out of Wibawa's.
+#   BUNDLE_GEMFILE=benchmark/Gemfile bundle install
+source "https://rubygems.org"
+
+gem "rails", "~> 8.1.0"
+gem "sqlite3"
+
+gem "wibawa", path: ".."
+gem "activeadmin", "~> 3.5"   # the current stable line; 4.0 is still in beta
+gem "administrate", "~> 1.0"
