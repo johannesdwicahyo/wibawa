@@ -2,7 +2,7 @@
 
 How long Wibawa, ActiveAdmin and Administrate take to build the same index page, and how much they send.
 
-**In short:** the three are about equally fast. Wibawa's page is the largest, two to three times the HTML of the others, and still the largest after compression.
+**In short:** Wibawa builds the page fastest of the three, by roughly 15 to 25% in undisturbed runs, and allocates the fewest objects. Its HTML is still the largest before compression. After compression it is smaller than Administrate's at 500 rows and larger than ActiveAdmin's at both sizes.
 
 ## Results
 
@@ -10,21 +10,31 @@ One table of 1,000 orders, an index page of 50 and of 500 rows. Measured on 26 N
 
 | Rows | Admin | Median | 95th percentile | Objects allocated | SQL queries | HTML | HTML, gzipped |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 50 | Wibawa 0.1.0 | 15.4 ms | 31.6 ms | 70,380 | 3 | 252 KB | 14 KB |
-| 50 | ActiveAdmin 3.5.2 | 14.4 ms | 17.5 ms | 88,627 | 3 | 80 KB | 4 KB |
-| 50 | Administrate 1.0.0 | 14.5 ms | 16.4 ms | 67,359 | 3 | 114 KB | 9 KB |
-| 500 | Wibawa 0.1.0 | 123.7 ms | 145.7 ms | 628,309 | 3 | 2,304 KB | 84 KB |
-| 500 | ActiveAdmin 3.5.2 | 134.8 ms | 140.2 ms | 793,146 | 3 | 745 KB | 24 KB |
-| 500 | Administrate 1.0.0 | 116.6 ms | 137.5 ms | 598,643 | 3 | 1,091 KB | 67 KB |
+| 50 | Wibawa 0.1.0 | 12.9 ms | 28.8 ms | 58,213 | 3 | 145 KB | 9 KB |
+| 50 | ActiveAdmin 3.5.2 | 16.3 ms | 23.8 ms | 88,636 | 3 | 80 KB | 4 KB |
+| 50 | Administrate 1.0.0 | 16.3 ms | 21.2 ms | 67,356 | 3 | 114 KB | 9 KB |
+| 500 | Wibawa 0.1.0 | 96.5 ms | 117.0 ms | 505,910 | 3 | 1,227 KB | 35 KB |
+| 500 | ActiveAdmin 3.5.2 | 134.4 ms | 151.2 ms | 793,147 | 3 | 745 KB | 24 KB |
+| 500 | Administrate 1.0.0 | 116.1 ms | 137.7 ms | 598,643 | 3 | 1,091 KB | 67 KB |
 
 ## Reading them
 
-- **Time.** Medians are within about 15% of each other at both sizes. Over four runs, Wibawa was the slowest at 50 rows every time, by 3 to 7%, and Administrate the fastest at 500 rows every time; Wibawa and ActiveAdmin swapped places at 500. The gaps are small next to a real database query or a network round trip. Wibawa's slowest requests at 50 rows (the 95th percentile) are slower than the others'; the likeliest cause is the larger page, which is not confirmed.
-- **Objects allocated.** Wibawa and Administrate allocate about the same, ActiveAdmin about a quarter more. This is the claim the README makes for the index table: one component for the whole table, not one per cell.
+- **Time.** Of three runs, two were undisturbed and Wibawa's median was the lowest in both: 12 to 13 ms against 15 to 16 ms at 50 rows, and 96 ms against 116 to 138 ms at 500. In the third run something else was using the machine (the other two took twice as long at 50 rows); Wibawa was still first at 50 and level with Administrate at 500. Wibawa's slowest requests at 50 rows (the 95th percentile) remain a little slower than the others'; the cause is not known.
+- **Objects allocated.** Wibawa allocates the fewest: about a seventh fewer than Administrate and a third fewer than ActiveAdmin. This is the claim the README makes for the index table: one component for the whole table, not one per cell.
 - **SQL.** Three queries each: the rows, the customers they belong to, and the count.
-- **HTML size.** This is where Wibawa is behind. A Wibawa row is about 4.6 KB. More than half of that is `class` attributes, and the row's three action buttons account for 2.9 KB: each repeats the full list of utility classes and carries its icon as inline SVG. Compression removes most of the repetition, and Wibawa's page is still the largest sent, 14 KB against 4 KB and 9 KB at 50 rows. A browser also has to parse the uncompressed page.
+- **HTML size.** Wibawa's page is the largest as written, about 2.7 KB a row: nearly twice ActiveAdmin's and a quarter more than Administrate's. Compressed, which is how a server sends it, it is the same as Administrate's at 50 rows and about half of it at 500, and about half as much again as ActiveAdmin's at 500. A browser has to parse the uncompressed page either way.
 
-Giving the row buttons and the pinned first cell one short class each, in place of the repeated utilities, would remove roughly a quarter of the page. That has not been done.
+## Before the rows were slimmed
+
+The first run of this benchmark found Wibawa level with the others on time and far behind on size: 252 KB at 50 rows and 2,304 KB at 500 (14 KB and 84 KB compressed), with 15.4 ms and 123.7 ms medians. A row was 4.6 KB, more than half of it `class` attributes, and its three action buttons were 2.9 KB.
+
+Three changes to the row followed, none of them visible:
+
+- what every row repeats (its hover and selection style, the pinned first cell, the action buttons) has one short class each in the stylesheet, where it used to spell out the utilities;
+- each row icon is drawn once on the page and pointed at from the rows;
+- the delete buttons of all rows submit one shared form, where each row used to hold a form and a CSRF token of its own.
+
+That took the page down by about 42% (58% compressed at 500 rows), allocations by about 17%, and the median time by about a fifth. About 450 bytes a row are still indentation, which compression removes.
 
 ## What was measured
 

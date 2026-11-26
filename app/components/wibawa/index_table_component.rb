@@ -4,6 +4,7 @@ module Wibawa
   # stay fast.
   class IndexTableComponent < BaseComponent
     BATCH_FORM_ID = "wb-batch-form".freeze
+    ROW_FORM_ID = "wb-row-form".freeze
     NUMERIC_AS = %i[money number percentage].freeze
     NUMERIC_TYPES = %i[integer bigint decimal float].freeze
 
@@ -18,6 +19,12 @@ module Wibawa
     def columns = @columns ||= resource.index_columns
     def model = resource.model
     def batch_form_id = BATCH_FORM_ID
+
+    # Every row's delete button submits this one form (it carries the CSRF
+    # token), each to its own record's URL, so a row holds a button and no form.
+    def row_form_id = ROW_FORM_ID
+    def row_delete? = show_row_action?(:destroy)
+    def row_icons = %w[eye pencil trash].zip(%i[show edit destroy]).filter_map { |icon, action| icon if show_row_action?(action) }
 
     def selectable?
       return @selectable if defined?(@selectable)
@@ -53,8 +60,10 @@ module Wibawa
     def pinned(column, surface)
       return unless column.equal?(columns.first)
 
-      class_names("max-sm:sticky max-sm:left-0 max-sm:max-w-40 max-sm:overflow-hidden max-sm:text-ellipsis max-sm:whitespace-nowrap",
-                surface == :header ? "max-sm:bg-surface-2" : "max-sm:bg-surface max-sm:shadow-[inset_-1px_0_0_var(--color-line)]")
+      # The cell's version is one class (src/wibawa.css): it is on every row.
+      return "wb-pin" unless surface == :header
+
+      "max-sm:sticky max-sm:left-0 max-sm:max-w-40 max-sm:overflow-hidden max-sm:text-ellipsis max-sm:whitespace-nowrap max-sm:bg-surface-2"
     end
 
     def sortable?(column) = column.sort_expression(model).present?

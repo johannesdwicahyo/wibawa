@@ -207,7 +207,7 @@ module Admin
 end
 ```
 
-For one resource, `index density: :compact` does the same without an override. To colour or mark whole rows you need the template: generate without `--no-template` and edit the `<tr>`.
+For one resource, `index density: :compact` does the same without an override. To colour or mark whole rows you need the template: generate without `--no-template` and edit the `<tr>`. If you copy it, keep the small form with the id `wb-row-form` and the icon sprite above the table: every row's delete button submits that form, and every row icon points at that sprite.
 
 ### pagination
 
