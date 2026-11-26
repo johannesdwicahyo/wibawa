@@ -116,6 +116,7 @@ RSpec.describe "Wibawa docs", type: :request do
 
       get "/admin/reports/orders_by_status"
       expect(response.body).to include("All orders")                                                       # report_page
+      expect(response.body).to include('<tr class="transition-colors hover:bg-surface-2 admin-row">')      # table
 
       post "/admin/orders/batch", params: { batch_action: "destroy" }
       follow_redirect! # to the index,

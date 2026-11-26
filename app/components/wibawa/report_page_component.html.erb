@@ -101,26 +101,9 @@
   <% end %>
 
   <div class="<%= card_class %> overflow-hidden">
-    <div class="relative overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead>
-          <tr class="border-b border-line bg-surface-2 text-left">
-            <% columns.each do |column| %>
-              <th scope="col" class="<%= class_names('whitespace-nowrap px-4 py-2.5 font-medium text-ink-2', 'text-right' => numeric?(column)) %>"><%= column.label %></th>
-            <% end %>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-line">
-          <% rows.each do |row| %>
-            <tr class="transition-colors hover:bg-surface-2">
-              <% columns.each do |column| %>
-                <td class="<%= class_names('px-4 py-2 align-middle text-ink', 'text-right tabular-nums' => numeric?(column)) %>"><%= cell(row, column) %></td>
-              <% end %>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+    <%= render wibawa_component(:table, Wibawa::TableComponent).new(headings: columns.map(&:label), rows: rows, style: :full,
+                                                                 numeric: columns.each_index.select { |index| numeric?(columns[index]) },
+                                                                 cells: ->(row) { columns.map { |column| cell(row, column) } }) %>
   </div>
   <%= render wibawa_component(:pagination, Wibawa::PaginationComponent).new(page: page, form_id: FORM_ID) %>
 <% end %>

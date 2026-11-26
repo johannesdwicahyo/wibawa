@@ -432,7 +432,7 @@ Store tokens hashed and make them revocable. There is no OAuth flow yet.
   config.components[:index_table] = "Admin::IndexTableComponent"
   ```
 
-  Components: `sidebar`, `page_header`, `flash`, `index_page`, `scopes`, `filters`, `index_table`, `pagination`, `saved_views`, `show_page`, `form_page`, `field`, `nested_fields`, `combobox`, `combobox_options`, `import_page`, `import_result`, `import_status`, `dashboard`, `report_page`, `custom_page`, `error_page`, `command_palette`, `search_results`. That is every page and every part of one. [docs/components.md](docs/components.md) has a worked example for each.
+  Components: `sidebar`, `page_header`, `flash`, `index_page`, `scopes`, `filters`, `index_table`, `table`, `pagination`, `saved_views`, `show_page`, `form_page`, `field`, `nested_fields`, `combobox`, `combobox_options`, `import_page`, `import_result`, `import_status`, `dashboard`, `report_page`, `custom_page`, `error_page`, `command_palette`, `search_results`. That is every page and every part of one. [docs/components.md](docs/components.md) has a worked example for each.
 
 ## Performance
 

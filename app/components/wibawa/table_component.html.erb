@@ -1,0 +1,17 @@
+<div class="relative overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <% if caption %><caption class="px-5 py-2 text-left text-ink-2"><%= caption %></caption><% end %>
+    <thead>
+      <tr class="<%= head_row_class %>">
+        <% headings.each_with_index do |heading, index| %><th scope="col" class="<%= heading_class(index) %>"><%= heading %></th><% end %>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-line">
+      <% rows.each do |row| %>
+        <tr class="<%= row_class %>">
+          <% cells_for(row).each_with_index do |cell, index| %><td class="<%= cell_classes[index] %>"><%= cell %></td><% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -30,24 +30,8 @@
         <% if records.empty? %>
           <p class="px-5 py-6 text-sm text-ink-2"><%= t("wibawa.none") %></p>
         <% else %>
-          <div class="relative overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead>
-                <tr class="border-b border-line text-left">
-                  <% columns.each do |column| %><th scope="col" class="whitespace-nowrap px-5 py-2 font-medium text-ink-2"><%= column.label %></th><% end %>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-line">
-                <% records.each do |record| %>
-                  <tr>
-                    <% columns.each do |column| %>
-                      <td class="px-5 py-2.5 text-ink"><%= presenter.cell(record, column) %></td>
-                    <% end %>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+          <%= render wibawa_component(:table, Wibawa::TableComponent).new(headings: columns.map(&:label), rows: records,
+                                                                       cells: ->(record) { columns.map { |column| presenter.cell(record, column) } }) %>
         <% end %>
       </section>
     <% end %>

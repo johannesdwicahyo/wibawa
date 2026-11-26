@@ -64,6 +64,7 @@ Which component draws what:
 | CSV import | `import_page` and, for a background import, `import_status`; both render `import_result` |
 | Dashboard | `dashboard` |
 | Report | `report_page`, which renders `pagination` |
+| The plain tables: a record's associated records, dashboard tables, a report's rows, the import preview | `table` |
 | Custom page (`Wibawa.page`) | `custom_page` |
 | Not found, not allowed | `error_page` |
 
@@ -374,6 +375,28 @@ end
 ```
 
 Overriding `sharing?` to return false only hides the checkbox; it does not stop a view from being shared.
+
+### table
+
+A plain table of rows, used wherever the admin lists something that is not an index page: the associated records on a record's page, dashboard tables, a report's rows and the import preview. The index table is `index_table`.
+
+Receives: `headings:`, `rows:`, `cells:` (a lambda that turns a row into its cells), and optionally `numeric:` (indexes of right-aligned columns), `caption:`, `style:` (`:inset` inside a card, `:full` as a card of its own) and `align:`. Worth overriding: `head_row_class`, `heading_class(index)`, `row_class`, `cell_class(index)`.
+
+Example: a class of your own on every row, to style from your stylesheet.
+
+```ruby
+# app/components/admin/table_component.rb
+module Admin
+  class TableComponent < Wibawa::TableComponent
+    def row_class = class_names(super, "admin-row")
+  end
+end
+```
+
+```css
+/* app/assets/stylesheets/admin.css, loaded by: config.stylesheets = %w[admin] */
+.admin-row:nth-child(even) { background: var(--wb-surface-2); }
+```
 
 ### flash
 
