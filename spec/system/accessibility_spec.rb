@@ -1,4 +1,5 @@
 require "spec_helper"
+require "tmpdir"
 
 # Every kind of page, checked by axe-core against WCAG 2.2 A and AA, in both
 # themes and at desktop and phone width. axe finds what a machine can find
@@ -64,7 +65,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     expect(violations.join).to include("button-name", "color-contrast")
   end
 
-  it "has no axe violations with the filters, the batch bar, the palette, a saved view's edit panel and form errors showing" do
+  it "has no axe violations with the filters, the batch bar, the palette, a saved view's edit panel, an import check and form errors showing" do
     found = []
     visit "/admin/orders"
     all("[data-wb-select]").first.click
@@ -92,6 +93,15 @@ RSpec.describe "Wibawa accessibility", type: :system do
       found += violations.map { |violation| "saved view edit panel#{' (dark)' if dark}: #{violation}" }
     end
     page.execute_script("localStorage.clear()")
+
+    Dir.mktmpdir do |dir|
+      File.write(File.join(dir, "orders.csv"), "number,status,customer_id\nN-1,paid,#{order.customer_id}\n#{order.number},paid,\n")
+      visit "/admin/orders/import"
+      attach_file "wb-import-file", File.join(dir, "orders.csv")
+      click_button "Check file"
+      expect(page).to have_css("[data-wb-import-preview]")
+      found += violations.map { |violation| "import check: #{violation}" }
+    end
 
     visit "/admin/orders/new"
     page.execute_script("document.querySelectorAll('form').forEach((form) => { form.noValidate = true })")

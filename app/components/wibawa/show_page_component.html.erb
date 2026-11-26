@@ -79,7 +79,7 @@
                     <% entry.changes.each do |name, change| %>
                       <div class="break-words">
                         <dt class="inline text-ink-2"><%= record.class.human_attribute_name(name) %>:</dt>
-                        <dd class="inline"><%= history_change(change) %></dd>
+                        <dd class="inline"><%= helpers.wibawa_change(change) %></dd>
                       </div>
                     <% end %>
                   </dl>

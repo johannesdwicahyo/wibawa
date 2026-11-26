@@ -85,7 +85,8 @@ module Wibawa
       end
     end
 
-    # GET: the upload form (or, as .csv, an empty template). POST: run the import.
+    # GET: the upload form (or, as .csv, an empty template). POST: run the import,
+    # or with dry_run only check the file and show what it would do.
     def import
       raise Wibawa::ResourceNotFound unless resource.importable?
 
@@ -95,8 +96,9 @@ module Wibawa
       return send_data(CSV.generate_line(@importer.headers), filename: "#{resource.key}-template.csv", type: "text/csv; charset=utf-8") if request.format.csv?
       return unless request.post?
 
-      @result = @importer.call(params[:file].respond_to?(:read) ? params[:file].read : "")
+      @result = @importer.call(params[:file].respond_to?(:read) ? params[:file].read : "", dry_run: params[:dry_run].present?)
       return render(:import, status: :unprocessable_entity) unless @result.ok?
+      return render(:import) if @result.dry_run
 
       wibawa_audit(:import, nil, { created: @result.created, updated: @result.updated })
       redirect_to resources_path(resource: resource.key), status: :see_other,

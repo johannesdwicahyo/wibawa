@@ -5,13 +5,22 @@ module Wibawa
   # go in or none do: any invalid row rolls the whole file back and is reported
   # with its line number.
   #
+  # A dry run does the same work and then rolls back whatever happened, so it
+  # reports exactly what the real import would do, database constraints and
+  # duplicate keys inside the file included.
+  # ponytail: that means every callback but after_commit runs during a check.
+  # Validate without saving instead if a model's callbacks reach outside the
+  # database, at the price of missing those errors.
+  #
   # ponytail: runs inside the request, so files are capped at MAX_ROWS. Move it
   # to a background job when someone needs more.
   class CsvImporter
     MAX_ROWS = 5000
     MAX_ERRORS = 20
+    PREVIEW_ROWS = 20
 
-    Result = Struct.new(:created, :updated, :errors) do
+    # preview: on a dry run, the first rows as [line, :create or :update, record label, { attribute => [old, new] }]
+    Result = Struct.new(:created, :updated, :errors, :dry_run, :preview) do
       def ok? = errors.empty?
     end
 
@@ -31,8 +40,8 @@ module Wibawa
     # Header row for the template file.
     def headers = attributes.map(&:to_s)
 
-    def call(text)
-      result = Result.new(0, 0, [])
+    def call(text, dry_run: false)
+      result = Result.new(0, 0, [], dry_run, [])
       table = CSV.parse(text.to_s.dup.force_encoding(Encoding::UTF_8).delete_prefix("﻿"), headers: true, skip_blanks: true)
       mapping = map_headers(table.headers.compact, result)
       result.errors << [ nil, I18n.t("wibawa.import.too_many", count: MAX_ROWS) ] if table.size > MAX_ROWS
@@ -43,12 +52,12 @@ module Wibawa
           import_row(row, mapping, line, result)
           break if result.errors.size >= MAX_ERRORS
         end
-        raise ActiveRecord::Rollback unless result.ok?
+        raise ActiveRecord::Rollback if dry_run || !result.ok?
       end
       result.created = result.updated = 0 unless result.ok?
       result
     rescue CSV::MalformedCSVError => e
-      Result.new(0, 0, [ [ e.line_number, e.message ] ])
+      Result.new(0, 0, [ [ e.line_number, e.message ] ], dry_run, [])
     end
 
     private
@@ -78,9 +87,12 @@ module Wibawa
       record.assign_attributes(values)
       allowed = @authorize.call(action, record) if action == :create
 
+      changes = record.changes if result.dry_run && result.preview.size < PREVIEW_ROWS
+
       if !allowed
         result.errors << [ line, I18n.t("wibawa.flash.not_authorized") ]
       elsif record.save
+        result.preview << [ line, action, Wibawa::AuditEntry.label_for(record), Wibawa::AuditEntry.filter(changes) || {} ] if changes
         action == :create ? result.created += 1 : result.updated += 1
       else
         result.errors << [ line, record.errors.full_messages.to_sentence ]

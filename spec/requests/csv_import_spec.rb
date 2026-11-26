@@ -4,9 +4,9 @@ RSpec.describe "Wibawa CSV import", type: :request do
   let!(:customer) { Customer.create!(name: "Sari") }
   let!(:order) { Order.create!(number: "A-1", customer: customer) }
 
-  def upload(csv)
+  def upload(csv, **params)
     file = Tempfile.new([ "orders", ".csv" ]).tap { |f| f.write(csv) and f.rewind }
-    post "/admin/orders/import", params: { file: Rack::Test::UploadedFile.new(file.path, "text/csv") }
+    post "/admin/orders/import", params: { file: Rack::Test::UploadedFile.new(file.path, "text/csv"), **params }
   end
 
   it "is offered only on resources that turn it on" do
@@ -32,6 +32,29 @@ RSpec.describe "Wibawa CSV import", type: :request do
     expect(Order.order(:number).pluck(:number, :status)).to eq([ [ "=C-3", "pending" ], [ "A-1", "paid" ], [ "B-2", "paid" ] ])
     expect(order.reload.customer).to eq(customer) # the empty cell did not clear it
   end
+
+  it "checks a file without keeping anything, and shows what it would do" do
+    Wibawa.config.audit_log = true
+    upload "number,status,customer_id\nB-2,paid,#{customer.id}\nA-1,paid,\nA-1,,\n", dry_run: "1"
+
+    expect(response).to have_http_status(:ok)
+    preview = response.body[/<section[^>]*data-wb-import-preview.*?<\/section>/m]
+    expect(preview).to include("would create 1 and update 2", "Nothing has been imported yet", "The first 3 rows", "B-2", "No change")
+    expect(preview.scan(/<tr class="align-top">.*?<\/tr>/m).map { |row| helpers_text(row) })
+      .to eq([ "2 Create B-2 Number: —→B-2 Status: pending→paid Customer: —→#{customer.id}", "3 Update A-1 Status: pending→paid", "4 Update A-1 No change" ])
+    expect(Order.pluck(:number, :status)).to eq([ [ "A-1", "pending" ] ])
+    expect(Wibawa::AuditEntry.count).to eq(0)
+
+    upload "number,status,customer_id\nB-2,paid,#{customer.id}\n,paid,#{customer.id}\n", dry_run: "1"
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("Line 3:")
+    expect(response.body).not_to include("data-wb-import-preview")
+    expect(Order.count).to eq(1)
+  ensure
+    Wibawa.config.audit_log = false
+  end
+
+  def helpers_text(html) = ActionController::Base.helpers.strip_tags(html).squish
 
   it "imports nothing when any row is invalid, and says which" do
     upload "number,status,customer_id\nB-2,paid,#{customer.id}\n,paid,#{customer.id}\nD-4,nonsense,#{customer.id}\n"
