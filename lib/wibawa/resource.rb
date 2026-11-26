@@ -3,9 +3,17 @@ module Wibawa
   class Resource
     CRUD_ACTIONS = %i[index show new create edit update destroy].freeze
     # Columns that hold a secret, whole name or last word: `digest`, `password_digest`,
-    # `api_key`, `otp_secret`. Never offered by default; the audit log masks them.
-    SECRET_ATTRIBUTES = /\A(encrypted_.*|.*_ciphertext|(.*_)?(digest|token|secret|salt|password|password_hash|api_key))\z/
+    # `api_key`, `pin_hash`, `otp_secret`. Never offered by default; the audit log masks them.
+    # So is anything the model declares with `encrypts` (see .secret?).
+    SECRET_ATTRIBUTES = /\A(encrypted_.*|.*_ciphertext|.*_hash|.*_key|(.*_)?(digest|token|secret|salt|password))\z/
     HIDDEN_ATTRIBUTES = Regexp.union(/\A(id|created_at|updated_at|lock_version)\z/, SECRET_ATTRIBUTES)
+
+    # Whether a column should stay out of default pages and generated files:
+    # its name looks secret, or the model encrypts it.
+    def self.secret?(klass, name)
+      name.to_s.match?(SECRET_ATTRIBUTES) ||
+        (klass.respond_to?(:encrypted_attributes) && Array(klass.encrypted_attributes).map(&:to_s).include?(name.to_s))
+    end
 
     attr_reader :model_name, :options, :scopes, :filters, :search_fields, :member_actions,
                 :controller_blocks, :menu_options, :include_associations
@@ -25,7 +33,7 @@ module Wibawa
       @controller_blocks = []
       @include_associations = []
       @menu_options = {}
-      @allowed_actions = CRUD_ACTIONS.dup
+      actions(*Wibawa.config.default_actions) # the panel's default; `actions` in the block replaces it
       @index = nil
       @show = nil
       @form = nil
@@ -299,7 +307,7 @@ module Wibawa
 
       foreign_keys = belongs_to_reflections.to_h { |r| [ r.foreign_key.to_s, r.name ] }
       model.columns.filter_map do |c|
-        next if c.name.match?(HIDDEN_ATTRIBUTES)
+        next if c.name.match?(HIDDEN_ATTRIBUTES) || self.class.secret?(model, c.name)
         next if c.name.end_with?("_type") && foreign_keys.key?(c.name.sub(/_type\z/, "_id"))
 
         foreign_keys.fetch(c.name, c.name).to_sym

@@ -103,8 +103,14 @@ module Wibawa
       scoped_collection.new
     end
 
+    # A model with optimistic locking (a lock_version column): the form carries
+    # the version it was opened with, so a save over someone else's is refused.
+    def locking_attribute
+      model.respond_to?(:locking_enabled?) && model.locking_enabled? ? [ model.locking_column.to_sym ] : []
+    end
+
     def record_params
-      params.fetch(:record, {}).permit(*resource.permitted_attributes)
+      params.fetch(:record, {}).permit(*resource.permitted_attributes, *locking_attribute)
     end
 
     # Sends an Enumerator of CSV lines as a download, without buffering it.

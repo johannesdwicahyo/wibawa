@@ -57,6 +57,7 @@ module Wibawa
 
       case as&.to_sym
       when :money then money(value, options[:currency])
+      when :cents then money(value.to_d / 100, options[:currency]) # an integer of hundredths: 1500000 is 15,000.00
       when :badge then badge(value)
       when :status then status(value)
       when :boolean then boolean(value)

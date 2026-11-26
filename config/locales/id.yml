@@ -129,6 +129,7 @@ id:
       view_saved: "Tampilan \"%{name}\" disimpan."
       view_deleted: "Tampilan \"%{name}\" dihapus."
       view_updated: "Tampilan \"%{name}\" diperbarui."
+      stale: "Orang lain mengubah data ini saat Anda menyuntingnya. Tidak ada yang disimpan. Buka lagi untuk melihat versi mereka."
       created: "%{resource} berhasil dibuat."
       updated: "%{resource} berhasil diperbarui."
       destroyed: "%{resource} berhasil dihapus."

@@ -1,6 +1,6 @@
 class CreateWibawaSavedViews < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
   def change
-    create_table :wibawa_saved_views do |t|
+    create_table :wibawa_saved_views<%= key_type_option %> do |t|
       t.string :resource_key, null: false
       t.string :name, null: false
       t.text :query, null: false, default: ""

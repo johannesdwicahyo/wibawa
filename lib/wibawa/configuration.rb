@@ -22,6 +22,11 @@ module Wibawa
 
     attr_accessor :per_page, :per_page_options, :max_per_page
 
+    # The actions a resource has unless it says otherwise with `actions`.
+    # For a read-only panel: config.default_actions = %i[index show]
+    # and `actions :all` in the few resources that may be edited.
+    attr_accessor :default_actions
+
     # Show record counts next to scopes. Turn off for very large tables.
     attr_accessor :scope_counts
 
@@ -91,6 +96,7 @@ module Wibawa
       @per_page = 50
       @per_page_options = [ 25, 50, 100, 250, 500 ]
       @max_per_page = 500
+      @default_actions = %i[index show new create edit update destroy]
       @scope_counts = true
       @currency = "USD"
       @money_format = nil

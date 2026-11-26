@@ -20,6 +20,10 @@ module Wibawa
       rich.present? ? content_tag(:div, rich.to_s, class: "wb-rich") : presenter.cell(record, column)
     end
 
+    def row_label(column)
+      column.options[:label] || record.class.human_attribute_name(column.as.to_s == "cents" ? column.name.to_s.delete_suffix("_cents") : column.name)
+    end
+
     def rich_text?(name)
       record.class.respond_to?(:rich_text_association_names) && record.class.rich_text_association_names.include?(:"rich_text_#{name}")
     end

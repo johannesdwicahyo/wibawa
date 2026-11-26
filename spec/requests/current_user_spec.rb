@@ -54,6 +54,17 @@ RSpec.describe "Wibawa and the signed-in user", type: :request do
     Wibawa::ApplicationController.send(:remove_method, :current_user)
   end
 
+  it "mounts the engine below the app's own routes, so a route under the same path still wins" do
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, "config"))
+      File.write(File.join(dir, "config/routes.rb"), %(Rails.application.routes.draw do\n  get "ops/login", to: "ops/sessions#new"\n  root "home#index"\nend\n))
+      expect { Wibawa::Generators::InstallGenerator.start(%w[--skip-resources --path=/ops], destination_root: dir) }
+        .to output(%r{Routes of your own under /ops .* must stay above the mount line}).to_stdout
+      expect(File.read(File.join(dir, "config/routes.rb"))).to eq(%(Rails.application.routes.draw do\n  get "ops/login", to: "ops/sessions#new"\n  root "home#index"\n  mount Wibawa::Engine, at: "/ops"\nend\n))
+      expect(File.read(File.join(dir, "config/initializers/wibawa.rb"))).to include("do not inherit from it", "Change this to your own")
+    end
+  end
+
   it "writes the Current.user line when the app has a Current model with a user" do
     initializer = lambda do |current|
       Dir.mktmpdir do |dir|

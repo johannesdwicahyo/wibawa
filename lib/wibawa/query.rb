@@ -33,6 +33,26 @@ module Wibawa
       [ ref.klass, column ]
     end
 
+    UUID = /\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/
+
+    # Whether `term` could be a value of this column, so that comparing it will
+    # not make the database reject the query: PostgreSQL raises on `id = 'abc'`
+    # for a uuid or integer column.
+    def self.comparable?(type, term)
+      case type
+      when :uuid then term.match?(UUID)
+      when :integer, :bigint then term.match?(/\A-?\d{1,18}\z/)
+      when :decimal, :float then term.match?(/\A-?\d+(\.\d+)?\z/)
+      else true
+      end
+    end
+
+    # Whether `term` could be the primary key of a `klass` record.
+    def self.key_like?(klass, term)
+      type = klass.columns_hash[klass.primary_key.to_s]&.type
+      %i[uuid integer bigint].include?(type) && comparable?(type, term)
+    end
+
     # Infer a filter's input type from the model when `as:` is omitted.
     def self.filter_type(model, filter)
       return filter.as.to_sym if filter.as
@@ -134,10 +154,10 @@ module Wibawa
     def condition_for(table, klass, column, term)
       type = klass.columns_hash[column]&.type
       attribute = table[column]
-      if NUMBER_TYPES.include?(type)
-        term.match?(/\A-?\d+(\.\d+)?\z/) ? attribute.eq(term) : nil
-      elsif type.nil? || STRING_TYPES.include?(type)
+      if type.nil? || STRING_TYPES.include?(type)
         attribute.matches("%#{ActiveRecord::Base.sanitize_sql_like(term)}%", "\\", false)
+      elsif NUMBER_TYPES.include?(type) || type == :uuid
+        self.class.comparable?(type, term) ? attribute.eq(term) : nil # a uuid or a number is matched whole, never by a part
       else
         attribute.eq(term)
       end

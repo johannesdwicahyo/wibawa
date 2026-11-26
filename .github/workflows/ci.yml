@@ -25,6 +25,26 @@ jobs:
           node-version: 22
       - run: npm ci # axe-core, for the accessibility specs
       - run: bundle exec rake spec sprockets demo:check
+  postgres:
+    name: PostgreSQL with UUID keys
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/wibawa_postgres_check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+      - run: bundle exec rake postgres
   lint:
     runs-on: ubuntu-latest
     steps:

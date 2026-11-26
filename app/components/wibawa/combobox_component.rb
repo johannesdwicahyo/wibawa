@@ -28,7 +28,7 @@ module Wibawa
                 columns = text if columns.empty? # no name-like column: search every text column
                 like = "%#{ActiveRecord::Base.sanitize_sql_like(term)}%"
                 matches = columns.map { |c| klass.arel_table[c].matches(like, "\\", false) }
-                matches << klass.arel_table[klass.primary_key].eq(term) if term.match?(/\A\d+\z/)
+                matches << klass.arel_table[klass.primary_key].eq(term) if Wibawa::Query.key_like?(klass, term)
                 matches.empty? ? scope.none : scope.where(matches.reduce { |a, b| a.or(b) })
       end
       scope.reorder(klass.primary_key => :desc).limit(RESULTS)
