@@ -225,7 +225,7 @@ bin/rails g wibawa:audit_log && bin/rails db:migrate
 config.audit_log = true
 ```
 
-Each entry holds who did it, when, the action, the record, the changed attributes (old and new value) and whether it came from the web or MCP. The log is an ordinary read-only resource called `audit_log`: it appears in the sidebar with search, filters and CSV, every record's page gets a **History** button, and you authorize it like any model (`Wibawa::AuditEntry`). To change its columns, register your own resource with `as: "audit_log"`.
+Each entry holds who did it, when, the action, the record, the changed attributes (old and new value) and whether it came from the web or MCP. An agent's reads through the MCP server are recorded too (actions `list`, `show` and `run_report`). The log is an ordinary read-only resource called `audit_log`: it appears in the sidebar with search, filters and CSV, every record's page gets a **History** button, and you authorize it like any model (`Wibawa::AuditEntry`). To change its columns, register your own resource with `as: "audit_log"`.
 
 What it does not cover:
 
@@ -359,11 +359,13 @@ The endpoint is `<mount path>/mcp` (for example `/admin/mcp`). Agents send `Auth
 | `list_reports`, `run_report` | Your [reports](#reports) and their parameters; runs one and returns its rows, 1,000 per page | |
 | `create_record`, `update_record`, `delete_record` | Write through the form's strong params | yes |
 | `run_action` | Run a `member_action` on a record | yes |
+| `run_batch_action` | Run a `batch_action` (the built-in delete included) on up to 1,000 records by id | yes |
 
-The user your block returns goes through the same `config.authorization`, the same `scoped_collection` overrides and the same strong params as in the browser, and an agent only sees the columns a resource declares. Two things differ from the browser:
+The user your block returns goes through the same `config.authorization`, the same `scoped_collection` overrides and the same strong params as in the browser, and an agent only sees the columns a resource declares. One thing differs from the browser:
 
 - The endpoint does not inherit from `parent_controller` (an agent has no session). In `controller do ... end` blocks, use `wibawa_current_user` rather than your app's `current_user` if the MCP server should honour them.
-- Batch actions are not exposed; an agent calls a tool once per record.
+
+With the [audit log](#audit-log) on, what an agent reads is recorded as well as what it changes: one entry per `list_records` (scope, search, filters, page, rows returned), `get_record` and `run_report` call. Browser reads are not logged.
 
 **This block is the admin gate for agents.** `authenticate_with` (your browser sign-in check) does not run here, so return a user only if they are allowed into the admin, as the example does with `user.admin?`. If you leave `config.authorization` unset, every user the block returns can read everything, and write everything when `mcp_write` is on.
 

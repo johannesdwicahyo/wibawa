@@ -80,4 +80,29 @@ RSpec.describe "Wibawa audit log", type: :request do
 
     expect(entries.last).to have_attributes(action: "update", via: "mcp", actor_label: "agent", data: { "number" => %w[A-1 M-1] })
   end
+
+  it "records what an agent reads through the MCP server, and no browser reads" do
+    Wibawa.config.mcp_authenticate_with { |token| token == "secret" ? :agent : nil }
+    call = lambda do |tool, arguments|
+      post "/admin/mcp", headers: { "Content-Type" => "application/json", "Authorization" => "Bearer secret" },
+                         params: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool, arguments: arguments } }.to_json
+    end
+    order = Order.first || Order.create!(number: "R-1", customer: Customer.create!(name: "Sari"))
+    before = Wibawa::AuditEntry.count
+
+    call.("list_records", { resource: "orders", search: order.number, filters: { status: "pending" }, page: 1 })
+    call.("get_record", { resource: "orders", id: order.id })
+    call.("run_report", { report: "orders_by_status", params: { number: "%" } })
+    call.("get_record", { resource: "orders", id: 0 }) # nothing read, nothing logged
+    call.("list_resources", {})
+    get "/admin/orders"
+    get "/admin/orders/#{order.id}"
+
+    entries = Wibawa::AuditEntry.order(:id).offset(before).to_a
+    expect(entries.map { |e| [ e.action, e.via, e.resource_key, e.record_id ] }).to eq([
+      [ "list", "mcp", "orders", nil ], [ "show", "mcp", "orders", order.id.to_s ], [ "run_report", "mcp", "orders_by_status", nil ]
+    ])
+    expect(entries.first.data).to include("search" => order.number, "q" => { "status" => "pending" }, "returned" => 1)
+    expect(entries.last.data).to include("number" => "%", "page" => 1)
+  end
 end

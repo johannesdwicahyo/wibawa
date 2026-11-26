@@ -26,6 +26,8 @@ module Wibawa
 
     ToolError = Class.new(StandardError)
 
+    MAX_BATCH = 1000
+
     RESOURCE = { resource: { type: "string", description: "Resource key from list_resources, e.g. \"orders\"" } }.freeze
     ID = { id: { type: %w[string integer], description: "Record id" } }.freeze
     ATTRIBUTES = { attributes: { type: "object", description: "Attribute values. Only the resource's writable_attributes are accepted; others are ignored." } }.freeze
@@ -69,6 +71,14 @@ module Wibawa
         description: "Run one of the resource's actions (see list_resources) on a record.",
         properties: RESOURCE.merge(ID, action: { type: "string", description: "Action name" }),
         required: %w[resource id action], write: true, destructive: true
+      },
+      run_batch_action: {
+        description: "Run one of the resource's batch actions (see list_resources) on several records at once. Ids you may not see are skipped; `matched` says how many records it ran on.",
+        properties: RESOURCE.merge(
+          action: { type: "string", description: "Batch action name" },
+          ids: { type: "array", items: { type: %w[string integer] }, minItems: 1, maxItems: MAX_BATCH, description: "Record ids, at most #{MAX_BATCH} per call" }
+        ),
+        required: %w[resource action ids], write: true, destructive: true
       }
     }.freeze
 
@@ -145,7 +155,10 @@ module Wibawa
           searchable: r.search_fields.present?,
           filters: r.filters.to_h { |f| [ f.name, Wibawa::Query.filter_type(r.model, f) ] }
         }
-        info.merge!(actions: r.member_actions.map(&:name), writable_attributes: r.permitted_attributes) if Wibawa.config.mcp_write
+        if Wibawa.config.mcp_write
+          info.merge!(actions: r.member_actions.map(&:name), writable_attributes: r.permitted_attributes,
+                      batch_actions: r.batch_actions.select { |a| wibawa_authorized?(:"batch_#{a.name}", r.model) }.map(&:name))
+        end
         info
       end
     end
@@ -155,7 +168,9 @@ module Wibawa
       wibawa_authorize!(:index, model)
       query = Wibawa::Query.new(resource, authorized_collection, params)
       page = Wibawa::Paginator.new(query.relation, page: params[:page], per_page: per_page, count: resource.index_options[:count])
-      { records: page.records.map { |record| serialize(record, resource.index_columns) },
+      records = page.records.map { |record| serialize(record, resource.index_columns) }
+      log_read(:list, resource, nil, params.permit(:scope, :search, :sort, :direction, :page, q: {}).to_h.merge(returned: records.size))
+      { records: records,
         page: page.page, per_page: page.per_page, total: page.total_count, has_next: page.next? }
     end
 
@@ -163,6 +178,7 @@ module Wibawa
       ensure_action!(:show)
       record = find_record
       wibawa_authorize!(:show, record)
+      log_read(:show, resource, record)
       detail(record)
     end
 
@@ -178,8 +194,10 @@ module Wibawa
       wibawa_authorize!(:show, report)
       values = report.values(params[:params])
       page = Wibawa::ReportPaginator.new(report.result(values), page: params[:page], per_page: Wibawa::Report::MAX_ROWS)
+      rows = page.records.map { |row| row.transform_values { |value| json_value(value) } }
+      log_read(:run_report, report, nil, values.transform_values { |value| json_value(value) }.merge(page: page.page, returned: rows.size))
       { report: report.key, params: values.transform_values { |value| json_value(value) },
-        rows: page.records.map { |row| row.transform_values { |value| json_value(value) } },
+        rows: rows,
         page: page.page, total: page.total_count, has_next: page.next? }
     end
 
@@ -214,13 +232,34 @@ module Wibawa
       wibawa_authorize!(action.name, record)
       result = instance_exec(record, &action.block)
       wibawa_audit(action.name, record)
-      # An action written for the browser may redirect or render; the agent gets JSON instead.
-      if performed?
-        self.response_body = nil
-        self.status = 200
-        response.headers.delete("Location")
-      end
+      discard_browser_response
       { message: result.is_a?(String) ? result : "#{action.label} done.", record: detail(record) }
+    end
+
+    def tool_run_batch_action
+      ids = Array(params[:ids]).compact_blank
+      raise ToolError, "Give between 1 and #{MAX_BATCH} ids." unless ids.size.between?(1, MAX_BATCH)
+
+      action, result, matched = run_batch_action(params[:action], ids)
+      discard_browser_response
+      { message: result.is_a?(String) ? result : "#{action.label} done.", matched: matched }
+    end
+
+    # An action written for the browser may redirect or render; the agent gets JSON instead.
+    def discard_browser_response
+      return unless performed?
+
+      self.response_body = nil
+      self.status = 200
+      response.headers.delete("Location")
+    end
+
+    # What an agent read goes in the audit log too, when that is on: which
+    # records or report, with what search and filters, and how many rows came back.
+    def log_read(action, subject, record = nil, data = nil)
+      return unless Wibawa.config.audit_log
+
+      Wibawa::AuditEntry.record!(user: wibawa_current_user, action: action, resource: subject, record: record, data: data, via: "mcp")
     end
 
     # ---- Serialization -----------------------------------------------------
