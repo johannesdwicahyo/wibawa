@@ -404,6 +404,22 @@ document.addEventListener("dragend", () => {
   dragging = null
 })
 
+// ---- A page that waits (background import) -----------------------------------
+
+// While [data-wb-reload] is on the page, fetch it again every few seconds.
+// Turbo morphs the answer in, so focus and scroll stay where they are.
+let reloadTimer
+const scheduleReload = () => {
+  clearTimeout(reloadTimer)
+  if (!document.querySelector("[data-wb-reload]")) return
+  reloadTimer = setTimeout(() => {
+    if (document.querySelector("[data-wb-reload]") && !document.hidden) window.Turbo?.visit(location.href, { action: "replace" })
+    else scheduleReload()
+  }, 4000)
+}
+document.addEventListener("turbo:load", scheduleReload)
+document.addEventListener("turbo:morph", scheduleReload)
+
 // ---- Delegated events ------------------------------------------------------
 
 document.addEventListener("click", (event) => {

@@ -45,6 +45,16 @@ en:
       create: "Create"
       update: "Update"
       no_change: "No change"
+      background_note: "A file with more than %{count} rows is imported in the background: you can leave the page and come back."
+      waiting: "This page checks again every few seconds. You can leave it and come back from the import page."
+      recent: "Recent background imports"
+      again: "Import another file"
+      check_again: "Check again"
+      status:
+        queued: "Waiting to start"
+        running: "Working on it…"
+        finished: "Finished"
+        failed: "Stopped"
     combobox:
       placeholder: "Type to search…"
       empty: "Nothing matches."

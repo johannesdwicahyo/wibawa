@@ -280,6 +280,25 @@ This adds an **Import CSV** button to the index page, with an upload form and a 
 - **Authorization.** `:import` on the model (falls back to `create?`), then `create` or `update` on each row.
 - The import runs inside the request and is capped at 5,000 rows. With the audit log on, each import is one entry with its counts.
 
+### Larger files, in the background
+
+```sh
+bin/rails g wibawa:background_import && bin/rails db:migrate
+```
+
+```ruby
+config.background_import = true
+```
+
+With this on, a file with more than 5,000 rows (up to 100,000) is stored and imported by an Active Job, so you need a job backend with a worker running (Solid Queue, Sidekiq, ...). The user lands on a page that waits for the result and can be left and found again from the import page. Smaller files are still imported at once. **Check file** works for large files the same way.
+
+- The job runs as the user who started it, through the same authorization: `:import` on the model, your policy scope for looking rows up, and `create` or `update` on each row. The user must be a record Active Job can find again (any Active Record model is).
+- **A resource with a `controller do ... end` block is never imported in the background**, because a `scoped_collection` or `build_record` defined there would not apply in a job. Such a resource keeps the 5,000-row limit.
+- It is still all or nothing, in one transaction, and the file is parsed in memory; that is what the 100,000-row limit is for.
+- The upload is kept in the `wibawa_imports` table until the job has run, then cleared. The row stays as the record of what happened.
+- If the worker dies mid-import, nothing was imported (the transaction is rolled back) but the page keeps saying "Working on it"; upload the file again.
+- To choose the queue: `Rails.application.config.to_prepare { Wibawa::ImportJob.queue_as :low }`.
+
 ## Custom pages
 
 For anything that is not a model: a settings screen, a maintenance panel, a page of links. It gets a menu entry and the admin layout, and you write no controller or route.

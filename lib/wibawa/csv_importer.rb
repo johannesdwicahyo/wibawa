@@ -12,8 +12,8 @@ module Wibawa
   # Validate without saving instead if a model's callbacks reach outside the
   # database, at the price of missing those errors.
   #
-  # ponytail: runs inside the request, so files are capped at MAX_ROWS. Move it
-  # to a background job when someone needs more.
+  # In a request, files are capped at MAX_ROWS. Larger ones go through
+  # Wibawa::Import and a background job, when config.background_import is on.
   class CsvImporter
     MAX_ROWS = 5000
     MAX_ERRORS = 20
@@ -40,11 +40,11 @@ module Wibawa
     # Header row for the template file.
     def headers = attributes.map(&:to_s)
 
-    def call(text, dry_run: false)
+    def call(text, dry_run: false, max_rows: MAX_ROWS)
       result = Result.new(0, 0, [], dry_run, [])
       table = CSV.parse(text.to_s.dup.force_encoding(Encoding::UTF_8).delete_prefix("﻿"), headers: true, skip_blanks: true)
       mapping = map_headers(table.headers.compact, result)
-      result.errors << [ nil, I18n.t("wibawa.import.too_many", count: MAX_ROWS) ] if table.size > MAX_ROWS
+      result.errors << [ nil, I18n.t("wibawa.import.too_many", count: max_rows) ] if table.size > max_rows
       return result unless result.ok?
 
       model.transaction do
