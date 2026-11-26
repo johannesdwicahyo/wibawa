@@ -54,7 +54,7 @@ RSpec.describe "Wibawa CSV import", type: :request do
     Wibawa.config.audit_log = false
   end
 
-  def helpers_text(html) = ActionController::Base.helpers.strip_tags(html).squish
+  def helpers_text(html) = ActionController::Base.helpers.strip_tags(html.gsub(%r{</(td|div)>}, " ")).squish # a space where a cell or a line ends
 
   it "imports nothing when any row is invalid, and says which" do
     upload "number,status,customer_id\nB-2,paid,#{customer.id}\n,paid,#{customer.id}\nD-4,nonsense,#{customer.id}\n"
