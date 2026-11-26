@@ -52,6 +52,9 @@ module Wibawa
       return empty if value.nil? && as&.to_sym != :boolean
       return empty if value.respond_to?(:empty?) && value.empty? && as.nil?
 
+      custom = as && Wibawa.config.column_types[as.to_sym]
+      return view.instance_exec(value, record, column, &custom) if custom
+
       case as&.to_sym
       when :money then money(value, options[:currency])
       when :badge then badge(value)

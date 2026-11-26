@@ -75,7 +75,7 @@ The things the first users will ask for in week one.
 Let people change Wibawa without forking it.
 
 - [x] Documented design tokens: every color, radius and space is a CSS variable with a stability promise
-- [ ] Field and column type registry (`Wibawa.field_type :color_swatch, …`)
+- [x] Field and column type registry (`Wibawa.field_type :color_swatch, …`)
 - [x] Component override guide with a worked example per component
 - [x] A translation completeness check in CI
 - [ ] More locales
