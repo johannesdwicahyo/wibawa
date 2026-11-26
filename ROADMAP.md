@@ -10,7 +10,7 @@ Make the repository safe to open to contributors.
 - [x] Request specs that boot the engine in a real Rails app (`spec/dummy`)
 - [x] Put the project under git and push to GitHub
 - [x] CI matrix written: Ruby 3.2–3.4 × Rails 7.2, 8.0, 8.1 (run by hand on Ruby 3.4 against all three)
-- [ ] CI matrix green on GitHub, once Actions can run
+- [x] CI matrix green on GitHub: Ruby 3.2 to 3.4 with Rails 7.2 to 8.1
 - [x] Commit `package-lock.json`, so the "CSS is up to date" check is repeatable
 - [x] RuboCop (rubocop-rails-omakase) in CI and in `bundle exec rake`
 - [x] CONTRIBUTING, CODE_OF_CONDUCT, SECURITY and issue/PR templates
