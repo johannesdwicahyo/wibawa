@@ -229,11 +229,15 @@ Each entry holds who did it, when, the action, the record, the changed attribute
 
 What it does not cover:
 
-- Changes made outside the admin (console, your app's own controllers, background jobs). Use PaperTrail or Audited for a full model history.
+- Changes made outside the admin (console, your app's own controllers, background jobs). Use PaperTrail or Audited for a full model history; Wibawa shows it on the record's page (below).
 - Reads. Agent calls that only read are not logged.
 - Changes to nested `has_many` rows are saved but only the parent's own attributes are listed.
 
 Values of attributes matching your app's `filter_parameters`, or that Wibawa already hides from forms (`digest`, `*_digest`, `*_token`, `*_secret`, `encrypted_*` and the like), are stored as `[FILTERED]`. The entry is written right after the change, not in the same transaction.
+
+### PaperTrail and Audited
+
+If a model uses [PaperTrail](https://github.com/paper-trail-gem/paper_trail) (`has_paper_trail`) or [Audited](https://github.com/collectiveidea/audited) (`audited`), its record page gets a **Change history** card with no setup: the 20 newest versions, each with the time, who made it, and old and new values. Only attributes the page itself shows are listed, and secret-looking ones are masked. PaperTrail shows `whodunnit` as stored (usually a user id) and needs the `object_changes` column to list values.
 
 ## Saved views
 

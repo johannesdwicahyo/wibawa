@@ -40,6 +40,13 @@ id:
     combobox:
       placeholder: "Ketik untuk mencari…"
       empty: "Tidak ada yang cocok."
+    history:
+      title: "Riwayat perubahan"
+      became: "menjadi"
+      events:
+        create: "Dibuat"
+        update: "Diubah"
+        destroy: "Dihapus"
     audit_log: "Log audit"
     audit:
       who: "Siapa"

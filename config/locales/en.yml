@@ -40,6 +40,13 @@ en:
     combobox:
       placeholder: "Type to search…"
       empty: "Nothing matches."
+    history:
+      title: "Change history"
+      became: "became"
+      events:
+        create: "Created"
+        update: "Updated"
+        destroy: "Deleted"
     audit_log: "Audit log"
     audit:
       who: "Who"

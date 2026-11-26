@@ -10,6 +10,8 @@ require "action_view/railtie"
 require "active_storage/engine"
 require "action_text/engine"
 require "rails-i18n"
+require "paper_trail"
+require "audited"
 require "propshaft" # serves the gem's CSS and JavaScript to the system specs
 require "wibawa"
 
@@ -56,6 +58,10 @@ end
 # the schema comes after, once the in-memory database is connected.
 Dummy::Application.initialize!
 
+# Both gems extend models once Rails has booted. A record page lists what they keep.
+Customer.has_paper_trail
+Product.audited
+
 ActiveRecord::Schema.verbose = false
 ActiveRecord::Schema.define do
   create_table(:customers) { |t| t.string :name }
@@ -87,6 +93,31 @@ ActiveRecord::Schema.define do
     t.datetime :created_at, null: false
   end
   create_table(:products) { |t| t.string :name }
+  create_table :versions do |t| # PaperTrail, as its install generator creates it (--with-changes)
+    t.string :item_type, null: false
+    t.bigint :item_id, null: false
+    t.string :event, null: false
+    t.string :whodunnit
+    t.json :object
+    t.json :object_changes
+    t.datetime :created_at
+  end
+  create_table :audits do |t| # Audited, as its install generator creates it
+    t.integer :auditable_id
+    t.string :auditable_type
+    t.integer :associated_id
+    t.string :associated_type
+    t.integer :user_id
+    t.string :user_type
+    t.string :username
+    t.string :action
+    t.text :audited_changes
+    t.integer :version, default: 0
+    t.string :comment
+    t.string :remote_address
+    t.string :request_uuid
+    t.datetime :created_at
+  end
   # Active Storage and Action Text tables, as their install generators create them.
   create_table :active_storage_blobs do |t|
     t.string :key, null: false

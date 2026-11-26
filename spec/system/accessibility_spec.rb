@@ -32,6 +32,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
     "dashboard" => "/admin",
     "index" => "/admin/orders",
     "show" => "/admin/orders/%<id>s",
+    "show with history" => "/admin/customers/%<customer>s",
     "form" => "/admin/orders/%<id>s/edit",
     "has_many form" => "/admin/customers/new",
     "bar report" => "/admin/reports/orders_by_status",
@@ -45,10 +46,10 @@ RSpec.describe "Wibawa accessibility", type: :system do
       it "has no axe violations on any page (#{size}, #{theme})" do
         page.current_window.resize_to(width, height)
         found = PAGES.flat_map do |name, path|
-          visit format(path, id: order.id)
+          visit format(path, id: order.id, customer: order.customer_id)
           if theme == "dark"
             dark!
-            visit format(path, id: order.id)
+            visit format(path, id: order.id, customer: order.customer_id)
           end
           violations.map { |violation| "#{name}: #{violation}" }
         end
@@ -184,7 +185,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
   it "loses no text when the reader widens line, paragraph, letter and word spacing (WCAG 1.4.12)" do
     spacing = "* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }"
     found = PAGES.flat_map do |name, path|
-      visit format(path, id: order.id)
+      visit format(path, id: order.id, customer: order.customer_id)
       page.execute_script("document.head.insertAdjacentHTML('beforeend', '<style>#{spacing}</style>')")
       problems(name)
     end
@@ -193,7 +194,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
 
   it "stays usable with text at 200% (WCAG 1.4.4)" do
     found = PAGES.flat_map do |name, path|
-      visit format(path, id: order.id)
+      visit format(path, id: order.id, customer: order.customer_id)
       page.execute_script("document.documentElement.style.fontSize = '200%'")
       problems(name)
     end
@@ -203,7 +204,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
   it "stays usable at 200% browser zoom, which halves the window to 640 px" do
     page.current_window.resize_to(640, 450)
     found = PAGES.flat_map do |name, path|
-      visit format(path, id: order.id)
+      visit format(path, id: order.id, customer: order.customer_id)
       heading = page.evaluate_script("(() => { const r = document.querySelector('h1').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth })()")
       problems(name) + (heading ? [] : [ "#{name}: the page title is cut off" ])
     end
@@ -213,7 +214,7 @@ RSpec.describe "Wibawa accessibility", type: :system do
   it "fits a 320 px wide screen without sideways scrolling" do
     page.current_window.resize_to(320, 700)
     wide = PAGES.filter_map do |name, path|
-      visit format(path, id: order.id)
+      visit format(path, id: order.id, customer: order.customer_id)
       name unless page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")
     end
     expect(wide).to eq([])
