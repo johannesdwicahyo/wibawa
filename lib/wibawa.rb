@@ -10,6 +10,7 @@ require "wibawa/page"
 require "wibawa/registry"
 require "wibawa/model_history"
 require "wibawa/related_scope"
+require "wibawa/mcp_scopes"
 
 module Wibawa
   class Error < StandardError; end
