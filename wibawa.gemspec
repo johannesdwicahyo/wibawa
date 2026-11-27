@@ -4,7 +4,6 @@ Gem::Specification.new do |spec|
   spec.name        = "wibawa"
   spec.version     = Wibawa::VERSION
   spec.authors     = [ "Johannes Dwi Cahyo Kristanto" ]
-  spec.email       = [] # TODO: add the address you want public on RubyGems
   spec.summary     = "A modern admin framework for Rails: ActiveAdmin ergonomics on ViewComponent, Hotwire and Tailwind."
   spec.description = <<~DESC
     Wibawa gives Rails apps a full admin panel from one small Ruby file per model:

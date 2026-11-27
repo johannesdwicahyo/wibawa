@@ -14,7 +14,7 @@ Make the repository safe to open to contributors.
 - [x] Commit `package-lock.json`, so the "CSS is up to date" check is repeatable
 - [x] RuboCop (rubocop-rails-omakase) in CI and in `bundle exec rake`
 - [x] CONTRIBUTING, CODE_OF_CONDUCT, SECURITY and issue/PR templates
-- [ ] Gemspec email, and private vulnerability reporting switched on in the repository settings
+- [ ] Private vulnerability reporting switched on in the repository settings
 - [x] Port the Minitest unit tests to RSpec so there is one test framework
 
 **Exit:** a stranger can clone, run `bundle exec rake` and get green on every matrix cell.
