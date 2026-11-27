@@ -453,7 +453,7 @@ config.mcp_authenticate_with do |token|
 end
 ```
 
-**Your block must check the token's audience.** A token issued for another service must be refused, or any token your authorization server ever issued opens the admin. `mcp_resource` is this endpoint's URL, the audience to compare with; set `config.mcp_resource` if a proxy changes the host or path the app sees. Wibawa cannot do this check for you: it does not know your token format.
+**Your block must check the token's audience.** A token issued for another service must be refused, or any token your authorization server ever issued opens the admin. `mcp_resource` is this endpoint's URL, the audience to compare with. Set it: `config.mcp_resource = "https://admin.example.com/admin/mcp"`. In development and test it is worked out from the request; anywhere else Wibawa raises until it is set, because a URL taken from the request's `Host` header is one the caller chose. Wibawa cannot do this check for you: it does not know your token format.
 
 Scopes, when the block returns them:
 

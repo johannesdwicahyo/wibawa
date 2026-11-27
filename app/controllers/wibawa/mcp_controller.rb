@@ -144,8 +144,18 @@ module Wibawa
 
     # This endpoint's canonical URL: what a token must have been issued for.
     # In mcp_authenticate_with, compare the token's audience with it.
+    #
+    # It comes from configuration, never from the request, outside development
+    # and test: the Host header is the caller's to choose, and an audience check
+    # against a URL the caller chose proves nothing.
     def mcp_resource
-      (Wibawa.config.mcp_resource.presence || "#{request.base_url}#{request.script_name}/mcp").to_s.chomp("/")
+      configured = Wibawa.config.mcp_resource.presence
+      return configured.to_s.chomp("/") if configured
+      return "#{request.base_url}#{request.script_name}/mcp" if Rails.env.local?
+
+      raise Wibawa::Error, "Set config.mcp_resource to the MCP endpoint's public URL (for example " \
+                           '"https://admin.example.com/admin/mcp"). It is what a token\'s audience is checked against, ' \
+                           "so outside development and test it is not taken from the request."
     end
     public :mcp_resource
 
@@ -171,17 +181,32 @@ module Wibawa
 
       spec = TOOLS[message.dig("params", "name").to_s.to_sym] or return nil
       arguments = message.dig("params", "arguments")
-      key = arguments.is_a?(Hash) ? (arguments["resource"] || arguments["report"]).presence : nil
+      key = target_of(spec, arguments.is_a?(Hash) ? arguments : {})
       @scopes.needed(key, write: !!spec[:write]) unless @scopes.allow?(key, write: !!spec[:write])
     rescue JSON::ParserError
       nil # the protocol layer answers a malformed message
+    end
+
+    # What a tool acts on, read from the one argument that tool itself uses: the
+    # report for a tool that requires `report`, the resource for one that
+    # requires `resource`, nothing for the list tools. Any other argument in the
+    # call is ignored, so a scope for one thing cannot be borrowed for another
+    # (run_report with an extra `resource` the token happens to hold).
+    def target_of(spec, arguments)
+      name = %w[report resource].find { |argument| Array(spec[:required]).include?(argument) }
+      name && (arguments[name] || arguments[name.to_sym]).presence&.to_s
     end
 
     def call_tool(name, args)
       @tool_params = ActionController::Parameters.new(
         args.except(:filters, :attributes).merge(q: args[:filters], record: args[:attributes]).compact
       )
-      use_resource(args[:resource]) if args[:resource]
+      # Checked again here, on the arguments the tool is about to use, so the scope
+      # check and the action can never be looking at different things.
+      spec = TOOLS.fetch(name)
+      raise Wibawa::NotAuthorized unless @scopes.allow?(target_of(spec, args), write: !!spec[:write])
+
+      use_resource(args[:resource]) if args[:resource] && Array(spec[:required]).include?("resource")
       MCP::Tool::Response.new([ { type: "text", text: send(:"tool_#{name}").to_json } ])
     rescue Wibawa::ResourceNotFound, ActiveRecord::RecordNotFound
       failure("Not found.")

@@ -77,8 +77,9 @@ module Wibawa
     attr_accessor :mcp_scope_prefix
 
     # The MCP endpoint's own URL, which tokens must be issued for (their
-    # audience). Worked out from the request; set it when a proxy changes the
-    # host or path the app sees.
+    # audience): "https://admin.example.com/admin/mcp". Required outside
+    # development and test once OAuth is used; there it is worked out from the
+    # request, which a caller could otherwise forge to match a stolen token.
     attr_accessor :mcp_resource
 
     # Lets each user save an index page's scope, search, filters and sort under

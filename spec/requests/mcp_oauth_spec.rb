@@ -86,6 +86,24 @@ RSpec.describe "Wibawa MCP server with OAuth scopes", type: :request do
       expect(challenge).to include("resource_metadata=")
     end
 
+    it "never takes its own URL from the request outside development and test" do
+      allow(Rails).to receive(:env).and_return(ActiveSupport::EnvironmentInquirer.new("production"))
+      Wibawa.config.authenticate_with :none # the browser gate, not under test here
+      Wibawa.config.mcp_authenticate_with { |token| [ :agent, "wibawa:read" ] if token == mcp_resource }
+
+      expect { get "/admin/mcp/oauth-protected-resource" }.to raise_error(Wibawa::Error, /Set config.mcp_resource/)
+      expect { rpc(nil, "tools/list") }.to raise_error(Wibawa::Error, /Set config.mcp_resource/)
+
+      Wibawa.config.mcp_resource = "https://admin.example.com/admin/mcp"
+      forged = { "Content-Type" => "application/json", "Host" => "evil.example" }
+      # A token minted for the attacker's own host, sent with that host in the request: refused.
+      post "/admin/mcp", params: { jsonrpc: "2.0", id: 1, method: "tools/list" }.to_json, headers: forged.merge("Authorization" => "Bearer http://evil.example/admin/mcp")
+      expect(response).to have_http_status(:unauthorized)
+      expect(challenge).to include(%(resource_metadata="https://admin.example.com/admin/mcp/oauth-protected-resource"))
+      post "/admin/mcp", params: { jsonrpc: "2.0", id: 1, method: "tools/list" }.to_json, headers: forged.merge("Authorization" => "Bearer https://admin.example.com/admin/mcp")
+      expect(response).to have_http_status(:ok)
+    end
+
     it "says nothing about OAuth when no authorization server is named" do
       Wibawa.config.mcp_authorization_servers = []
       get "/admin/mcp/oauth-protected-resource"
@@ -152,6 +170,39 @@ RSpec.describe "Wibawa MCP server with OAuth scopes", type: :request do
       expect(call("report-reader", "list_resources")).to eq([])
     end
 
+    it "judges a call by the argument the tool uses, not by another one slipped in beside it" do
+      # A scope for the orders resource does not run a report, however the call is dressed.
+      expect(call("orders-reader", "run_report", report: "orders_per_customer", resource: "orders")).to eq(403)
+      expect(challenge).to include(%(scope="wibawa:read:orders_per_customer"))
+      expect(call("orders-reader", "run_report", resource: "orders", report: "orders_by_status")).to eq(403)
+
+      # Nor does a scope for one report read a resource.
+      expect(call("report-reader", "list_records", resource: "customers", report: "orders_by_status")).to eq(403)
+      expect(challenge).to include(%(scope="wibawa:read:customers"))
+      expect(call("report-reader", "get_record", resource: "orders", id: order.id, report: "orders_by_status")).to eq(403)
+
+      # Nor does a write scope for orders change customers.
+      expect(call("orders-writer", "update_record", resource: "customers", id: customer.id, attributes: { name: "X" }, report: "orders")).to eq(403)
+      expect(customer.reload.name).to eq("Sari")
+
+      # What each token is allowed still works with a stray argument beside it.
+      expect(call("report-reader", "run_report", report: "orders_by_status", resource: "customers")["rows"]).to be_present
+      expect(call("orders-reader", "list_records", resource: "orders", report: "orders_per_customer")["records"].size).to eq(1)
+    end
+
+    it "does not let a made-up resource name into the response header" do
+      expect(call("orders-reader", "list_records", resource: %(x", error="invalid_token))).to eq(403)
+      expect(challenge).to eq(%(Bearer error="insufficient_scope", scope="wibawa:read", resource_metadata="http://www.example.com/admin/mcp/oauth-protected-resource"))
+    end
+
+    it "checks again where the tool runs, so the two checks cannot disagree" do
+      controller = Wibawa::McpController.new
+      controller.instance_variable_set(:@scopes, Wibawa::McpScopes.new("wibawa:read:orders"))
+      refused = controller.send(:call_tool, :run_report, { report: "orders_per_customer", resource: "orders" })
+      expect(refused.to_h).to include(isError: true)
+      expect(refused.to_h[:content].first[:text]).to eq("Not authorized.")
+    end
+
     it "refuses a token with no scope of its own, whatever else it carries" do
       %w[nothing other-app].each do |token|
         expect(call(token, "list_resources")).to eq(403)
@@ -191,6 +242,7 @@ RSpec.describe "Wibawa MCP server with OAuth scopes", type: :request do
       expect(scopes.allow?).to be(true) # something
       expect(scopes.allow?(write: true)).to be(true)
       expect(scopes.needed("products", write: true)).to eq("wibawa:write:products")
+      expect(scopes.needed(%(x", error="none), write: true)).to eq("wibawa:write") # a key that would bend the header is dropped
 
       expect(described_class.new(nil)).to be_unrestricted
       expect(described_class.new([]).allow?).to be(false)

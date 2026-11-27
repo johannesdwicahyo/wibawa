@@ -36,7 +36,10 @@ module Wibawa
     end
 
     # The narrowest scope that would allow it: what a refused request is told to ask for.
+    # It goes into a response header, and the key came from the caller: anything
+    # that is not a plain key is left out, so the header cannot be bent.
     def needed(key = nil, write: false)
+      key = nil unless key.to_s.match?(/\A[\w-]+\z/)
       [ prefix, write ? "write" : "read", key ].compact.join(":")
     end
 
