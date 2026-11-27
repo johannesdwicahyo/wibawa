@@ -3,6 +3,8 @@ Wibawa::Engine.routes.draw do
 
   # Model Context Protocol endpoint. Answers 404 until config.mcp_authenticate_with is set.
   match "mcp", to: "mcp#handle", via: %i[get post delete]
+  # OAuth Protected Resource Metadata (RFC 9728). 404 until config.mcp_authorization_servers names one.
+  get "mcp/oauth-protected-resource", to: "mcp#resource_metadata", as: :mcp_resource_metadata
 
   get "-/search", to: "search#index", as: :search
 

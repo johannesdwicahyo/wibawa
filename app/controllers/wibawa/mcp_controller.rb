@@ -88,19 +88,32 @@ module Wibawa
       return head :method_not_allowed, allow: "POST" unless request.post?
 
       token = request.authorization.to_s[/\ABearer (.+)\z/, 1]
-      @wibawa_current_user = token && instance_exec(token, &authenticate)
-      unless wibawa_current_user
-        response.headers["WWW-Authenticate"] = "Bearer"
-        return head :unauthorized
-      end
+      @wibawa_current_user, granted = token && instance_exec(token, &authenticate)
+      @scopes = Wibawa::McpScopes.new(granted)
+      return challenge(:unauthorized, scope: Wibawa::McpScopes.baseline) unless wibawa_current_user
 
       # One message per request: a batch could mix resources, and each resource
       # installs its own `controller do` overrides on this controller instance.
       body = request.raw_post
       return head :bad_request if body.lstrip.start_with?("[")
 
+      # A tool the token's scopes do not cover is refused here, as HTTP 403 naming
+      # the scope to ask for, which is what lets a client go and get it.
+      needed = scope_needed_for(body)
+      return challenge(:forbidden, scope: needed, error: "insufficient_scope") if needed
+
       reply = server.handle_json(body)
       reply ? render(json: reply) : head(:accepted)
+    end
+
+    # OAuth Protected Resource Metadata: where a client learns which
+    # authorization servers issue tokens for this endpoint.
+    def resource_metadata
+      return head :not_found unless Wibawa.config.mcp_authenticate && oauth?
+
+      render json: { resource: mcp_resource, authorization_servers: Wibawa.config.mcp_authorization_servers,
+                     scopes_supported: [ Wibawa::McpScopes.baseline ], bearer_methods_supported: %w[header],
+                     resource_name: Wibawa.config.site_title }
     end
 
     private
@@ -114,7 +127,7 @@ module Wibawa
 
       controller = self
       tools = TOOLS.filter_map do |name, spec|
-        next if spec[:write] && !Wibawa.config.mcp_write
+        next if spec[:write] && !(Wibawa.config.mcp_write && @scopes.allow?(write: true))
 
         MCP::Tool.define(
           name: name.to_s, description: spec[:description],
@@ -125,6 +138,43 @@ module Wibawa
 
       MCP::Server.new(name: "wibawa", version: Wibawa::VERSION, tools: tools, capabilities: { tools: {} },
                       instructions: "Admin data for #{Wibawa.config.site_title}. Call list_resources first to see what exists.")
+    end
+
+    def oauth? = Wibawa.config.mcp_authorization_servers.present?
+
+    # This endpoint's canonical URL: what a token must have been issued for.
+    # In mcp_authenticate_with, compare the token's audience with it.
+    def mcp_resource
+      (Wibawa.config.mcp_resource.presence || "#{request.base_url}#{request.script_name}/mcp").to_s.chomp("/")
+    end
+    public :mcp_resource
+
+    # 401 or 403 with the Bearer challenge of RFC 6750. With OAuth configured it
+    # also says where the metadata is and which scope would be enough.
+    def challenge(status, scope:, error: nil)
+      parts = []
+      parts << %(error="#{error}") if error
+      if oauth? || error
+        parts << %(scope="#{scope}")
+        parts << %(resource_metadata="#{mcp_resource}/oauth-protected-resource") if oauth?
+      end
+      response.headers["WWW-Authenticate"] = [ "Bearer", parts.join(", ").presence ].compact.join(" ")
+      head status
+    end
+
+    # The scope a tools/call needs and the token lacks, or nil when it may go ahead.
+    def scope_needed_for(body)
+      return nil if @scopes.unrestricted?
+
+      message = JSON.parse(body)
+      return nil unless message.is_a?(Hash) && message["method"] == "tools/call"
+
+      spec = TOOLS[message.dig("params", "name").to_s.to_sym] or return nil
+      arguments = message.dig("params", "arguments")
+      key = arguments.is_a?(Hash) ? (arguments["resource"] || arguments["report"]).presence : nil
+      @scopes.needed(key, write: !!spec[:write]) unless @scopes.allow?(key, write: !!spec[:write])
+    rescue JSON::ParserError
+      nil # the protocol layer answers a malformed message
     end
 
     def call_tool(name, args)
@@ -149,14 +199,16 @@ module Wibawa
     # ---- Tools -------------------------------------------------------------
 
     def tool_list_resources
-      Wibawa.registry.select { |r| r.action?(:index) && wibawa_authorized?(:index, r.model) }.map do |r|
+      Wibawa.registry.select { |r| r.action?(:index) && @scopes.allow?(r.key) && wibawa_authorized?(:index, r.model) }.map do |r|
         info = {
           resource: r.key, label: r.label, columns: r.index_columns.map(&:name), scopes: r.scopes.map(&:name),
           searchable: r.search_fields.present?,
           filters: r.filters.to_h { |f| [ f.name, Wibawa::Query.filter_type(r.model, f) ] }
         }
         if Wibawa.config.mcp_write
-          info.merge!(actions: r.member_actions.map(&:name), writable_attributes: r.permitted_attributes,
+          next info unless @scopes.allow?(r.key, write: true)
+
+        info.merge!(actions: r.member_actions.map(&:name), writable_attributes: r.permitted_attributes,
                       batch_actions: r.batch_actions.select { |a| wibawa_authorized?(:"batch_#{a.name}", r.model) }.map(&:name))
         end
         info
@@ -184,7 +236,7 @@ module Wibawa
     end
 
     def tool_list_reports
-      Wibawa.registry.reports.select { |report| wibawa_authorized?(:show, report) }.map do |report|
+      Wibawa.registry.reports.select { |report| @scopes.allow?(report.key) && wibawa_authorized?(:show, report) }.map do |report|
         { report: report.key, title: report.title, description: report.description,
           params: report.params.map { |param| { name: param.name, type: param.as, default: json_value(param.default), options: param.collection }.compact } }.compact
       end

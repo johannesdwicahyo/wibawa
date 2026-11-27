@@ -66,6 +66,21 @@ module Wibawa
     # actions. Off by default: agents can only read.
     attr_accessor :mcp_write
 
+    # OAuth for the MCP server. Naming the authorization servers that issue its
+    # tokens (their issuer URLs) makes the endpoint publish OAuth Protected
+    # Resource Metadata and point clients at it when it refuses a request.
+    # Wibawa issues no tokens: it checks them, through mcp_authenticate_with.
+    #   config.mcp_authorization_servers = [ "https://auth.example.com" ]
+    attr_accessor :mcp_authorization_servers
+
+    # The first part of the MCP scope names: "wibawa:read", "wibawa:write:orders".
+    attr_accessor :mcp_scope_prefix
+
+    # The MCP endpoint's own URL, which tokens must be issued for (their
+    # audience). Worked out from the request; set it when a proxy changes the
+    # host or path the app sees.
+    attr_accessor :mcp_resource
+
     # Lets each user save an index page's scope, search, filters and sort under
     # a name. Needs a table: run `bin/rails g wibawa:saved_views` first.
     attr_accessor :saved_views
@@ -116,6 +131,9 @@ module Wibawa
       @column_types = {}
       @field_types = {}
       @mcp_write = false
+      @mcp_authorization_servers = []
+      @mcp_scope_prefix = "wibawa"
+      @mcp_resource = nil
       @saved_views = false
       @audit_log = false
       @background_import = false
@@ -148,6 +166,11 @@ module Wibawa
     # This block is the admin gate for agents: `authenticate_with` does not run
     # on the MCP endpoint, so return only users who may use the admin. That
     # user then goes through the same authorization as in the browser.
+    #
+    # To limit what one token may do, return the user and the token's scopes:
+    #   config.mcp_authenticate_with { |token| [ user, %w[wibawa:read wibawa:write:orders] ] }
+    # Scopes may be an array or an OAuth space-separated string (see Wibawa::McpScopes).
+    # A block that returns only a user gives an unrestricted token.
     def mcp_authenticate_with(&block)
       @mcp_authenticate = block
     end

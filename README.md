@@ -435,7 +435,47 @@ With the [audit log](#audit-log) on, what an agent reads is recorded as well as 
 
 **This block is the admin gate for agents.** `authenticate_with` (your browser sign-in check) does not run here, so return a user only if they are allowed into the admin, as the example does with `user.admin?`. If you leave `config.authorization` unset, every user the block returns can read everything, and write everything when `mcp_write` is on.
 
-Store tokens hashed and make them revocable. There is no OAuth flow yet.
+Store tokens hashed and make them revocable.
+
+### OAuth and scopes
+
+Wibawa's MCP endpoint is an OAuth **resource server**: it checks tokens and enforces their scopes. It does not issue tokens. Those come from an authorization server you already run or add (Doorkeeper, Auth0, WorkOS, Keycloak, ...).
+
+```ruby
+config.mcp_authorization_servers = [ "https://auth.example.com" ]   # the issuer of your tokens
+
+config.mcp_authenticate_with do |token|
+  claims = MyTokens.verify(token, audience: mcp_resource)           # your check: signature, expiry, issuer, audience
+  next unless claims
+
+  user = User.find_by(id: claims["sub"])
+  [ user, claims["scope"] ] if user&.admin?                         # the user, and what this token may do
+end
+```
+
+**Your block must check the token's audience.** A token issued for another service must be refused, or any token your authorization server ever issued opens the admin. `mcp_resource` is this endpoint's URL, the audience to compare with; set `config.mcp_resource` if a proxy changes the host or path the app sees. Wibawa cannot do this check for you: it does not know your token format.
+
+Scopes, when the block returns them:
+
+| Scope | Allows |
+| --- | --- |
+| `wibawa:read` | Read every resource and report |
+| `wibawa:read:orders` | Read the `orders` resource only (a resource key or a report key) |
+| `wibawa:write` | Read and change every resource |
+| `wibawa:write:orders` | Read and change `orders` only |
+
+- Write includes read. A scope with no key covers every key. Scopes with another prefix, or malformed, grant nothing; `config.mcp_scope_prefix` changes `wibawa`.
+- A block that returns only a user gives an unrestricted token, as before.
+- Scopes narrow, they never widen: `config.authorization` still applies inside them, and write scopes do nothing unless `config.mcp_write` is on.
+- The list tools show only what the token may read, and `tools/list` leaves out the write tools for a read-only token.
+
+With an authorization server named, the endpoint follows the MCP authorization spec for a protected server:
+
+- `GET <mount path>/mcp/oauth-protected-resource` serves OAuth Protected Resource Metadata (RFC 9728): this endpoint's URL, your authorization servers, and the baseline scope.
+- A request with no valid token gets `401` with `WWW-Authenticate: Bearer scope="wibawa:read", resource_metadata="..."`, which is how a client finds the metadata.
+- A tool the token's scopes do not cover gets `403` with `error="insufficient_scope"` and the one scope that would be enough, for example `scope="wibawa:write:orders"`.
+
+What this is not: an authorization server. There is no consent screen, client registration or token endpoint here. The metadata is served under the mount path, not at the domain's `/.well-known/`, so a client finds it through the `401` response; the spec allows either.
 
 ## Customizing the UI
 
