@@ -137,6 +137,9 @@ RSpec.describe "Wibawa and related records, with real policies", type: :request 
 
   describe "ActionPolicy" do
     before do
+      # ActionPolicy remembers which policy class belongs to a model. Here the classes are made anew for every
+      # example, so that memory would hand one example another's policies. A Rails app only enables it in production.
+      ActionPolicy::LookupChain.namespace_cache_enabled = false
       stub_const("ApplicationPolicy", Class.new(ActionPolicy::Base) do
         authorize :user, allow_nil: true
         %i[index? show? create? update? destroy?].each { |rule| define_method(rule) { true } }
